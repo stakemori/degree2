@@ -3,7 +3,7 @@
 A Sage package for computation of degree 2 Siegel modular forms
 
 # Installation
-Here, we install the pakcage in "~/sage_packages/".
+Here, we install the package in "~/sage\_packages/".
 
 1. First install [Sage](http://www.sagemath.org/).
 
@@ -15,10 +15,13 @@ Here, we install the pakcage in "~/sage_packages/".
     git clone git://github.com/stakemori/degree2.git
     ```
 
-3. Put the following lines to "~/.sage/init.sage".
+3. Put the following lines to "~/.sage/init.sage" and replace the
+   string between double quotes in the second line by the absolute
+   path of "~/sage\_packages".
+   If you are a Mac user, it is "/Users/your\_username/sage_packages".
 
     ```python
     import sys
-    sys.path.append("/home/your_user_name/sage_packages")
+    sys.path.append("/absolute/path/to/sage_packages")
     from degree2.all import *
     ```
