@@ -1184,8 +1184,8 @@ class KlingenEisenstein_and_cuspforms_space(object):
         basis = self.basis()
         dim = self.dimension()
         stbd = self.strum_bound()
-        if self.prec < trbd:
-            raise RuntimeError("prec must be greater than " + str(trbd) + "!")
+        if self.prec < stbd:
+            raise RuntimeError("prec must be greater than " + str(stbd) + "!")
         tpls = [(n, r, m) for (n, r, m) in semi_pos_def_matarices(self.prec) if n <= stbd and m <= stbd]
         ml = [[f.fourier_coefficient(*t) for f in basis] for t in tpls]
         index_list = _linearly_indep_cols_index_list(ml, dim)
