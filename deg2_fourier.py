@@ -8,16 +8,23 @@ def deg2_fc_set_number_of_threads(a):
     num_of_threads = a
 
 @cached_function
-def semi_pos_def_matarices(bd):
+def semi_pos_def_matarices_trace(bd):
     '''トレースがbd以下の半整数半正定値対称行列[[n,r/2],[r/2,m]]について，
     (n, r, m)からなるsetを返す．bdは非負整数であることを仮定する．
     '''
     if bd == 0:
         return {(0, 0, 0)}
     else:
-        return semi_pos_def_matarices(bd - 1) | \
+        return semi_pos_def_matarices_trace(bd - 1) | \
             {(n, r, bd - n) for n in range(0, bd + 1)\
                  for r in range(-floor(2*sqrt(n*(bd-n))), floor(2*sqrt(n*(bd-n))) + 1)}
+
+@cached_function
+def semi_pos_def_matarices(bd):
+    '''
+    max(n, m) <= bd のsetを返す．
+    '''
+    return set([(n, r, m) for n, r, m in semi_pos_def_matarices_trace(2*bd) if n <= bd and m <= bd])
 
 @cached_function
 def _semi_pos_def_mats_ev_grouped(bd):
@@ -92,7 +99,8 @@ def _mul_fourier(mp1, mp2, prec):
     return {t: v for t, v in rl1}
 
 def _mul_fourier_even(mp1, mp2, prec):
-    '''積が偶数weightになるようなときのFourier係数の積を返す
+    '''
+    積が偶数weightになるようなときのFourier係数の積を返す
     '''
     dgrpd = _semi_pos_def_mats_ev_grouped(prec)
     alsts = _partition_mul_fourier_hol_even(prec)
@@ -198,8 +206,9 @@ class Deg2QsrsElement(object):
     '''degree 2の有限のFourier級数のclass
     '''
     def __init__(self, mp, prec, base_ring = QQ):
-        '''mpは (n, r, m) -> a(n, r, m)という形のmapでトレース(n+m)がprec以下のもの，
-        トレースがprec以下でkeyがないものは，a(n, r, m) = 0.
+        '''
+        mpは (n, r, m) -> a(n, r, m)という形のmapで(n, r, m) in semi_pos_def_matarices(prec)のもの，
+        semi_pos_def_matarices(prec)の元でkeyがないものは，a(n, r, m) = 0.
         '''
         mp1 = mp.copy()
         diff = semi_pos_def_matarices(prec) - set(mp1.keys())
@@ -1175,7 +1184,6 @@ class KlingenEisenstein_and_cuspforms_space(object):
         basis = self.basis()
         dim = self.dimension()
         stbd = self.strum_bound()
-        trbd = stbd * 2 if self.wt % 2 == 0 else stbd * 2 - 1
         if self.prec < trbd:
             raise RuntimeError("prec must be greater than " + str(trbd) + "!")
         tpls = [(n, r, m) for (n, r, m) in semi_pos_def_matarices(self.prec) if n <= stbd and m <= stbd]
