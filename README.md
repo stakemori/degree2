@@ -51,14 +51,14 @@ Here, we install the package in "~/sage\_packages/".
   half integral symmetric matrix ![alt text](./images/mat1.png) is 2903040.
   The third lines means that `es4` knows Fourier coefficients of
   Siegel-Eisenstein series of weight 4
-  at half integral matrices whose trace are less than or equal to 10.
+  at half integral matrices whose maximum value of diagonal entries are less than or equal to 10.
 
 * Igusa's weight 10 , 12 and 35 cusp forms can be obtained by the
   function `X10_with_prec`, `X12_with_prec` and `X35_with_prec`
   respectively. These functions take one positive integer argument.
   The meaning of the argument is same as the attribute `prec` of
   `es4`, i.e. it means that the returned value knows the Fourier
-  coefficients at half integral matrices whose trace are less than or
+  coefficients at half integral matrices whose maximum value of diagonal entries are less than or
   equal to the argument.
 
     ```python
