@@ -37,11 +37,11 @@ Here, we install the package in "~/sage\_packages/".
 # Basic Usage
 
 * Siegel-Eisenstein of degree two can be obtained by the function
-  `EisensteinSeries_degree_2`. Siegel-Eisenstein series is normalized
+  `eisenstein_series_degree2`. Siegel-Eisenstein series is normalized
   so that the constant term is one.
 
     ```python
-    sage: es4 = EisensteinSeries_degree_2(4, 10)
+    sage: es4 = eisenstein_series_degree2(4, 10)
     sage: es4.prec
     10
     sage: es4.fourier_coefficient(2, 1, 3)
@@ -54,7 +54,7 @@ Here, we install the package in "~/sage\_packages/".
   at half integral matrices whose maximum value of diagonal entries are less than or equal to 10.
 
 * Igusa's weight 10 , 12 and 35 cusp forms can be obtained by the
-  function `X10_with_prec`, `X12_with_prec` and `X35_with_prec`
+  function `x10_with_prec`, `x12_with_prec` and `x35_with_prec`
   respectively. These functions take one positive integer argument.
   The meaning of the argument is same as the attribute `prec` of
   `es4`, i.e. it means that the returned value knows the Fourier
@@ -62,9 +62,9 @@ Here, we install the package in "~/sage\_packages/".
   equal to the argument.
 
     ```python
-    sage: x10 = X10_with_prec(10)
-    sage: x12 = X12_with_prec(10)
-    sage: x35 = X35_with_prec(10)
+    sage: x10 = x10_with_prec(10)
+    sage: x12 = x12_with_prec(10)
+    sage: x35 = x35_with_prec(10)
     sage: x10.fourier_coefficient(1, 1, 1)
     1
     sage: x12.fourier_coefficient(1, 1, 1)
@@ -78,8 +78,8 @@ Here, we install the package in "~/sage\_packages/".
 * You can add and multiply modular forms by `+` and `*`.
 
     ```python
-    sage: es4 = EisensteinSeries_degree_2(4, 10)
-    sage: es8 = EisensteinSeries_degree_2(8, 10)
+    sage: es4 = eisenstein_series_degree2(4, 10)
+    sage: es8 = eisenstein_series_degree2(8, 10)
     sage: es4 + es4
     Siegel Modular form of weight 4 with prec = 10:
     {(0, 0, 0) : 2,

@@ -4,7 +4,7 @@ import unittest, random
 from unittest import skip
 
 class TestDeg2fcFunctions(unittest.TestCase):
-    # @skip("OK")
+    @skip("OK")
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
             '''
@@ -56,7 +56,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_mulfourier_even(self):
         bd = 10
-        es4 = EisensteinSeries_degree_2(4, bd)
+        es4 = eisenstein_series_degree2(4, bd)
         f8 = es4 * es4
         mp8 = f8.mp
         ples4 = dict_to_pol(es4.mp, bd)
@@ -66,7 +66,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_add_fourier_even(self):
         bd = 10
-        es4 = EisensteinSeries_degree_2(4, bd)
+        es4 = eisenstein_series_degree2(4, bd)
         f = es4 + es4
         mp = f.mp
         ples4 = dict_to_pol(es4.mp, bd)
@@ -76,7 +76,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_qsr_mul_add(self):
         bd = 10
-        es4 = EisensteinSeries_degree_2(4, bd)
+        es4 = eisenstein_series_degree2(4, bd)
         es4 = Deg2QsrsElement(es4.mp, es4.prec)
         pes4 = dict_to_pol(es4.mp, bd)
         s = es4 + es4
@@ -88,8 +88,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_odd_mul_add(self):
         bd = 10
-        es4 = EisensteinSeries_degree_2(4, bd)
-        x35 = X35_with_prec(bd)
+        es4 = eisenstein_series_degree2(4, bd)
+        x35 = x35_with_prec(bd)
         s = x35 + x35
         m = es4 * x35
         pes4 = dict_to_pol(es4.mp, bd)
@@ -101,7 +101,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_pow(self):
         bd = 10
-        es6 = EisensteinSeries_degree_2(6, bd)
+        es6 = eisenstein_series_degree2(6, bd)
         def pow(f, n):
             return reduce(operator.mul, [f]*n, 1)
         bls = [(es6**u).mp == pow(es6, u).mp for u in [2, 3, 5, 9]]
@@ -118,14 +118,15 @@ class TestDeg2fcFunctions(unittest.TestCase):
         dim = KS.dimension()
         self.assertTrue(all([lbasis[i].mp == basis[i].mp for i in range(dim)]))
 
-    # @skip("OK")
+    @skip("OK")
     def test_wt_34_47_save_load_basis(self):
         self.save_load_basis(34)
         self.save_load_basis(47)
 
+    @skip("OK")
     def test_sym2_rankin_cohen(self):
-        es4 = EisensteinSeries_degree_2(4, 10)
-        es6 = EisensteinSeries_degree_2(6, 10)
+        es4 = eisenstein_series_degree2(4, 10)
+        es6 = eisenstein_series_degree2(6, 10)
         r1 = naive_rankin_cohen_pair_sym2(es4, es6)
         r2 = rankin_cohen_pair_sym(2, es4, es6)
         self.assertTrue(r1 == r2.forms)

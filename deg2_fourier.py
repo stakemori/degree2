@@ -724,11 +724,11 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
             tupls = tuples_even_wt_modular_forms(self.wt)
         else:
             tupls = tuples_even_wt_modular_forms(self.wt - 35)
-            x35 = X35_with_prec(bd)
-        e4 = EisensteinSeries_degree_2(4, bd)
-        e6 = EisensteinSeries_degree_2(6, bd)
-        x10 = X10_with_prec(bd)
-        x12 = X12_with_prec(bd)
+            x35 = x35_with_prec(bd)
+        e4 = eisenstein_series_degree2(4, bd)
+        e6 = eisenstein_series_degree2(6, bd)
+        x10 = x10_with_prec(bd)
+        x12 = x12_with_prec(bd)
         def coeff(a, b, c, d):
             if self.wt % 2 == 0:
                 return base_ring(pl.coefficient({ple4: a, ple6: b, plx10: c, plx12: d}))
@@ -829,7 +829,7 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
 Deg2global_gens_dict = {}
 
 @cached_function
-def EisensteinSeries_degree_2(k, prec):
+def eisenstein_series_degree2(k, prec):
     if "es" + str(k) in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict["es" + str(k)]
         keys = set(f.mp.keys())
@@ -841,7 +841,7 @@ def EisensteinSeries_degree_2(k, prec):
     return f
 
 @cached_function
-def X10_with_prec(prec):
+def x10_with_prec(prec):
     k = 10
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
@@ -850,16 +850,16 @@ def X10_with_prec(prec):
         if f.prec >= prec:
             fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
-    es4 = EisensteinSeries_degree_2(4, prec)
-    es6 = EisensteinSeries_degree_2(6, prec)
-    es10 = EisensteinSeries_degree_2(10, prec)
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    es10 = eisenstein_series_degree2(10, prec)
     chi10 = QQ(43867) * QQ(2**12 * 3**5 * 5**2 * 7 * 53)**(-1) * (es10 - es4*es6)
     res = - 2**2 * chi10
     Deg2global_gens_dict[key] = res
     return res
 
 @cached_function
-def X12_with_prec(prec):
+def x12_with_prec(prec):
     k = 12
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
@@ -868,9 +868,9 @@ def X12_with_prec(prec):
         if f.prec >= prec:
             fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
-    es4 = EisensteinSeries_degree_2(4, prec)
-    es6 = EisensteinSeries_degree_2(6, prec)
-    es12 = EisensteinSeries_degree_2(12, prec)
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    es12 = eisenstein_series_degree2(12, prec)
     chi12 =QQ(131 * 593)/QQ(2**13 * 3**7 * 5**3 * 7**2 * 337) * \
         (3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12)
     res = 12 * chi12
@@ -878,7 +878,7 @@ def X12_with_prec(prec):
     return res
 
 @cached_function
-def X35_with_prec(prec):
+def x35_with_prec(prec):
     k = 35
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
@@ -887,10 +887,10 @@ def X35_with_prec(prec):
         if f.prec >= prec:
             fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
-    es4 = EisensteinSeries_degree_2(4, prec)
-    es6 = EisensteinSeries_degree_2(6, prec)
-    x10 = X10_with_prec(prec)
-    x12 = X12_with_prec(prec)
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    x10 = x10_with_prec(prec)
+    x12 = x12_with_prec(prec)
     l = [es4, es6, x10, x12]
     [x11,x12,x13,x14] = [f.wt * f for f in l]
     [x21,x22,x23,x24] = [f.differentiate_wrt_tau() for f in l]
@@ -951,18 +951,18 @@ def _det3(ls):
 def Y12_with_prec(prec):
     '''井草先生の論文にかいてあったもの．eigenformでない．
     '''
-    es4 = EisensteinSeries_degree_2(4, prec)
-    es6 = EisensteinSeries_degree_2(6, prec)
-    x12 = X12_with_prec(prec)
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    x12 = x12_with_prec(prec)
     return 1/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**4 * 3**2 * x12
 
 # @cached_function
 # def KS12_with_prec(prec):
 #     '''ラマヌジャンデルタからえられるKlingen Eisenstein級数
 #     '''
-#     es4 = EisensteinSeries_degree_2(4, prec)
-#     es6 = EisensteinSeries_degree_2(6, prec)
-#     x12 = X12_with_prec(prec)
+#     es4 = eisenstein_series_degree2(4, prec)
+#     es6 = eisenstein_series_degree2(6, prec)
+#     x12 = x12_with_prec(prec)
 #     return QQ(7)/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**5 * 3**2 * x12
 
 @cached_function
@@ -1029,7 +1029,7 @@ class Deg2SpaceOfModularForms(object):
             a._construction = RDeg2(1)
             return [a]
         if self.wt%2 == 1:
-            x35  = X35_with_prec(prec)
+            x35  = x35_with_prec(prec)
             bs = Deg2SpaceOfModularForms(self.wt - 35, prec).basis()
             l = []
             for a in bs:
@@ -1038,10 +1038,10 @@ class Deg2SpaceOfModularForms(object):
                 l.append(b)
             return l
         # if wt is even
-        es4 = EisensteinSeries_degree_2(4, prec)
-        es6 = EisensteinSeries_degree_2(6, prec)
-        x10 = X10_with_prec(prec)
-        x12 = X12_with_prec(prec)
+        es4 = eisenstein_series_degree2(4, prec)
+        es6 = eisenstein_series_degree2(6, prec)
+        x10 = x10_with_prec(prec)
+        x12 = x12_with_prec(prec)
         tuples = tuples_even_wt_modular_forms(self.wt)
         res = []
         for (p, q, r, s) in tuples:
@@ -1114,10 +1114,10 @@ class KlingenEisensteinAndCuspForms(object):
             M = Deg2SpaceOfModularForms(self.wt, self.prec)
             return M.basis()
         # wtが偶数のとき
-        es4 = EisensteinSeries_degree_2(4, prec)
-        es6 = EisensteinSeries_degree_2(6, prec)
-        x10 = X10_with_prec(prec)
-        x12 = X12_with_prec(prec)
+        es4 = eisenstein_series_degree2(4, prec)
+        es6 = eisenstein_series_degree2(6, prec)
+        x10 = x10_with_prec(prec)
+        x12 = x12_with_prec(prec)
         tuples = tuples_even_wt_modular_forms(self.wt)
         not_kl_or_cusp = [(p, q, r, s) for (p, q, r, s) in tuples if r == 0 and s == 0]
         kl_or_cusp = [t for t in tuples if t not in not_kl_or_cusp]
@@ -1271,9 +1271,9 @@ class KlingenEisensteinAndCuspForms(object):
         pol_list = [f**i for f, i in factor(f)]
         return _subspace_bases_list(A, K, basis, pol_list)
 
-    def hecke_eigen_form_of_eigen_value_t2(self, K, root = False, basis = False):
-        '''T(2)がbasisで張られる空間に作用しているとする．
-        T(2)の固有多項式は重根をもたないと仮定する．
+    def eigenform_with_eigenvalue_t2(self, K, root = False, basis = False):
+        '''
+        T(2)がbasisで張られる空間に作用しているとする．
         basisが与えられなければ，self.basis()になる．
         KはT(2)の固有多項式の1つの根で生成される体．
         root はT(2)のKにおける根．与えられなければ，K.gens()[0]になる．
