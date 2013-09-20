@@ -97,10 +97,10 @@ Here, we install the package in "~/sage\_packages/".
     ```
 
 * You can create the space of Klingen-Eisenstein series and cusp forms
-  by the function `KlingenEisenstein_and_cuspforms_space`.
+  by the function `KlingenEisensteinAndCuspForms`.
 
     ```python
-    sage: N47 = KlingenEisenstein_and_cuspforms_space(47, 15)
+    sage: N47 = KlingenEisensteinAndCuspForms(47, 15)
     sage: N47.dimension()
     3
     sage: N47.prec

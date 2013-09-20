@@ -4,7 +4,7 @@ from os import path
 current_dir = path.dirname(path.abspath(__file__))
 cached_dir = path.join(current_dir, "cached_data")
 
-from degree2.deg2_fourier import Deg2ModularFormQseries, Deg2EisensteinQseries, KlingenEisenstein_and_cuspforms_space
+from degree2.deg2_fourier import Deg2ModularFormQseries, Deg2EisensteinQseries, KlingenEisensteinAndCuspForms
 import degree2.deg2_fourier
 _deg2fc_gens_dict = load(path.join(cached_dir, '_fc_dict17.sobj'))
 

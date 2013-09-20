@@ -4,7 +4,7 @@ import unittest, random
 from unittest import skip
 
 class TestDeg2fcFunctions(unittest.TestCase):
-    @skip("OK")
+    # @skip("OK")
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
             '''
@@ -48,12 +48,12 @@ class TestDeg2fcFunctions(unittest.TestCase):
     @skip("OK")
     def test_dict_to_pol_to_dict(self):
         seq = range(10)
-        bd = 20
+        bd = 10
         l = semi_pos_def_matarices(bd)
         dct = {t: random.choice(seq) for t in l}
-        self.assertTrue(pol_to_dict(dict_to_pol(dct, 20), 20) == dct)
+        self.assertTrue(pol_to_dict(dict_to_pol(dct, bd), bd) == dct)
 
-    @skip("OK")
+    # @skip("OK")
     def test_mulfourier_even(self):
         bd = 10
         es4 = EisensteinSeries_degree_2(4, bd)
@@ -63,7 +63,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
         plf8 = ples4**2
         self.assertTrue(pol_to_dict(plf8, bd) == mp8)
 
-    @skip("OK")
+    # @skip("OK")
     def test_add_fourier_even(self):
         bd = 10
         es4 = EisensteinSeries_degree_2(4, bd)
@@ -73,9 +73,9 @@ class TestDeg2fcFunctions(unittest.TestCase):
         plf = ples4*2
         self.assertTrue(pol_to_dict(plf, bd) == mp)
 
-    @skip("OK")
+    # @skip("OK")
     def test_qsr_mul_add(self):
-        bd = 13
+        bd = 10
         es4 = EisensteinSeries_degree_2(4, bd)
         es4 = Deg2QsrsElement(es4.mp, es4.prec)
         pes4 = dict_to_pol(es4.mp, bd)
@@ -85,9 +85,9 @@ class TestDeg2fcFunctions(unittest.TestCase):
         pm = pes4 * pes4
         self.assertTrue(s.mp == pol_to_dict(ps, bd) and m.mp == pol_to_dict(pm, bd))
 
-    @skip("OK")
+    # @skip("OK")
     def test_odd_mul_add(self):
-        bd = 13
+        bd = 10
         es4 = EisensteinSeries_degree_2(4, bd)
         x35 = X35_with_prec(bd)
         s = x35 + x35
@@ -98,9 +98,9 @@ class TestDeg2fcFunctions(unittest.TestCase):
         pm = pes4 * px35
         self.assertTrue(s.mp == pol_to_dict(ps, bd) and m.mp == pol_to_dict(pm, bd))
 
-    @skip("OK")
+    # @skip("OK")
     def test_pow(self):
-        bd = 13
+        bd = 10
         es6 = EisensteinSeries_degree_2(6, bd)
         def pow(f, n):
             return reduce(operator.mul, [f]*n, 1)
@@ -108,17 +108,17 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertTrue(all(bls))
 
     def save_load_basis(self, wt):
-        trbd = (wt//10)*2 if wt%2 == 0 else (wt//10)*2 - 1
-        KS = KlingenEisenstein_and_cuspforms_space(wt, trbd)
+        bd = 10
+        KS = KlingenEisensteinAndCuspForms(wt, 10)
         basis = KS.basis()
         KS.save_basis_as_binary("/tmp/basis_test.sobj")
-        KS = KlingenEisenstein_and_cuspforms_space(wt, trbd)
+        KS = KlingenEisensteinAndCuspForms(wt, 10)
         KS.load_basis_from("/tmp/basis_test.sobj")
         lbasis = KS.basis()
         dim = KS.dimension()
         self.assertTrue(all([lbasis[i].mp == basis[i].mp for i in range(dim)]))
 
-    @skip("OK")
+    # @skip("OK")
     def test_wt_34_47_save_load_basis(self):
         self.save_load_basis(34)
         self.save_load_basis(47)

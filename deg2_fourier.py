@@ -24,6 +24,7 @@ def semi_pos_def_matarices(bd):
     '''
     max(n, m) <= bd のsetを返す．
     '''
+
     return set([(n, r, m) for n, r, m in semi_pos_def_matarices_trace(2*bd) if n <= bd and m <= bd])
 
 @cached_function
@@ -67,7 +68,7 @@ def _semi_pos_def_matarices_less_than(tpl):
     (n-n1, r-r1, m-m1)も半正定値半整数対称行列なものからなるlistを返す．
     '''
     (n, r, m) = tpl
-    l = semi_pos_def_matarices(n + m)
+    l = semi_pos_def_matarices(max(n, m))
     return [(n1, r1, m1) for (n1, r1, m1) in l if (n - n1, r - r1, m - m1) in l]
 
 
@@ -1169,7 +1170,7 @@ class KlingenEisenstein_and_cuspforms_space(object):
 
     def _cache_lin_indep_tuples(self, l):
         k = self.wt
-        KlingenEisenstein_and_cuspforms_space.lin_indep_tuples_cached[k] = l
+        KlingenEisensteinAndCuspForms.lin_indep_tuples_cached[k] = l
 
     lin_indep_tuples_cached = {}
     def linearly_indep_tuples(self):
@@ -1178,7 +1179,7 @@ class KlingenEisenstein_and_cuspforms_space(object):
         次独立であるようなものを返す．
         '''
         wt = self.wt
-        lin_indep_tuples_cached = KlingenEisenstein_and_cuspforms_space.lin_indep_tuples_cached
+        lin_indep_tuples_cached = KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
         if wt in lin_indep_tuples_cached.keys() and lin_indep_tuples_cached[wt] != []:
             return lin_indep_tuples_cached[wt]
         basis = self.basis()
