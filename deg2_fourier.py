@@ -998,14 +998,12 @@ def hecke_t2_fourier_list(f, l):
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 (ple4, ple6, plx10, plx12, plx35) = RDeg2.gens()
 
-global_prec = 10
-
 class Deg2SpaceOfModularForms(object):
     '''degree 2のModular Formからなる空間
     '''
-    def __init__(self, wt, prec = global_prec):
+    def __init__(self, wt, prec = False):
         self.__wt = wt
-        self.__prec = prec
+        self.__prec = wt//10 * 2 if prec is False else prec
 
     @property
     def wt(self):
@@ -1054,12 +1052,13 @@ class Deg2SpaceOfModularForms(object):
 
 
 
-class KlingenEisenstein_and_cuspforms_space(object):
-    '''Klingen-Eisenstein級数とcuspformからなる空間
+class KlingenEisensteinAndCuspForms(object):
     '''
-    def __init__(self, wt, prec = global_prec):
+    Klingen-Eisenstein級数とcuspformからなる空間
+    '''
+    def __init__(self, wt, prec = False):
         self.__wt = wt
-        self.__prec = prec
+        self.__prec = wt//10 * 2 if prec is False else prec
         self.__basis_cached = False
         self.__cached_basis = False
 
