@@ -100,14 +100,14 @@ Here, we install the package in "~/sage\_packages/".
   by the function `KlingenEisensteinAndCuspForms`.
 
     ```python
-    sage: N47 = KlingenEisensteinAndCuspForms(47, 15)
+    sage: N47 = KlingenEisensteinAndCuspForms(47, 8)
     sage: N47.dimension()
     3
     sage: N47.prec
-    15
+    8
     ```
     Here `N47` is the space of Klingen-Eisenstein series and cusp forms
-    of weight 47. Last line means each `prec` of the basis of `N47` is 15.
+    of weight 47. Last line means each `prec` of the basis of `N47` is 8.
 
     You can compute the matrix of Hecke operator T(p) (p: prime) by
     the function `N47.hecke_tp_matrix`.
@@ -125,13 +125,13 @@ Here, we install the package in "~/sage\_packages/".
     ```
     Here `K` is the Hecke field of a weight 47 cusp form `x47`.
     You can obtain a weight 47 cusp form `x47` by the function
-    `N47.hecke_eigen_form_of_eigen_value_t2`.
+    `N47.eigenform_with_eigenvalue_t2`.
 
     ```python
-    sage: x47 = N47.hecke_eigen_form_of_eigen_value_t2(K, a)
+    sage: x47 = N47.eigenform_with_eigenvalue_t2(K, a)
     ```
     Here the first argument of
-    `N47.hecke_eigen_form_of_eigen_value_t2` is the Hecke field of the
+    `N47.eigenform_with_eigenvalue_t2` is the Hecke field of the
     eigenform and the second argument is the eigenvalue of T(2).
 
     ```python
