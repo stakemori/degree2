@@ -334,7 +334,7 @@ class Deg2QsrsElement(object):
             dic[k] = (4*n*m - r**2) * v
         return Deg2QsrsElement(dic, self.prec, self.base_ring)
 
-    def phi_operator_as_dict(self):
+    def phi_operator(self):
         fcmap = self.mp
         res = {}
         for (n, r, m) , v in fcmap.iteritems():
