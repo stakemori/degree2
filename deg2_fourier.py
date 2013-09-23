@@ -252,6 +252,12 @@ class Deg2QsrsElement(object):
     def fourier_coefficient(self, n, r, m):
         return self.mp[(n, r, m)]
 
+    def __getitem__(self, idx):
+        return self.mp[idx]
+
+    def iteritems(self):
+        return self.mp.iteritems()
+
     def __add__(self, other):
         if is_number(other):
             fcmap = self.mp.copy()
