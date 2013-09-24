@@ -1232,8 +1232,11 @@ class KlingenEisensteinAndCuspForms(object):
     def hecke_t2_matrix(self):
         return self.hecke_matrix(2)
 
-    def hecke_t2_charpoly(self):
-        return self.hecke_t2_matrix().charpoly()
+    def hecke_charpoly(self, a, var='x', algorithm='linbox'):
+        return self.hecke_matrix(a).charpoly(var, algorithm)
+
+    def hecke_t2_charpoly(self, var='x', algorithm='linbox'):
+        return self.hecke_charpoly(2, var='x', algorithm='linbox')
 
     def _to_vector(self, fm):
         '''basisを標準基底にする列ベクトルを返す
@@ -1370,7 +1373,7 @@ class KlingenEisensteinAndCuspForms(object):
         for t in ts:
             if f.fourier_coefficient(*t) != 0:
                 return f.hecke_operator(a, t)/f.fourier_coefficient(*t)
-    
+
     def subspace_basis_annihilated_by(self, pol, a = 2):
         '''有理係数の多項式plが与えられたとき，polにT(a)を代入した作用素で，
         消される部分空間の基底を返す．
