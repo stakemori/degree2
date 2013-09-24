@@ -686,7 +686,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         Assumes m is a prime or the square of a prime.
         '''
         (p, i) = factor(m)[0]
-        if not (Integer(m).is_prime_power() and 0 < i < 3):
+        if not (ZZ(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
         if i == 1:
             return self.hecke_tp(p, tpl)
@@ -1432,10 +1432,10 @@ class CuspFormsDegree2(object):
 
     def hecke_charpoly(self, m):
         N = self.klingeneisensteinAndCuspForms()
-        p, i = factor(Integer(m))[0]
+        p, i = factor(ZZ(m))[0]
         if self.wt%2 == 1:
             return N.hecke_charpoly(m)
-        if not (Integer(m).is_prime_power() and 0 < i < 3):
+        if not (ZZ(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
         if i == 1:
             return self._hecke_tp_charpoly(p)
