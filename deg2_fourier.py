@@ -515,12 +515,12 @@ def is_number(a):
     else:
         return False
 
-def _number_to_hol_modform(a):
+def _number_to_hol_modform(a, prec = infinity):
     if hasattr(a, 'parent'):
         parent = a.parent()
     else:
         parent = QQ
-    return Deg2ModularFormQseries(0, {(0, 0, 0): a}, infinity, parent)
+    return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
 
 def load_deg2_modular_form(filename):
     data_dict = load(filename)
@@ -576,7 +576,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
                 bs = self.base_ring
             return Deg2ModularFormQseries(self.wt, fcmap, self.prec, bs)
         if isinstance(other, Deg2ModularFormQseries) and other.wt == 0:
-            fcmap = _mul_fourier_by_num(self.mp, other.mp([0, 0, 0]), self.prec)
+            fcmap = _mul_fourier_by_num(self.mp, other.mp[0, 0, 0], self.prec)
             return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring)
         if self._is_hol_modform(other):
             prec = min(self.prec, other.prec)
@@ -1036,10 +1036,14 @@ class Deg2SpaceOfModularForms(object):
         if self.dimension() == 0:
             return []
         if self.wt == 0:
-            a = _number_to_hol_modform(QQ(1))
+            a = _number_to_hol_modform(QQ(1), prec)
             a._construction = RDeg2(1)
             return [a]
-        if self.wt%2 == 1:
+        elif self.wt == 35:
+            x35  = x35_with_prec(prec)
+            x35._construction = plx35
+            return [x35]
+        elif self.wt%2 == 1:
             x35  = x35_with_prec(prec)
             bs = Deg2SpaceOfModularForms(self.wt - 35, prec).basis()
             l = []
