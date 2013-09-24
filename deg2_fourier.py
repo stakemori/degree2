@@ -681,21 +681,26 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
                 if i1 + i2 + i3 == 2]
         return sum([psum(*i) for i in idcs])
 
-    def eigen_value_tp2(self, p):
-        '''selfが固有形式だと仮定して，T(p^2)の固有値を返す．
+    def hecke_operator(self, m, tpl):
         '''
-        keys_sorted = sorted(self.mp.keys(), key = lambda x: (x[0] + x[2]))
-        for t in keys_sorted:
-            if self.fourier_coefficient(*t) != 0:
-                return self.hecke_tp2(p, t)/(self.fourier_coefficient(*t))
+        Assumes m is a prime or the square of a prime.
+        '''
+        (p, i) = factor(m)[0]
+        if not (Integer(m).is_prime_power() and 0 < i < 2):
+            raise RuntimeError("m must be a prime or the square of a prime.")
+        if i == 1:
+            return self.hecke_tp(p, tpl)
+        if i == 2:
+            return self.hecke_tp2(p, tpl)
 
-    def eigen_value_tp(self, p):
-        '''selfが固有形式だと仮定して，固有値を返す
+    def eigen_value_tm(self, m):
+        '''
+        Assumes self is an eigenform and returns the eigenvalue ass. to T(m).
         '''
         keys_sorted = sorted(self.mp.keys(), key = lambda x: (x[0] + x[2]))
         for t in keys_sorted:
             if self.fourier_coefficient(*t) != 0:
-                return self.hecke_tp(p, t)/(self.fourier_coefficient(*t))
+                return self.hecke_operator(m, t)/(self.fourier_coefficient(*t))
 
     def hecke_t2(self, n, r, m):
         return self.hecke_tp(2, (n, r, m))
