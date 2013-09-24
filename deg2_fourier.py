@@ -1406,13 +1406,50 @@ class CuspFormsDegree2(object):
     def prec(self):
         return self.__prec
 
+    @cached_method
+    def klingeneisensteinAndCuspForms(self):
+        return KlingenEisensteinAndCuspForms(self.wt, self.prec)
+
     def dimension(self):
-        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+        N = self.klingeneisensteinAndCuspForms()
         return N.dimension_of_cuspforms()
 
-    def hecke_tp_charpoly(self, p):
+    @cached_method
+    def basis(self):
+        '''
+        Returns a basis of this space. It assumes the characteristic
+        polynomial of T(2) acting on KlingenEisensteinAndCuspForms has
+        no double roots.
+        '''
+        N = self.klingeneisensteinAndCuspForms()
+        if self.wt%2 == 1:
+            return N.basis()
+        return N.subspace_basis_annihilated_by(self.hecke_charpoly(2))
+
+    def hecke_charpoly(self, m):
+        N = self.klingeneisensteinAndCuspForms()
+        p, i = factor(Integer(m))[0]
+        if self.wt%2 == 1:
+            return N.hecke_charpoly(m)
+        if not (Integer(m).is_prime_power() and 0 < i < 3):
+            raise RuntimeError("m must be a prime or the square of a prime.")
+        if i == 1:
+            return self._hecke_tp_charpoly(p)
+        else:
+            return self._hecke_tp2_charpoly(p)
+
+    def eigenform_with_eigenvalue_t2(self, root):
+        '''
+        Returns an eigenform whose eigenvalue is root.  It assumes the
+        characteristic polynomial of T(2) acting on
+        KlingenEisensteinAndCuspForms has no double roots.
+        '''
+        N = self.klingeneisensteinAndCuspForms()
+        return N.eigenform_with_eigenvalue_t2(root)
+
+    def _hecke_tp_charpoly(self, p):
         a = p**(self.wt - 2) + 1
-        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+        N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
         R = PolynomialRing(QQ, names = "x")
@@ -1422,9 +1459,9 @@ class CuspFormsDegree2(object):
         g = R(N.hecke_matrix(p).charpoly("x"))
         return g/f1
 
-    def hecke_tp2_charpoly(self, p):
-        u = p**(self.wt - 2) + 1
-        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+    def _hecke_tp2_charpoly(self, p):
+        u = p**(self.wt - 2)
+        N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
         R = PolynomialRing(QQ, names = "x")
