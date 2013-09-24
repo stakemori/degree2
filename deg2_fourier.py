@@ -693,7 +693,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         if i == 2:
             return self.hecke_tp2(p, tpl)
 
-    def eigen_value_tm(self, m):
+    def hecke_eigenvalue(self, m):
         '''
         Assumes self is an eigenform and returns the eigenvalue ass. to T(m).
         '''
@@ -1386,6 +1386,58 @@ class KlingenEisensteinAndCuspForms(object):
         for f in res:
             f._construction = self.construction(f)
         return res
+
+class CuspFormsDegree2(object):
+    '''
+    Space of cusp forms of degree 2.  This class assumes that the
+    characteristic polynomial of T(2) acting on
+    KlingenEisensteinAndCuspForms has no double roots.
+    '''
+    def __init__(self, wt, prec = False):
+        self.__wt = wt
+        self.__prec = wt//10 * 2 if prec is False else prec
+
+    @property
+    def wt(self):
+        return self.__wt
+
+    @property
+    def prec(self):
+        return self.__prec
+
+    def dimension(self):
+        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+        return N.dimension_of_cuspforms()
+
+    def hecke_tp_charpoly(self, p):
+        a = p**(self.wt - 2) + 1
+        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+        S = CuspForms(1, self.wt)
+        m = S.dimension()
+        R = PolynomialRing(QQ, names = "x")
+        x = R.gens()[0]
+        f = R(S.hecke_matrix(p).charpoly("x"))
+        f1 = f.subs({x: a**(-1) * x}) * a**m
+        g = R(N.hecke_matrix(p).charpoly("x"))
+        return g/f1
+
+    def hecke_tp2_charpoly(self, p):
+        u = p**(self.wt - 2) + 1
+        N = KlingenEisensteinAndCuspForms(self.wt, self.prec)
+        S = CuspForms(1, self.wt)
+        m = S.dimension()
+        R = PolynomialRing(QQ, names = "x")
+        x = R.gens()[0]
+        f = R(S.hecke_matrix(p).charpoly("x"))
+        g = R(N.hecke_matrix(p**2).charpoly("x"))
+        def morph(a, b, f, m):
+            G = (-1)**m * f.subs({x: -x}) * f
+            alst = [[k//2, v] for k, v in G.dict().iteritems()]
+            F = sum([v * x**k for k, v in alst])
+            return a**m * F.subs({x: (x - b)/a})
+        f1 = morph(u**2 + u + 1, -p * u**3 - u**2 - p*u, f, m)
+        return g/f1
+
 
 def diagonalize_matrix(mat, K):
     '''matの固有値がすべて体K内にある，特性多項式が重根をもたないと仮定
