@@ -686,7 +686,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         Assumes m is a prime or the square of a prime.
         '''
         (p, i) = factor(m)[0]
-        if not (Integer(m).is_prime_power() and 0 < i < 2):
+        if not (Integer(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
         if i == 1:
             return self.hecke_tp(p, tpl)
