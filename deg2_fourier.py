@@ -1230,7 +1230,7 @@ class KlingenEisensteinAndCuspForms(object):
         return (m2 * m1**(-1)).transpose()
 
     def hecke_t2_matrix(self):
-        return self.hecke_matrix(a)
+        return self.hecke_matrix(2)
 
     def hecke_t2_charpoly(self):
         return self.hecke_t2_matrix().charpoly()
@@ -1362,17 +1362,15 @@ class KlingenEisensteinAndCuspForms(object):
                 return False
         return True
 
-    def eigen_value_tp(self, f, p):
-        '''fをeigen formと仮定してT_pの固有値をもとめる．
+    def hecke_eigenvalue(self, f, a):
+        '''
+        Assumes f is an eigenform and returns the eigenvalue w.r.t T(a).
         '''
         ts = self.linearly_indep_tuples()
         for t in ts:
             if f.fourier_coefficient(*t) != 0:
-                return f.hecke_tp(p, t)/f.fourier_coefficient(*t)
-
-    def eigen_value_t2(self, f):
-        return self.eigen_value_tp(f,2)
-
+                return f.hecke_operator(a, t)/f.fourier_coefficient(*t)
+    
     def subspace_basis_annihilated_by(self, pol, a = 2):
         '''有理係数の多項式plが与えられたとき，polにT(a)を代入した作用素で，
         消される部分空間の基底を返す．
