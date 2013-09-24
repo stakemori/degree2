@@ -1213,8 +1213,9 @@ class KlingenEisensteinAndCuspForms(object):
         return matrix(l).rank() == len(basis)
 
     @cached_method
-    def hecke_tp_matrix(self, p):
-        '''basisに関するT_pの行列表示を返す
+    def hecke_matrix(self, a):
+        '''
+        Returns the matrix representation of T(a).
         '''
         basis = self.basis()
         lin_indep_tuples = self.linearly_indep_tuples()
@@ -1224,12 +1225,12 @@ class KlingenEisensteinAndCuspForms(object):
         m1 = matrix(l1)
         l2 = []
         for f in basis:
-            l2.append([f.hecke_tp(p, tpl) for tpl in lin_indep_tuples])
+            l2.append([f.hecke_operator(a, tpl) for tpl in lin_indep_tuples])
         m2 = matrix(l2)
         return (m2 * m1**(-1)).transpose()
 
     def hecke_t2_matrix(self):
-        return self.hecke_tp_matrix(2)
+        return self.hecke_matrix(a)
 
     def hecke_t2_charpoly(self):
         return self.hecke_t2_matrix().charpoly()
@@ -1372,13 +1373,13 @@ class KlingenEisensteinAndCuspForms(object):
     def eigen_value_t2(self, f):
         return self.eigen_value_tp(f,2)
 
-    def subspace_basis_annihilated_by(self, pol, p = 2):
-        '''有理係数の多項式plが与えられたとき，polにT(p)を代入した作用素で，
+    def subspace_basis_annihilated_by(self, pol, a = 2):
+        '''有理係数の多項式plが与えられたとき，polにT(a)を代入した作用素で，
         消される部分空間の基底を返す．
         '''
         S = PolynomialRing(QQ, names = "x")
         pol = S(pol)
-        A = self.hecke_tp_matrix(p)
+        A = self.hecke_matrix(a)
         B = polynomial_func(pol)(A.transpose())
         basis = self.basis()
         res = [self._to_form(v) for v in B.kernel().basis()]
