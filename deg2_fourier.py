@@ -1277,12 +1277,11 @@ class KlingenEisensteinAndCuspForms(object):
         pol_list = [f**i for f, i in factor(f)]
         return _subspace_bases_list(A, K, basis, pol_list)
 
-    def eigenform_with_eigenvalue_t2(self, K, root = False, basis = False):
+    def eigenform_with_eigenvalue_t2(self, root, basis = False):
         '''
         T(2)がbasisで張られる空間に作用しているとする．
         basisが与えられなければ，self.basis()になる．
-        KはT(2)の固有多項式の1つの根で生成される体．
-        root はT(2)のKにおける根．与えられなければ，K.gens()[0]になる．
+        root はT(2)の固有多項式の根．
         T(2)の固有多項式が重根をもたないと仮定し，root がeigen valueとなる，
         eigen formを返す．
         '''
@@ -1291,8 +1290,10 @@ class KlingenEisensteinAndCuspForms(object):
             A = self.hecke_t2_matrix()
         else:
             A = self.hecke_t2_matrix_wrt_basis(basis)
-        if root is False:
-            root = K.gens()[0]
+        if root in QQ:
+            K = QQ
+        else:
+            K = root.parent()
         dim = len(basis)
         S = PolynomialRing(K, names = "x")
         x = S.gens()[0]
