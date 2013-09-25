@@ -702,6 +702,19 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
             if self.fourier_coefficient(*t) != 0:
                 return self.hecke_operator(m, t)/(self.fourier_coefficient(*t))
 
+    def euler_factor_of_spinor_l(self, p, var = "x"):
+        '''
+        Assumes self is eigenform and returns p-Euler factor of spinor L as a polynomial.
+        '''
+        K = self.base_ring
+        R = PolynomialRing(K, 1, names = var, order='neglex')
+        x = R.gens()[0]
+        a1 = self.hecke_eigenvalue(p)
+        a2 = self.hecke_eigenvalue(p**2)
+        wt = self.wt
+        return 1 - a1 * x + (a1**2 - a2 - p**(2*wt - 4)) * x**2 - \
+          a1 * p**(2*wt - 3) * x**3 + p**(4*wt - 6) * x**4
+
     def hecke_t2(self, n, r, m):
         return self.hecke_tp(2, (n, r, m))
 
