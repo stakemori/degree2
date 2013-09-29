@@ -27,6 +27,13 @@ def semi_pos_def_matarices(bd):
 
     return set([(n, r, m) for n, r, m in semi_pos_def_matarices_trace(2*bd) if n <= bd and m <= bd])
 
+def to_sorted_fc_list(mp):
+    dct = {k: v for k, v in mp.iteritems() if v != 0}
+    keys = dct.keys()
+    keys_sorted = sorted(keys, key = lambda x: (max(x[0],x[2]),
+                                                x[0], x[2], abs(x[1]), x[1]))
+    return [(k, dct[k]) for k in keys_sorted]
+
 @cached_function
 def _semi_pos_def_mats_ev_grouped(bd):
     '''bd以下の
@@ -772,16 +779,6 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
                      "construction": self._construction if hasattr(self, "_construction") else False,
                      "mp": self.mp}
         save(data_dict, filename)
-
-def to_sorted_fc_list(mp):
-    dct = {}
-    for k,v  in mp.iteritems():
-        if v != 0:
-            dct[k] = v
-    keys = dct.keys()
-    keys_sorted = sorted(keys, key = lambda x: (x[0] + x[2], max(x[0],x[2]),
-                                                x[0],abs(x[1]), x[1]))
-    return [(k, dct[k]) for k in keys_sorted]
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
     def __init__(self, wt, prec = 5, base_ring = QQ, mp = False):
