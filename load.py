@@ -6,9 +6,9 @@ cached_dir = path.join(current_dir, "cached_data")
 
 from degree2.deg2_fourier import Deg2ModularFormQseries, Deg2EisensteinQseries, KlingenEisensteinAndCuspForms
 import degree2.deg2_fourier
-_deg2fc_gens_dict = load(path.join(cached_dir, '_fc_dict17.sobj'))
+_deg2fc_gens_dict = load(path.join(cached_dir, '_fc_dict21.sobj'))
 
-bd = 17
+bd = 21
 
 es4 = Deg2ModularFormQseries(4, _deg2fc_gens_dict[4], bd)
 degree2.deg2_fourier.Deg2global_gens_dict['es4'] = es4
