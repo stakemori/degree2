@@ -24,8 +24,9 @@ def semi_pos_def_matarices(bd):
     '''
     max(n, m) <= bd のsetを返す．
     '''
-
-    return set([(n, r, m) for n, r, m in semi_pos_def_matarices_trace(2*bd) if n <= bd and m <= bd])
+    s = set([(n, r, m) for n in range(bd + 1) for r in range(2 * bd + 1) \
+                    for m in range(bd + 1) if 4*n*m - r**2 >= 0])
+    return s.union(set([(n, -r, m) for n, r, m in s]))
 
 def to_sorted_fc_list(mp):
     dct = {k: v for k, v in mp.iteritems() if v != 0}
