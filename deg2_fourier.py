@@ -1673,7 +1673,6 @@ class SymmetricWeightGenericElement(object):
         '''
         wtはweight,
         precはprec,
-        fc_mpsはj個のdictionaryで，それぞれFourier係数を表わす．
         '''
         self.__base_ring = base_ring
         self.__prec = prec
@@ -1893,6 +1892,7 @@ def rankin_cohen_pair_det2_sym(j, f, g):
     unames = "u1, u2"
     RS_ring = PolynomialRing(QQ, names = rnames)
     (r11, r12, r22, s11, s12, s22) = RS_ring.gens()
+    (u1, u2) = PolynomialRing(RS_ring, names = unames).gens()
     r = r11 * u1**2 + r12 * u1 * u2 + r22 * u2**2
     s = s11 * u1**2 + s12 * u1 * u2 + s22 * u2**2
     k = f.wt
