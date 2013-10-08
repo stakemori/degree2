@@ -232,6 +232,26 @@ class Deg2QsrsElement(object):
         else:
             return self - other == 0
 
+    def _to_format_dct(self):
+        data_dict = {"prec": self.prec,
+                     "base_ring": self.base_ring,
+                     "mp": self.mp}
+        return data_dict
+
+    def save_as_binary(self, filename):
+        data_dict = self._to_format_dct()
+        save(data_dict, filename)
+
+    @classmethod
+    def _from_dict_to_object(cls, data_dict):
+        mp, prec, base_ring = [data_dict[ky] for ky in ["mp", "prec", "base_ring"]]
+        return cls(mp, prec, base_ring)
+
+    @classmethod
+    def load_from(cls, filename):
+        data_dict = load(filename)
+        return cls._from_dict_to_object(data_dict)
+
     @property
     def base_ring(self):
         return self.__base_ring
@@ -530,18 +550,10 @@ def _number_to_hol_modform(a, prec = infinity):
         parent = QQ
     return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
 
-def load_deg2_modular_form(filename):
-    data_dict = load(filename)
-    res = Deg2ModularFormQseries(data_dict["wt"], data_dict["mp"], data_dict["prec"],
-                                 base_ring = data_dict["base_ring"])
-    const = data_dict["construction"]
-    if not const is False:
-        res._construction = const
-    return res
-
 class Deg2ModularFormQseries(Deg2QsrsElement):
     def __init__(self, wt, mp, prec, base_ring = QQ):
         self.__wt = wt
+        self._construction = None
         Deg2QsrsElement.__init__(self, mp, prec, base_ring)
 
     @property
@@ -773,13 +785,26 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         else:
             return s * x35
 
-    def save_as_binary(self, filename):
-        data_dict = {"prec": self.prec,
-                     "wt": self.wt,
-                     "base_ring": self.base_ring,
-                     "construction": self._construction if hasattr(self, "_construction") else False,
-                     "mp": self.mp}
-        save(data_dict, filename)
+    def _to_format_dct(self):
+        d = {"wt": self.wt,
+             "construction": self._construction if hasattr(self, "_construction") else None}
+        return dict(d.items() + Deg2QsrsElement._to_format_dct(self).items())
+
+    @classmethod
+    def _from_dict_to_object(cls, data_dict):
+        wt, mp, prec, base_ring, const =  [data_dict[ky] for ky in ["wt",
+                                                                    "mp",
+                                                                    "prec",
+                                                                    "base_ring",
+                                                                    "construction"]]
+        f = Deg2ModularFormQseries(wt, mp, prec, base_ring = base_ring)
+        f._construction = const
+        return f
+
+    @classmethod
+    def load_from(cls, filename):
+        data_dict = load(filename)
+        return cls._from_dict_to_object(data_dict)
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
     def __init__(self, wt, prec = 5, base_ring = QQ, mp = False):
@@ -1661,8 +1686,6 @@ def is_p_integral(p, elm):
     return all([denominator(x)%p != 0 for x in f.coefficients()])
 
 
-
-
 class SymmetricWeightGenericElement(object):
     '''
     GL2の多項式表現Symm(j)を2変数j次の斉次多項式の空間に実現するとき，
@@ -1681,6 +1704,25 @@ class SymmetricWeightGenericElement(object):
 
     def __repr__(self):
         return "Formal Sym({j}) valued function with prec = {prec}".format(j = self.sym_wt, prec = self.prec)
+
+    def _to_format_dct(self):
+        return {"base_ring" : self.base_ring,
+                "prec" : self.prec,
+                "forms" : [f._to_format_dct() for f in self.forms]}
+
+    def save_as_binary(self, filename):
+        save(self._to_format_dct(), filename)
+
+    @classmethod
+    def _from_dict_to_object(cls, data_dict):
+        base_ring, prec, forms_dct = [data_dict[ky] for ky in ["base_ring", "prec", "forms"]]
+        forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
+        return cls(forms, prec, base_ring)
+
+    @classmethod
+    def load_from(cls, filename):
+        data_dict = load(filename)
+        return cls._from_dict_to_object(data_dict)
 
     @property
     def forms(self):
@@ -1760,7 +1802,27 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
         self.__wt= wt
 
     def __repr__(self):
-        return "Vector valued modular form of weight det^{wt} Sym({j}) with prec = {prec}".format(wt = self.wt, j = self.sym_wt, prec = self.prec)
+        return "Vector valued modular form of weight det^{wt} Sym({j}) with prec = {prec}".format(wt = self.wt,
+                                                                                                  j = self.sym_wt,
+                                                                                                  prec = self.prec)
+
+    def _to_format_dct(self):
+        d1 = SymmetricWeightGenericElement._to_format_dct(self)
+        return dict([("wt", self.wt)] + d1.items())
+
+    @classmethod
+    def _from_dict_to_object(cls, data_dict):
+        forms_dct, wt, prec, base_ring = [data_dict[ky] for ky in ["forms",
+                                                                   "wt",
+                                                                   "prec",
+                                                                   "base_ring"]]
+        forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
+        return cls(forms, wt, prec, base_ring)
+
+    @classmethod
+    def load_from(cls, filename):
+        data_dict = load(filename)
+        return cls._from_dict_to_object(data_dict)
 
     @property
     def wt(self):
