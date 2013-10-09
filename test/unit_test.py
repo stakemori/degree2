@@ -45,7 +45,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
             bls.append(bl)
         self.assertTrue(all(bls))
 
-    @skip("OK")
+    # @skip("OK")
     def test_dict_to_pol_to_dict(self):
         seq = range(10)
         bd = 10
@@ -58,8 +58,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
         bd = 10
         es4 = eisenstein_series_degree2(4, bd)
         f8 = es4 * es4
-        mp8 = f8.mp
-        ples4 = dict_to_pol(es4.mp, bd)
+        mp8 = f8.fc_dct
+        ples4 = dict_to_pol(es4.fc_dct, bd)
         plf8 = ples4**2
         self.assertTrue(pol_to_dict(plf8, bd) == mp8)
 
@@ -68,22 +68,22 @@ class TestDeg2fcFunctions(unittest.TestCase):
         bd = 10
         es4 = eisenstein_series_degree2(4, bd)
         f = es4 + es4
-        mp = f.mp
-        ples4 = dict_to_pol(es4.mp, bd)
+        fc_dct = f.fc_dct
+        ples4 = dict_to_pol(es4.fc_dct, bd)
         plf = ples4*2
-        self.assertTrue(pol_to_dict(plf, bd) == mp)
+        self.assertTrue(pol_to_dict(plf, bd) == fc_dct)
 
     # @skip("OK")
     def test_qsr_mul_add(self):
         bd = 10
         es4 = eisenstein_series_degree2(4, bd)
-        es4 = Deg2QsrsElement(es4.mp, es4.prec)
-        pes4 = dict_to_pol(es4.mp, bd)
+        es4 = Deg2QsrsElement(es4.fc_dct, es4.prec)
+        pes4 = dict_to_pol(es4.fc_dct, bd)
         s = es4 + es4
         m = es4 * es4
         ps = pes4 + pes4
         pm = pes4 * pes4
-        self.assertTrue(s.mp == pol_to_dict(ps, bd) and m.mp == pol_to_dict(pm, bd))
+        self.assertTrue(s.fc_dct == pol_to_dict(ps, bd) and m.fc_dct == pol_to_dict(pm, bd))
 
     # @skip("OK")
     def test_odd_mul_add(self):
@@ -92,11 +92,11 @@ class TestDeg2fcFunctions(unittest.TestCase):
         x35 = x35_with_prec(bd)
         s = x35 + x35
         m = es4 * x35
-        pes4 = dict_to_pol(es4.mp, bd)
-        px35 = dict_to_pol(x35.mp, bd)
+        pes4 = dict_to_pol(es4.fc_dct, bd)
+        px35 = dict_to_pol(x35.fc_dct, bd)
         ps = px35 + px35
         pm = pes4 * px35
-        self.assertTrue(s.mp == pol_to_dict(ps, bd) and m.mp == pol_to_dict(pm, bd))
+        self.assertTrue(s.fc_dct == pol_to_dict(ps, bd) and m.fc_dct == pol_to_dict(pm, bd))
 
     # @skip("OK")
     def test_pow(self):
@@ -104,7 +104,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
         es6 = eisenstein_series_degree2(6, bd)
         def pow(f, n):
             return reduce(operator.mul, [f]*n, 1)
-        bls = [(es6**u).mp == pow(es6, u).mp for u in [2, 3, 5, 9]]
+        bls = [(es6**u).fc_dct == pow(es6, u).fc_dct for u in [2, 3, 5, 9]]
         self.assertTrue(all(bls))
 
     def save_load_basis(self, wt):
@@ -116,7 +116,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
         KS.load_basis_from("/tmp/basis_test.sobj")
         lbasis = KS.basis()
         dim = KS.dimension()
-        self.assertTrue(all([lbasis[i].mp == basis[i].mp for i in range(dim)]))
+        self.assertTrue(all([lbasis[i].fc_dct == basis[i].fc_dct for i in range(dim)]))
 
     @skip("OK")
     def test_wt_34_47_save_load_basis(self):

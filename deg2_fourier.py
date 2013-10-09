@@ -28,8 +28,8 @@ def semi_pos_def_matarices(bd):
                     for m in range(bd + 1) if 4*n*m - r**2 >= 0])
     return s.union(set([(n, -r, m) for n, r, m in s]))
 
-def to_sorted_fc_list(mp):
-    dct = {k: v for k, v in mp.iteritems() if v != 0}
+def to_sorted_fc_list(fc_dct):
+    dct = {k: v for k, v in fc_dct.iteritems() if v != 0}
     keys = dct.keys()
     keys_sorted = sorted(keys, key = lambda x: (max(x[0],x[2]),
                                                 x[0], x[2], abs(x[1]), x[1]))
@@ -187,15 +187,15 @@ def _partition_add_fourier(prec):
 def _add_fourier1(ts, mp1, mp2):
     return [(t, mp1[t] + mp2[t]) for t in ts]
 
-def _mul_fourier_by_num(mp, a, prec):
+def _mul_fourier_by_num(fc_dct, a, prec):
     tss = partition_weighted(list(semi_pos_def_matarices(prec)), num_of_threads)
-    rl = list(_mul_fourier_by_num1([(ts, mp, a) for ts in tss]))
+    rl = list(_mul_fourier_by_num1([(ts, fc_dct, a) for ts in tss]))
     rl1 = reduce(operator.add, [a[1] for a in rl])
     return {t: v for t, v in rl1}
 
 @parallel
-def _mul_fourier_by_num1(ts, mp, a):
-    return [(t, a*mp[t]) for t in ts]
+def _mul_fourier_by_num1(ts, fc_dct, a):
+    return [(t, a*fc_dct[t]) for t in ts]
 
 def _common_base_ring(r1, r2):
     if r1.has_coerce_map_from(r2):
@@ -214,12 +214,12 @@ def common_prec(forms):
 class Deg2QsrsElement(object):
     '''degree 2の有限のFourier級数のclass
     '''
-    def __init__(self, mp, prec, base_ring = QQ):
+    def __init__(self, fc_dct, prec, base_ring = QQ):
         '''
-        mpは (n, r, m) -> a(n, r, m)という形のmapで(n, r, m) in semi_pos_def_matarices(prec)のもの，
+        fc_dctは (n, r, m) -> a(n, r, m)という形のmapで(n, r, m) in semi_pos_def_matarices(prec)のもの，
         semi_pos_def_matarices(prec)の元でkeyがないものは，a(n, r, m) = 0.
         '''
-        mp1 = mp.copy()
+        mp1 = fc_dct.copy()
         diff = semi_pos_def_matarices(prec) - set(mp1.keys())
         mp1.update({t: base_ring(0) for t in diff})
         self.__mp = mp1
@@ -228,14 +228,14 @@ class Deg2QsrsElement(object):
 
     def __eq__(self, other):
         if other == 0:
-            return all([x == 0 for x in self.mp.itervalues()])
+            return all([x == 0 for x in self.fc_dct.itervalues()])
         else:
             return self - other == 0
 
     def _to_format_dct(self):
         data_dict = {"prec": self.prec,
                      "base_ring": self.base_ring,
-                     "mp": self.mp}
+                     "fc_dct": self.fc_dct}
         return data_dict
 
     def save_as_binary(self, filename):
@@ -244,8 +244,12 @@ class Deg2QsrsElement(object):
 
     @classmethod
     def _from_dict_to_object(cls, data_dict):
-        mp, prec, base_ring = [data_dict[ky] for ky in ["mp", "prec", "base_ring"]]
-        return cls(mp, prec, base_ring)
+        if "mp" in data_dict.keys():
+            kys = ["mp", "prec", "base_ring"]
+        else:
+            kys = ["fc_dct", "prec", "base_ring"]
+        fc_dct, prec, base_ring = [data_dict[ky] for ky in kys]
+        return cls(fc_dct, prec, base_ring)
 
     @classmethod
     def load_from(cls, filename):
@@ -257,7 +261,7 @@ class Deg2QsrsElement(object):
         return self.__base_ring
 
     @property
-    def mp(self):
+    def fc_dct(self):
         return self.__mp
 
     @property
@@ -265,7 +269,7 @@ class Deg2QsrsElement(object):
         return self.__prec
 
     def __str__(self):
-        return self.mp.__str__()
+        return self.fc_dct.__str__()
 
     def _name(self):
         return 'q-expansion'
@@ -278,24 +282,24 @@ class Deg2QsrsElement(object):
         return ' with prec = '+ str(self.prec) \
             + ': \n' + '{' + ",\n ".join(l) + '}'
     def fourier_coefficient(self, n, r, m):
-        return self.mp[(n, r, m)]
+        return self.fc_dct[(n, r, m)]
 
     def __getitem__(self, idx):
-        return self.mp[idx]
+        return self.fc_dct[idx]
 
     def iteritems(self):
-        return self.mp.iteritems()
+        return self.fc_dct.iteritems()
 
     def __add__(self, other):
         if is_number(other):
-            fcmap = self.mp.copy()
-            fcmap[(0, 0, 0)] = self.mp[(0, 0, 0)] + other
+            fcmap = self.fc_dct.copy()
+            fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
         prec = min(self.prec, other.prec)
         bsring = _common_base_ring(self.base_ring, other.base_ring)
-        ms = self.mp
-        mo = other.mp
+        ms = self.fc_dct
+        mo = other.fc_dct
         fcmap = _add_fourier(ms, mo, prec)
         return Deg2QsrsElement(fcmap, prec, bsring)
 
@@ -310,7 +314,7 @@ class Deg2QsrsElement(object):
 
     def __mul__(self, other):
         if is_number(other):
-            fcmap = _mul_fourier_by_num(self.mp, other, self.prec)
+            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec)
             if hasattr(other, "parent"):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
@@ -319,8 +323,8 @@ class Deg2QsrsElement(object):
         elif isinstance(other, Deg2QsrsElement):
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
-            ms = self.mp
-            mo = other.mp
+            ms = self.fc_dct
+            mo = other.fc_dct
             fcmap = _mul_fourier(ms, mo, prec)
             return Deg2QsrsElement(fcmap, prec, bsring)
         elif isinstance(other, SymmetricWeightGenericElement):
@@ -352,18 +356,18 @@ class Deg2QsrsElement(object):
             return res
 
     def __neg__(self):
-        fcmap = _mul_fourier_by_num(self.mp, -1, self.prec)
+        fcmap = _mul_fourier_by_num(self.fc_dct, -1, self.prec)
         return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def theta_operator4(self):
         dic = dict()
-        for k, v in self.mp.iteritems():
+        for k, v in self.fc_dct.iteritems():
             (n, r, m) = k
             dic[k] = (4*n*m - r**2) * v
         return Deg2QsrsElement(dic, self.prec, self.base_ring)
 
     def phi_operator(self):
-        fcmap = self.mp
+        fcmap = self.fc_dct
         res = {}
         for (n, r, m) , v in fcmap.iteritems():
             if r == 0 and m == 0 and not v == 0:
@@ -372,11 +376,11 @@ class Deg2QsrsElement(object):
 
     def gcd_of_coefficients(self):
         K = self.base_ring
-        l = [K(v) for v in self.mp.values()]
+        l = [K(v) for v in self.fc_dct.values()]
         if K == QQ:
             return reduce(gcd, l)
         elif isinstance(K, sage.rings.number_field.number_field.NumberField_generic):
-            l = [K(v) for v in self.mp.values()]
+            l = [K(v) for v in self.fc_dct.values()]
             R = K.ring_of_integers()
             return R.fractional_ideal(l)
 
@@ -390,7 +394,7 @@ class Deg2QsrsElement(object):
                 return x.norm()
         if bd is False:
             bd = self.prec
-        return gcd([QQ(norm(self.mp[t])) for t in semi_pos_def_matarices(bd)])
+        return gcd([QQ(norm(self.fc_dct[t])) for t in semi_pos_def_matarices(bd)])
 
     def gcd_of_norms_ratio_theta4(self, bd = False):
         '''theta4を作用させたもののgcd_of_normsをself.gcd_of_normsで割ったものを返す
@@ -406,7 +410,7 @@ class Deg2QsrsElement(object):
         '''
         del_tau^a del_z^b del_w^c
         '''
-        fcmap = {(n, r, m) : n**a * r**b * m**c * v for (n, r, m), v in self.mp.iteritems()}
+        fcmap = {(n, r, m) : n**a * r**b * m**c * v for (n, r, m), v in self.fc_dct.iteritems()}
         return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def theta_sym(self, j = 2):
@@ -430,37 +434,37 @@ class Deg2QsrsElement(object):
         '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，tauについて偏微分したもの
         に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : n*a for (n, r, m), a in self.mp.iteritems()}
+        fcmap = {(n, r, m) : n*a for (n, r, m), a in self.fc_dct.iteritems()}
         return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def differentiate_wrt_w(self):
         '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，wについて偏微分したもの
         に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : m*a for (n, r, m), a in self.mp.iteritems()}
+        fcmap = {(n, r, m) : m*a for (n, r, m), a in self.fc_dct.iteritems()}
         return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def differentiate_wrt_z(self):
         '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，zについて偏微分したもの
         に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : r*a for (n, r, m), a in self.mp.iteritems()}
+        fcmap = {(n, r, m) : r*a for (n, r, m), a in self.fc_dct.iteritems()}
         return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def sorted_list(self):
-        return to_sorted_fc_list(self.mp)
+        return to_sorted_fc_list(self.fc_dct)
 
     def change_ring(self, R):
         '''Fourier係数がRに属するとして，base_ringをかえる
         '''
         fc_map = {}
-        for k, v in self.mp.iteritems():
+        for k, v in self.fc_dct.iteritems():
             fc_map[k] = R(v)
         return Deg2QsrsElement(fc_map, self.prec, R)
 
     def mod_p_map(self, p):
         fcmap = {}
-        for k, v in self.mp.iteritems():
+        for k, v in self.fc_dct.iteritems():
             if v != 0:
                 fcmap[k] = modulo(v, p, self.base_ring)
         return fcmap
@@ -551,10 +555,10 @@ def _number_to_hol_modform(a, prec = infinity):
     return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
 
 class Deg2ModularFormQseries(Deg2QsrsElement):
-    def __init__(self, wt, mp, prec, base_ring = QQ):
+    def __init__(self, wt, fc_dct, prec, base_ring = QQ):
         self.__wt = wt
         self._construction = None
-        Deg2QsrsElement.__init__(self, mp, prec, base_ring)
+        Deg2QsrsElement.__init__(self, fc_dct, prec, base_ring)
 
     @property
     def wt(self):
@@ -565,8 +569,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def __add__(self, other):
         if is_number(other):
-            fcmap = self.mp.copy()
-            fcmap[(0, 0, 0)] = self.mp[(0, 0, 0)] + other
+            fcmap = self.fc_dct.copy()
+            fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             if other == 0:
                 return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring)
             else:
@@ -575,8 +579,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         if self._is_hol_modform(other) and self.wt == other.wt:
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
-            ms = self.mp
-            mo = other.mp
+            ms = self.fc_dct
+            mo = other.fc_dct
             if self.wt%2 == 0:
                 fcmap = _add_fourier_even(ms, mo, prec)
             else:
@@ -589,20 +593,20 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def __mul__(self, other):
         if is_number(other):
-            fcmap = _mul_fourier_by_num(self.mp, other, self.prec)
+            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec)
             if hasattr(other, "parent"):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
                 bs = self.base_ring
             return Deg2ModularFormQseries(self.wt, fcmap, self.prec, bs)
         if isinstance(other, Deg2ModularFormQseries) and other.wt == 0:
-            fcmap = _mul_fourier_by_num(self.mp, other.mp[0, 0, 0], self.prec)
+            fcmap = _mul_fourier_by_num(self.fc_dct, other.fc_dct[0, 0, 0], self.prec)
             return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring)
         if self._is_hol_modform(other):
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
-            ms = self.mp
-            mo = other.mp
+            ms = self.fc_dct
+            mo = other.fc_dct
             if (self.wt + other.wt)%2 == 0:
                 fcmap = _mul_fourier_even(ms, mo, prec)
             else:
@@ -622,7 +626,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         if other == 0:
             return 1
         return Deg2ModularFormQseries(self.wt * other,
-                                      res.mp,
+                                      res.fc_dct,
                                       res.prec,
                                       res.base_ring)
 
@@ -635,7 +639,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def __neg__(self):
         res = Deg2QsrsElement.__neg__(self)
-        return Deg2ModularFormQseries(self.wt, res.mp,
+        return Deg2ModularFormQseries(self.wt, res.fc_dct,
                                       res.prec, res.base_ring)
 
     def _name(self):
@@ -644,18 +648,18 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
     def satisfies_maass_relation_for(self, n, r, m):
         if (n, r, m) == 0:
             return True
-        mp = self.mp
+        fc_dct = self.fc_dct
         for k in semi_pos_def_matarices(self.prec):
-            if not k in self.mp.keys():
-                mp[k] = 0
-        return mp[(n, r, m)] == sum([d**(self.wt - 1)*mp[(1, r/d, m*n/(d**2))] \
+            if not k in self.fc_dct.keys():
+                fc_dct[k] = 0
+        return fc_dct[(n, r, m)] == sum([d**(self.wt - 1)*fc_dct[(1, r/d, m*n/(d**2))] \
                                          for d in divisors(gcd((n, r, m)))])
 
     def hecke_tp(self, p, tpl):
         '''T_pを作用させたもののtpl番目のFourier係数を求める．'''
         (n, r, m) = tpl
         k = self.wt
-        fcmap = self.mp
+        fcmap = self.fc_dct
         if n%p == 0 and m%p == 0 and r%p == 0:
             a1 = p**(2*k - 3) * fcmap[(n/p, r/p, m/p)]
         else:
@@ -717,7 +721,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         '''
         Assumes self is an eigenform and returns the eigenvalue ass. to T(m).
         '''
-        keys_sorted = sorted(self.mp.keys(), key = lambda x: (x[0] + x[2]))
+        keys_sorted = sorted(self.fc_dct.keys(), key = lambda x: (x[0] + x[2]))
         for t in keys_sorted:
             if self.fourier_coefficient(*t) != 0:
                 return self.hecke_operator(m, t)/(self.fourier_coefficient(*t))
@@ -792,12 +796,12 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     @classmethod
     def _from_dict_to_object(cls, data_dict):
-        wt, mp, prec, base_ring, const =  [data_dict[ky] for ky in ["wt",
-                                                                    "mp",
-                                                                    "prec",
-                                                                    "base_ring",
-                                                                    "construction"]]
-        f = Deg2ModularFormQseries(wt, mp, prec, base_ring = base_ring)
+        if "mp" in data_dict.keys():
+            kys = ["wt", "mp", "prec", "base_ring", "construction"]
+        else:
+            kys = ["wt", "fc_dct", "prec", "base_ring", "construction"]
+        wt, fc_dct, prec, base_ring, const =  [data_dict[ky] for ky in kys]
+        f = Deg2ModularFormQseries(wt, fc_dct, prec, base_ring = base_ring)
         f._construction = const
         return f
 
@@ -807,15 +811,15 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         return cls._from_dict_to_object(data_dict)
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
-    def __init__(self, wt, prec = 5, base_ring = QQ, mp = False):
+    def __init__(self, wt, prec = 5, base_ring = QQ, fc_dct = False):
         self.__wt = wt
-        if mp is False:
-            mp = {}
+        if fc_dct is False:
+            fc_dct = {}
             for (n, r, m) in semi_pos_def_matarices(prec):
                 fc = self.fourier_coefficient(n, r, m)
-                mp[(n, r, m)] = fc
-                mp[(n, -r, m)] = fc
-        Deg2ModularFormQseries.__init__(self, wt, mp, prec, base_ring)
+                fc_dct[(n, r, m)] = fc
+                fc_dct[(n, -r, m)] = fc
+        Deg2ModularFormQseries.__init__(self, wt, fc_dct, prec, base_ring)
 
     @property
     def wt(self):
@@ -879,9 +883,9 @@ Deg2global_gens_dict = {}
 def eisenstein_series_degree2(k, prec):
     if "es" + str(k) in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict["es" + str(k)]
-        keys = set(f.mp.keys())
+        keys = set(f.fc_dct.keys())
         if f.prec >= prec:
-            fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
+            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2EisensteinQseries(k, prec, QQ, fcmap)
     f = Deg2EisensteinQseries(k, prec)
     Deg2global_gens_dict["es" + str(k)] = f
@@ -893,9 +897,9 @@ def x10_with_prec(prec):
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict[key]
-        keys = set(f.mp.keys())
+        keys = set(f.fc_dct.keys())
         if f.prec >= prec:
-            fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
+            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
@@ -911,9 +915,9 @@ def x12_with_prec(prec):
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict[key]
-        keys = set(f.mp.keys())
+        keys = set(f.fc_dct.keys())
         if f.prec >= prec:
-            fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
+            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
@@ -930,9 +934,9 @@ def x35_with_prec(prec):
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict[key]
-        keys = set(f.mp.keys())
+        keys = set(f.fc_dct.keys())
         if f.prec >= prec:
-            fcmap = {t: f.mp[t] for t in semi_pos_def_matarices(prec) & keys}
+            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
             return Deg2ModularFormQseries(k, fcmap, prec, QQ)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
@@ -951,7 +955,7 @@ def x35_with_prec(prec):
         + x13*x22*x34*x41 + x13*x24*x31*x42 - x13*x24*x32*x41\
         - x14*x21*x32*x43 + x14*x21*x33*x42 + x14*x22*x31*x43\
         - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
-    fcmap = (1/QQ(41472) * d).mp
+    fcmap = (1/QQ(41472) * d).fc_dct
     res = Deg2ModularFormQseries(35, fcmap, prec)
     Deg2global_gens_dict[key] = res
     return res
@@ -972,7 +976,7 @@ def diff_opetator_4(f1, f2, f3, f4):
         + x13*x22*x34*x41 + x13*x24*x31*x42 - x13*x24*x32*x41\
         - x14*x21*x32*x43 + x14*x21*x33*x42 + x14*x22*x31*x43\
         - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
-    fcmap = d.mp
+    fcmap = d.fc_dct
     res = Deg2ModularFormQseries(sum(wt_s) + 3, fcmap, prec_res)
     return res
 
@@ -1194,7 +1198,7 @@ class KlingenEisensteinAndCuspForms(object):
                   "wt": self.wt,
                   "base_ring": QQ,
                   "construction": b._construction,
-                  "mp": b.mp}\
+                  "fc_dct": b.fc_dct}\
                   for b in basis]
         save(dicts, filename)
 
@@ -1203,7 +1207,7 @@ class KlingenEisensteinAndCuspForms(object):
         prec = dicts[0]["prec"]
         if self.prec > prec:
             raise RuntimeError("self.prec must be less than {prec}".format(prec = prec))
-        basis = [Deg2ModularFormQseries(self.wt, dct["mp"], self.prec) for dct in dicts]
+        basis = [Deg2ModularFormQseries(self.wt, dct["fc_dct"], self.prec) for dct in dicts]
         for i in range(len(basis)):
             b = basis[i]
             b._construction = dicts[i]["construction"]
