@@ -752,7 +752,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         if a != 0:
             res = self
             pl = 1
-            if hasattr(self, "_construction"):
+            if hasattr(self, "_construction") and self._construction is not None:
                 pl = a**(-1) * self._construction
             res = a**(-1) * self
             res._construction = pl
