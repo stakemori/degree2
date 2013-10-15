@@ -4,8 +4,10 @@ from common_import import *
 num_of_threads = 8
 
 def partition_weighted(l, n, weight_fn = False):
-    '''リストの分割，weight_fnの値の和がだいたい同じになるよう
-    lをn個に分割する．
+    '''
+    weight_fn is a function defined on an element of l.
+    Divides l into n lists so that the sum of weight_fn of each list
+    is almost same.
     '''
     if n == 1:
         return [l]
@@ -20,15 +22,16 @@ def partition_weighted(l, n, weight_fn = False):
             rl1[-1] = rl1[-1] + a
             return rl1
     m = len(l)
-    pw_fn = lambda i: sum([weight_fn(x) for x in l[:i+1]])
-    wts = [pw_fn(i) for i in range(m)]
+    fn_vals = pmap(weight_fn, l)
+    wts = pmap(lambda i: sum(fn_vals[:i+1]), range(m))
     av_wt = max(wts[-1] // n, 1)
-    idx_list = [list(v) for k, v in groupby(range(m), lambda i: min(pw_fn(i) // av_wt, n - 1))]
+    idx_list = [list(v) for k, v in groupby(range(m), lambda i: min(wts[i] // av_wt, n - 1))]
     return [[l[i] for i in idl] for idl in idx_list]
 
 def pmap(fn, l, weight_fn = False, sort = True, num_of_threads = num_of_threads):
-    '''lはリスト．parallel map．weight_fnは partition_weightedの引数の意味と同じ．
-    sortがFalse(default True)のときは返されるリストの順番は保証されない．
+    '''
+    Parallel map. The meaning of weight_fn is same as the meaning of the argument of
+    partition_weighted.
     '''
     if weight_fn is False:
         wt_fn = False
@@ -45,9 +48,20 @@ def pmap(fn, l, weight_fn = False, sort = True, num_of_threads = num_of_threads)
     else:
         return map(lambda x: x[1], sorted(calc_res, key = lambda x: x[0]))
 
+def parallel_concat(func):
+    '''
+    func returns a list of results.
+    '''
+    pfunc = parallel(func)
+    def f(*args, **kwargs):
+        return reduce(operator.add,
+                      [x[1] for x in list(pfunc(*args, **kwargs))],
+                      [])
+    return f
+
 def group(ls, n):
     '''
-    lsをn個づつに分ける．
+    Partition of ls into n lists.
     '''
     m = len(ls)//n
     if len(ls)%n == 0:
@@ -73,7 +87,7 @@ def combination(n, m):
 @cached_function
 def naive_det_func(n):
     '''
-    行列がリストのリストで与えられるとき，行列式を計算する関数を返す．
+    Returns a function that computes the determinant of n by n matrix.
     '''
     def removed_list_at(i, l):
         return [l[j] for j in range(len(l)) if i != j]

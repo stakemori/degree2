@@ -1,32 +1,12 @@
 # -*- coding: utf-8; mode: sage -*-
 from utils import *
-
-# TODO コードの重複をなくす
+from basic_operation import semi_pos_def_matarices, _semi_pos_def_matarices_less_than,\
+    _mul_fourier, _add_fourier, _mul_fourier_by_num, _semi_pos_def_mats_odd_grouped,\
+    _semi_pos_def_mats_ev_grouped
 
 def deg2_fc_set_number_of_threads(a):
     global num_of_threads
     num_of_threads = a
-
-@cached_function
-def semi_pos_def_matarices_trace(bd):
-    '''トレースがbd以下の半整数半正定値対称行列[[n,r/2],[r/2,m]]について，
-    (n, r, m)からなるsetを返す．bdは非負整数であることを仮定する．
-    '''
-    if bd == 0:
-        return {(0, 0, 0)}
-    else:
-        return semi_pos_def_matarices_trace(bd - 1) | \
-            {(n, r, bd - n) for n in range(0, bd + 1)\
-                 for r in range(-floor(2*sqrt(n*(bd-n))), floor(2*sqrt(n*(bd-n))) + 1)}
-
-@cached_function
-def semi_pos_def_matarices(bd):
-    '''
-    max(n, m) <= bd のsetを返す．
-    '''
-    s = set([(n, r, m) for n in range(bd + 1) for r in range(2 * bd + 1) \
-                    for m in range(bd + 1) if 4*n*m - r**2 >= 0])
-    return s.union(set([(n, -r, m) for n, r, m in s]))
 
 def to_sorted_fc_list(fc_dct):
     dct = {k: v for k, v in fc_dct.iteritems() if v != 0}
@@ -34,169 +14,6 @@ def to_sorted_fc_list(fc_dct):
     keys_sorted = sorted(keys, key = lambda x: (max(x[0],x[2]),
                                                 x[0], x[2], abs(x[1]), x[1]))
     return [(k, dct[k]) for k in keys_sorted]
-
-@cached_function
-def _semi_pos_def_mats_ev_grouped(bd):
-    '''bd以下の
-    (0,0,0) => set([(0, 0, 0)])
-    (n, 0, 0) => content n，rank 1のset
-    rank 2, n >= m, r>=0, r <= nのとき
-    (n, r, m) => (n, r, m)と同値なset
-    という形のdictを返す．
-    '''
-    r0 = []
-    r1 = []
-    r2 = []
-    for t in semi_pos_def_matarices(bd):
-        (n, r, m) = t
-        if t == (0, 0, 0):
-            r0.append(t)
-        elif 4*n*m - r**2 == 0:
-            r1.append(t)
-        else:
-            r2.append(t)
-    res0 = {(0, 0, 0): set(r0)}
-    key_func1 = lambda t: gcd([QQ(x) for x in t])
-    res1 = {(k, 0, 0): set(grps) for k, grps in groupby(sorted(r1, key = key_func1), key_func1)}
-    res2 = {k: set(ls) for k, ls in list_group_by(r2, lambda x : reduced_form_with_sign(x)[0])}
-    res = {}
-    for dct in [res0, res1, res2]:
-        res.update(dct)
-    return res
-
-@cached_function
-def _semi_pos_def_mats_odd_grouped(bd):
-    pos_defs = [(n, r, m) for n, r, m in semi_pos_def_matarices(bd) if 4*n*m - r**2 != 0]
-    red_form_s = [(t, reduced_form_with_sign(t)) for t in pos_defs]
-    return {t: set([(a, sg) for a, (_, sg) in v]) for t, v in list_group_by(red_form_s, lambda x : x[1][0])}
-
-@cached_function
-def _semi_pos_def_matarices_less_than(tpl):
-    '''(n,r,m)=tplとするとき，半正定値半整数対称行列に対応する(n1, r1, m1)で，
-    (n-n1, r-r1, m-m1)も半正定値半整数対称行列なものからなるlistを返す．
-    '''
-    (n, r, m) = tpl
-    l = semi_pos_def_matarices(max(n, m))
-    return [(n1, r1, m1) for (n1, r1, m1) in l if (n - n1, r - r1, m - m1) in l]
-
-
-@cached_function
-def _partition_mul_fourier(prec):
-    tup_alist = [(t, _semi_pos_def_matarices_less_than(t)) \
-                     for t in semi_pos_def_matarices(prec)]
-    return partition_weighted(tup_alist, num_of_threads, lambda x: len(x[1]))
-
-@cached_function
-def _partition_mul_fourier_hol_even(prec):
-    dgrpd = _semi_pos_def_mats_ev_grouped(prec)
-    mats = dgrpd.keys()
-    _alst = [(t, _semi_pos_def_matarices_less_than(t)) for t in mats]
-    return partition_weighted(_alst, num_of_threads, lambda x: len(x[1]))
-
-@cached_function
-def _partition_mul_fourier_hol_odd(prec):
-    mats = _semi_pos_def_mats_odd_grouped(prec).keys()
-    _alst = [(t, _semi_pos_def_matarices_less_than(t)) for t in mats]
-    return partition_weighted(_alst, num_of_threads, lambda x: len(x[1]))
-
-def _mul_fourier(mp1, mp2, prec):
-    '''mp1, mp2に対応するFourier級数の積をmulti threadsで計算する．
-    '''
-    alsts = _partition_mul_fourier(prec)
-    rl = list(_mul_fourier1([(a, mp1, mp2) for a in alsts]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    return {t: v for t, v in rl1}
-
-def _mul_fourier_even(mp1, mp2, prec):
-    '''
-    積が偶数weightになるようなときのFourier係数の積を返す
-    '''
-    dgrpd = _semi_pos_def_mats_ev_grouped(prec)
-    alsts = _partition_mul_fourier_hol_even(prec)
-    rl = list(_mul_fourier1([(a, mp1, mp2) for a in alsts]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    res = {}
-    for t, v in rl1:
-        for tp in dgrpd[t]:
-            res[tp] = v
-    return res
-
-def _mul_fourier_odd(mp1, mp2, prec):
-    '''積が奇数weightになるようなときのFourier係数の積を返す
-    '''
-    alsts = _partition_mul_fourier_hol_odd(prec)
-    rl = list(_mul_fourier1([(a, mp1, mp2) for a in alsts]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    res = {}
-    dgrpd = _semi_pos_def_mats_odd_grouped(prec)
-    for t, v in rl1:
-        for tpl, sign in dgrpd[t]:
-            res[tpl] = sign * v
-    return res
-
-@parallel
-def _mul_fourier1(alst, mp1, mp2):
-    '''alstは(t, _semi_pos_def_matarices_less_than(t))のlist
-    '''
-    return [((n, r, m), sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)] \
-                                 for n0, r0, m0 in ts])) for (n, r, m), ts in alst]
-
-def _add_fourier(mp1, mp2, prec):
-    tss = _partition_add_fourier(prec)
-    rl = list(_add_fourier1([(ts, mp1, mp2) for ts in tss]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    return {t: v for t, v in rl1}
-
-def _add_fourier_even(mp1, mp2, prec):
-    '''偶数weightの保型形式の和
-    '''
-    tss = _partition_add_fourier_hol_even(prec)
-    rl = list(_add_fourier1([(ts, mp1, mp2) for ts in tss]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    res = {}
-    tpgrpd = _semi_pos_def_mats_ev_grouped(prec)
-    for t, v in rl1:
-        for tpl in tpgrpd[t]:
-            res[tpl] = v
-    return res
-
-def _add_fourier_odd(mp1, mp2, prec):
-    tss = _partition_add_fourier_hol_odd(prec)
-    rl = list(_add_fourier1([(ts, mp1, mp2) for ts in tss]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    dgrpd = _semi_pos_def_mats_odd_grouped(prec)
-    res = {}
-    for t, v in rl1:
-        for tpl, sign in dgrpd[t]:
-            res[tpl] = sign * v
-    return res
-
-@cached_function
-def _partition_add_fourier_hol_even(prec):
-    return partition_weighted(_semi_pos_def_mats_ev_grouped(prec).keys(), num_of_threads)
-
-@cached_function
-def _partition_add_fourier_hol_odd(prec):
-    return partition_weighted(_semi_pos_def_mats_odd_grouped(prec).keys(), num_of_threads)
-
-@cached_function
-def _partition_add_fourier(prec):
-    return partition_weighted(list(semi_pos_def_matarices(prec)), num_of_threads)
-
-@parallel
-def _add_fourier1(ts, mp1, mp2):
-    return [(t, mp1[t] + mp2[t]) for t in ts]
-
-def _mul_fourier_by_num(fc_dct, a, prec):
-    tss = partition_weighted(list(semi_pos_def_matarices(prec)), num_of_threads)
-    rl = list(_mul_fourier_by_num1([(ts, fc_dct, a) for ts in tss]))
-    rl1 = reduce(operator.add, [a[1] for a in rl])
-    return {t: v for t, v in rl1}
-
-@parallel
-def _mul_fourier_by_num1(ts, fc_dct, a):
-    return [(t, a*fc_dct[t]) for t in ts]
-
 def _common_base_ring(r1, r2):
     if r1.has_coerce_map_from(r2):
         return r1
@@ -212,13 +29,14 @@ def common_prec(forms):
     return min([x.prec for x in forms])
 
 class Deg2QsrsElement(object):
-    '''degree 2の有限のFourier級数のclass
     '''
-    def __init__(self, fc_dct, prec, base_ring = QQ):
+    A class of formal Fourier series of degree 2.
+    '''
+    def __init__(self, fc_dct, prec, base_ring = QQ, is_cuspidal = False):
         '''
-        fc_dctは (n, r, m) -> a(n, r, m)という形のmapで(n, r, m) in semi_pos_def_matarices(prec)のもの，
-        semi_pos_def_matarices(prec)の元でkeyがないものは，a(n, r, m) = 0.
+        fc_dct is a dictionary whose set of keys is semi_pos_def_matarices(prec).
         '''
+        self._is_cuspidal = is_cuspidal
         mp1 = fc_dct.copy()
         diff = semi_pos_def_matarices(prec) - set(mp1.keys())
         mp1.update({t: base_ring(0) for t in diff})
@@ -294,14 +112,18 @@ class Deg2QsrsElement(object):
         if is_number(other):
             fcmap = self.fc_dct.copy()
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
-            return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+            cuspidal = other == 0 and self._is_cuspidal
+            return Deg2QsrsElement(fcmap, self.prec, self.base_ring,
+                                   is_cuspidal = cuspidal)
 
         prec = min(self.prec, other.prec)
         bsring = _common_base_ring(self.base_ring, other.base_ring)
+        cuspidal = self._is_cuspidal and other._is_cuspidal
         ms = self.fc_dct
         mo = other.fc_dct
-        fcmap = _add_fourier(ms, mo, prec)
-        return Deg2QsrsElement(fcmap, prec, bsring)
+        fcmap = _add_fourier(ms, mo, prec, cuspidal)
+        return Deg2QsrsElement(fcmap, prec, base_ring = bsring,
+                               is_cuspidal = cuspidal)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -314,21 +136,28 @@ class Deg2QsrsElement(object):
 
     def __mul__(self, other):
         if is_number(other):
-            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec)
+            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec,
+                                        self._is_cuspidal)
             if hasattr(other, "parent"):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
                 bs = self.base_ring
-            return Deg2QsrsElement(fcmap, self.prec, bs)
+            return Deg2QsrsElement(fcmap, self.prec, base_ring = bs,
+                                   is_cuspidal = self._is_cuspidal)
+
         elif isinstance(other, Deg2QsrsElement):
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
-            fcmap = _mul_fourier(ms, mo, prec)
-            return Deg2QsrsElement(fcmap, prec, bsring)
+            cuspidal = self._is_cuspidal or other._is_cuspidal
+            fcmap = _mul_fourier(ms, mo, prec, cuspidal)
+            return Deg2QsrsElement(fcmap, prec, base_ring = bsring,
+                                   is_cuspidal = cuspidal)
+
         elif isinstance(other, SymmetricWeightGenericElement):
             return other.__mul__(self)
+
         raise NotImplementedError
 
     def __rmul__(self, other):
@@ -411,7 +240,9 @@ class Deg2QsrsElement(object):
         del_tau^a del_z^b del_w^c
         '''
         fcmap = {(n, r, m) : n**a * r**b * m**c * v for (n, r, m), v in self.fc_dct.iteritems()}
-        return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+        res = Deg2QsrsElement(fcmap, self.prec, base_ring = self.base_ring,
+                              is_cuspidal = self._is_cuspidal)
+        return res
 
     def theta_sym(self, j = 2):
         '''
@@ -431,25 +262,25 @@ class Deg2QsrsElement(object):
         return SymmetricWeightGenericElement(forms, self.prec, self.base_ring)
 
     def differentiate_wrt_tau(self):
-        '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，tauについて偏微分したもの
-        に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : n*a for (n, r, m), a in self.fc_dct.iteritems()}
-        return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to tau.
+        '''
+        return self._differential_operator_monomial(1, 0, 0)
 
     def differentiate_wrt_w(self):
-        '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，wについて偏微分したもの
-        に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : m*a for (n, r, m), a in self.fc_dct.iteritems()}
-        return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to w.
+        '''
+        return self._differential_operator_monomial(0, 0, 1)
 
     def differentiate_wrt_z(self):
-        '''[[tau, z],[z, w]]をH_2のパラメーターとしたとき，zについて偏微分したもの
-        に2pi iで割ったものを返す
         '''
-        fcmap = {(n, r, m) : r*a for (n, r, m), a in self.fc_dct.iteritems()}
-        return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to z.
+        '''
+        return self._differential_operator_monomial(0, 1, 0)
 
     def sorted_list(self):
         return to_sorted_fc_list(self.fc_dct)
@@ -514,30 +345,6 @@ class HalfIntegralMatrices2():
     def __div__(self, a):
         return HalfIntegralMatrices2((self._n / a, self._r / a, self._m / a))
 
-@cached_function
-def reduced_form_with_sign(tpl):
-    '''
-    tplがpositive definite であると仮定して，
-    ((n, r, m), sign)でn <= m, 0 <= r <= nとなるselfと
-    unimodular 同値のものを返す．signは，unimodular同値を与えるGL2(ZZ)の行列の行列式．
-    '''
-    sign = 1
-    (n, r, m) = tpl
-    if n > m:
-        sign *= -1
-        (n, m) = m, n
-    rem = mod(r, 2*n)
-    if rem > n:
-        u = r//(2*n) + 1
-    else:
-        u = r//(2*n)
-    m = n * u**2 - r * u + m
-    r = r - 2*n*u
-    if r < 0:
-        sign *= -1
-        r *= -1
-    return ((n, r, m), sign)
-
 def is_number(a):
     if isinstance(a, (int, float, long, complex)):
         return True
@@ -547,6 +354,9 @@ def is_number(a):
     else:
         return False
 
+def is_hol_mod_form(f):
+    return isinstance(f, Deg2ModularFormQseries)
+
 def _number_to_hol_modform(a, prec = infinity):
     if hasattr(a, 'parent'):
         parent = a.parent()
@@ -555,66 +365,88 @@ def _number_to_hol_modform(a, prec = infinity):
     return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
 
 class Deg2ModularFormQseries(Deg2QsrsElement):
-    def __init__(self, wt, fc_dct, prec, base_ring = QQ):
+    def __init__(self, wt, fc_dct, prec, base_ring = QQ,
+                 is_cuspidal = False,
+                 given_reduced_tuples_only = False):
+        '''
+        given_reduced_tuples_only means that Fourier coefficients are given
+        at reduced tuples.
+        '''
         self.__wt = wt
         self._construction = None
-        Deg2QsrsElement.__init__(self, fc_dct, prec, base_ring)
+        if given_reduced_tuples_only:
+            if is_cuspidal:
+                for rdf, col in _semi_pos_def_mats_odd_grouped(prec).iteritems():
+                    for t, sgn in col:
+                        fc_dct[t] = fc_dct[rdf] * sgn**wt
+            else:
+                for rdf, col in _semi_pos_def_mats_ev_grouped(prec).iteritems():
+                    for t in col:
+                        fc_dct[t] = fc_dct[rdf]
+        Deg2QsrsElement.__init__(self, fc_dct, prec, base_ring = base_ring,
+                                 is_cuspidal = is_cuspidal)
 
     @property
     def wt(self):
         return self.__wt
-
-    def _is_hol_modform(self, other):
-        return isinstance(other, Deg2ModularFormQseries)
 
     def __add__(self, other):
         if is_number(other):
             fcmap = self.fc_dct.copy()
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             if other == 0:
-                return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring)
+                return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring,
+                                              is_cuspidal = self._is_cuspidal)
             else:
                 return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
-        if self._is_hol_modform(other) and self.wt == other.wt:
+        if is_hol_mod_form(other) and self.wt == other.wt:
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
-            if self.wt%2 == 0:
-                fcmap = _add_fourier_even(ms, mo, prec)
-            else:
-                fcmap = _add_fourier_odd(ms, mo, prec)
-            return Deg2ModularFormQseries(self.wt, fcmap, prec, bsring)
+            cuspidal = self._is_cuspidal and other._is_cuspidal
+            fcmap = _add_fourier(ms, mo, prec, cuspidal = cuspidal,
+                                 hol = True)
+            return Deg2ModularFormQseries(self.wt, fcmap, prec, bsring,
+                                          is_cuspidal = cuspidal,
+                                          given_reduced_tuples_only = True)
         else:
             return Deg2QsrsElement.__add__(self, other)
+
     def __radd__(self, other):
         return self.__add__(other)
 
     def __mul__(self, other):
         if is_number(other):
-            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec)
+            fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec,
+                                        cuspidal = self._is_cuspidal,
+                                        hol = True)
             if hasattr(other, "parent"):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
                 bs = self.base_ring
-            return Deg2ModularFormQseries(self.wt, fcmap, self.prec, bs)
+            return Deg2ModularFormQseries(self.wt, fcmap, self.prec,
+                                          base_ring = bs,
+                                          is_cuspidal = self._is_cuspidal,
+                                          given_reduced_tuples_only = True)
         if isinstance(other, Deg2ModularFormQseries) and other.wt == 0:
-            fcmap = _mul_fourier_by_num(self.fc_dct, other.fc_dct[0, 0, 0], self.prec)
-            return Deg2ModularFormQseries(self.wt, fcmap, self.prec, self.base_ring)
-        if self._is_hol_modform(other):
+            return self.__mul__(other[(0, 0, 0)])
+
+        if is_hol_mod_form(other):
             prec = min(self.prec, other.prec)
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
-            if (self.wt + other.wt)%2 == 0:
-                fcmap = _mul_fourier_even(ms, mo, prec)
-            else:
-                fcmap = _mul_fourier_odd(ms, mo, prec)
+            cuspidal = self._is_cuspidal or other._is_cuspidal
+            fcmap = _mul_fourier(ms, mo, prec, cuspidal = cuspidal,
+                                  hol = True)
             return Deg2ModularFormQseries(self.wt + other.wt,
                                           fcmap,
                                           prec,
-                                          bsring)
+                                          base_ring = bsring,
+                                          is_cuspidal = cuspidal,
+                                          given_reduced_tuples_only = True)
         else:
             return Deg2QsrsElement.__mul__(self, other)
 
@@ -900,12 +732,13 @@ def x10_with_prec(prec):
         keys = set(f.fc_dct.keys())
         if f.prec >= prec:
             fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, QQ)
+            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es10 = eisenstein_series_degree2(10, prec)
     chi10 = QQ(43867) * QQ(2**12 * 3**5 * 5**2 * 7 * 53)**(-1) * (es10 - es4*es6)
     res = - 2**2 * chi10
+    res._is_cuspidal = True
     Deg2global_gens_dict[key] = res
     return res
 
@@ -918,13 +751,14 @@ def x12_with_prec(prec):
         keys = set(f.fc_dct.keys())
         if f.prec >= prec:
             fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, QQ)
+            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es12 = eisenstein_series_degree2(12, prec)
     chi12 =QQ(131 * 593)/QQ(2**13 * 3**7 * 5**3 * 7**2 * 337) * \
         (3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12)
     res = 12 * chi12
+    res._is_cuspidal = True
     Deg2global_gens_dict[key] = res
     return res
 
@@ -937,7 +771,7 @@ def x35_with_prec(prec):
         keys = set(f.fc_dct.keys())
         if f.prec >= prec:
             fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, QQ)
+            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     x10 = x10_with_prec(prec)
@@ -957,6 +791,7 @@ def x35_with_prec(prec):
         - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
     fcmap = (1/QQ(41472) * d).fc_dct
     res = Deg2ModularFormQseries(35, fcmap, prec)
+    res._is_cuspidal = True
     Deg2global_gens_dict[key] = res
     return res
 
