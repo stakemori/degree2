@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 from common_import import *
 
-num_of_threads = 8
+num_of_threads = sage.parallel.ncpus.ncpus()
 
 def partition_weighted(l, n, weight_fn = False):
     '''
