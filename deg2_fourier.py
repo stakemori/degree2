@@ -4,6 +4,11 @@ from basic_operation import semi_pos_def_matarices, _semi_pos_def_matarices_less
     _mul_fourier, _add_fourier, _mul_fourier_by_num, _semi_pos_def_mats_odd_grouped,\
     _semi_pos_def_mats_ev_grouped
 
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+cached_dir = os.path.join(current_dir, "cached_data")
+
 def deg2_fc_set_number_of_threads(a):
     global num_of_threads
     num_of_threads = a
@@ -712,7 +717,25 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
 Deg2global_gens_dict = {}
 
 @cached_function
+def load_cached_gens(prec):
+    global Deg2global_gens_dict
+    if prec <= 21:
+        gens_dct = load(os.path.join(cached_dir, '_fc_dict21.sobj'))
+    elif prec <= 39:
+        gens_dct = load(os.path.join(cached_dir, '_fc_dict39.sobj'))
+    es4 = Deg2ModularFormQseries(4, gens_dct[4], prec)
+    es6 = Deg2ModularFormQseries(6, gens_dct[6], prec)
+    x10 = Deg2ModularFormQseries(10, gens_dct[10], prec)
+    x12 = Deg2ModularFormQseries(12, gens_dct[12], prec)
+    x35 = Deg2ModularFormQseries(35, gens_dct[35], prec)
+    Deg2global_gens_dict = {"es4" : es4,
+                            "es6" : es6,
+                            "x10" : x10,
+                            "x12" : x12,
+                            "x35" : x35}
+
 def eisenstein_series_degree2(k, prec):
+    load_cached_gens(prec)
     if "es" + str(k) in Deg2global_gens_dict.keys():
         f = Deg2global_gens_dict["es" + str(k)]
         keys = set(f.fc_dct.keys())
@@ -723,8 +746,8 @@ def eisenstein_series_degree2(k, prec):
     Deg2global_gens_dict["es" + str(k)] = f
     return f
 
-@cached_function
 def x10_with_prec(prec):
+    load_cached_gens(prec)
     k = 10
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
@@ -742,8 +765,8 @@ def x10_with_prec(prec):
     Deg2global_gens_dict[key] = res
     return res
 
-@cached_function
 def x12_with_prec(prec):
+    load_cached_gens(prec)
     k = 12
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
@@ -762,8 +785,8 @@ def x12_with_prec(prec):
     Deg2global_gens_dict[key] = res
     return res
 
-@cached_function
 def x35_with_prec(prec):
+    load_cached_gens(prec)
     k = 35
     key = "x" + str(k)
     if key in Deg2global_gens_dict.keys():
