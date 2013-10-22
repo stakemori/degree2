@@ -60,7 +60,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         self.assertTrue(f.fc_dct == pol_to_dict(pf1 + pf2))
         return f
 
-    @skip("Ok")
+    # @skip("Ok")
     def test_hol_add(self):
         f1 = self.add_is_correct("es4", "0")
         self.assertFalse(f1._is_cuspidal)
@@ -99,7 +99,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         self.assertTrue(f5._is_cuspidal)
         self.assertFalse(isinstance(f5, Deg2ModularFormQseries))
 
-    @skip("OK")
+    # @skip("OK")
     def test_qsr_add(self):
         f1 = self.add_is_correct("qsres4", "0")
         self.assertFalse(f1._is_cuspidal)
@@ -122,7 +122,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         f7 = self.add_is_correct("qsrx12", "qsrx10")
         self.assertTrue(f7._is_cuspidal)
 
-    @skip("OK")
+    # @skip("OK")
     def test_qsr_mul_not_cusp(self):
         f = self.mul_is_correct("qsres4", "qsres4")
         self.assertFalse(f._is_cuspidal)
@@ -130,7 +130,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         g = self.mul_is_correct("qsres6", "qsres4")
         self.assertFalse(g._is_cuspidal)
 
-    @skip("OK")
+    # @skip("OK")
     def test_qsr_mul_num(self):
         f = self.mul_is_correct("qsres4", "2")
         self.assertFalse(f._is_cuspidal)
@@ -138,7 +138,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         g = self.mul_is_correct("qsrx10", "2")
         self.assertTrue(g._is_cuspidal)
 
-    @skip("OK")
+    # @skip("OK")
     def test_qsr_mul_cusp(self):
         f = self.mul_is_correct("qsres4", "qsrx10")
         g = self.mul_is_correct("qsrx10", "qsrx12")
