@@ -567,7 +567,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def hecke_eigenvalue(self, m):
         '''
-        Assumes self is an eigenform and returns the eigenvalue ass. to T(m).
+        Assuming self is an eigenform, this method returns the eigenvalue ass. to T(m).
         '''
         keys_sorted = sorted(self.fc_dct.keys(), key = lambda x: (x[0] + x[2]))
         for t in keys_sorted:
@@ -576,7 +576,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def euler_factor_of_spinor_l(self, p, var = "x"):
         '''
-        Assumes self is eigenform and returns p-Euler factor of spinor L as a polynomial.
+        Assuming self is eigenform, this method returns p-Euler factor of spinor L as a polynomial.
         '''
         K = self.base_ring
         R = PolynomialRing(K, 1, names = var, order='neglex')
@@ -1173,8 +1173,8 @@ class KlingenEisensteinAndCuspForms(object):
 
     def hecke_t2_matrix_wrt_basis(self, basis):
         '''
-        Assumes the subspace spanned by basis is stable under the action of T(2)
-        and returns the matrix representation of T(2).
+        Assuming the subspace spanned by basis is stable under the action of T(2),
+        this method returns the matrix representation of T(2).
         '''
         n = len(basis)
         lin_indep_tuples = self.linearly_indep_tuples()[:n]
@@ -1205,8 +1205,8 @@ class KlingenEisensteinAndCuspForms(object):
 
     def eigenform_with_eigenvalue_t2(self, eigenvalue, basis = False):
         '''
-        Assumes the characteristic polynomial of T(2) has no double eigenvalues
-        and returns an eigenform whose eigenvalue is eigenvalue.
+        Assuming the characteristic polynomial of T(2) has no double eigenvalues,
+        this method returns an eigenform whose eigenvalue is eigenvalue.
         '''
         if basis is False:
             basis = self.basis()

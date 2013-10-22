@@ -4,8 +4,8 @@ from utils import *
 @cached_function
 def reduced_form_with_sign(tpl):
     '''
-    Assumes the 2-by-2 matrix correspoding to tpl
-    is positive definite and returns
+    Assuming the 2-by-2 matrix correspoding to tpl
+    is positive definite, returns
     ((n, r, m), sgn)
     where (n, r, m) is unmimodular equivalent to tpl
     s.t. n <= m and 0 <= r <= n.
