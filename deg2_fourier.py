@@ -6,9 +6,6 @@ from basic_operation import semi_pos_def_matarices, _semi_pos_def_matarices_less
 
 import os
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-cached_dir = os.path.join(current_dir, "cached_data")
-
 def deg2_fc_set_number_of_threads(a):
     global num_of_threads
     num_of_threads = a
@@ -219,7 +216,8 @@ class Deg2QsrsElement(object):
             return R.fractional_ideal(l)
 
     def gcd_of_norms(self, bd = False):
-        '''bd以下のFourier係数の絶対ノルムのgcdをかえす
+        '''
+        Returns the g.c.d of absolute norms of Fourier coefficients.
         '''
         def norm(x):
             if x in QQ:
@@ -231,8 +229,6 @@ class Deg2QsrsElement(object):
         return gcd([QQ(norm(self.fc_dct[t])) for t in semi_pos_def_matarices(bd)])
 
     def gcd_of_norms_ratio_theta4(self, bd = False):
-        '''theta4を作用させたもののgcd_of_normsをself.gcd_of_normsで割ったものを返す
-        '''
         return self.theta_operator4().gcd_of_norms(bd)/self.gcd_of_norms(bd)
 
     def ratio_theta4(self):
@@ -251,7 +247,16 @@ class Deg2QsrsElement(object):
 
     def theta_sym(self, j = 2):
         '''
-        Sym(j) (j >= 2, even), に値をもつような，thetaを作用させたものを返す
+        Returns an image as a vector valued (Sym_{j} j:even) Fourier expansion
+        of the generalized Theta operator associated with
+        the Rankin-cohen operator {F, G}_{Sym_{j}}.
+
+        [Reference]
+        Ibukiyama, Vector valued Siegel modular forms of symmetric
+        tensor weight of small degrees, COMMENTARI MATHEMATICI
+        UNIVERSITATIS SANCTI PAULI VOL 61, NO 1, 2012.
+
+        Boecherer, Nagaoka, On p-adic properties of Siegel modular forms, arXiv, 2013.
         '''
         R = PolynomialRing(QQ, "r1, r2, r3")
         (r1, r2, r3) = R.gens()
@@ -291,7 +296,8 @@ class Deg2QsrsElement(object):
         return to_sorted_fc_list(self.fc_dct)
 
     def change_ring(self, R):
-        '''Fourier係数がRに属するとして，base_ringをかえる
+        '''
+        Returns a Fourier expansion whose base ring is changed.
         '''
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
@@ -308,8 +314,8 @@ class Deg2QsrsElement(object):
 
 class HalfIntegralMatrices2():
     '''
-    (n, r, m)に対応する．半整数行列のclass．
-    積や和は，Sageの行列の積や和を使わない．
+    An instance of this class corresponds to
+    a tuple (n, r, m).
     '''
     def __eq__(self, other):
         return self._t == other._t
@@ -332,8 +338,9 @@ class HalfIntegralMatrices2():
         return self + other.__neg__()
 
     def __getitem__(self, matlist):
-        '''matlistは[[a,b], [c,d]]の形のリストで，2次の行列に対応．
-        matlist.transpose() * self * matlistを返す．
+        '''
+        matlist is a list such as [[a,b], [c,d]] that corresponds to a 2-by-2 matrix.
+        Returns matlist.transpose() * self * matlist.
         '''
         ((a, b), (c, d)) = matlist
         (n, r, m) = self._t
@@ -493,7 +500,10 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
                                          for d in divisors(gcd((n, r, m)))])
 
     def hecke_tp(self, p, tpl):
-        '''T_pを作用させたもののtpl番目のFourier係数を求める．'''
+        '''
+        Returns tpls-th Fourier coefficient of T(p)(self), where p : prime.
+        cf. Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
+        '''
         (n, r, m) = tpl
         k = self.wt
         fcmap = self.fc_dct
@@ -511,7 +521,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         return a1 + a2 + a31 + a32
 
     def hecke_tp2(self, p, tpl):
-        '''T(p^2)を作用させたもののtpl番目のFourier係数を返す．
+        '''
+        Returns tpls-th Fourier coefficient of T(p^2)(self), where p : prime.
         cf Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
         '''
         R = HalfIntegralMatrices2(tpl)
@@ -579,11 +590,13 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
     def hecke_t2(self, n, r, m):
         return self.hecke_tp(2, (n, r, m))
 
-    def normalize(self, c = False):
-        '''cでわったものを返す．cがfalseのときは，(1, 0, 0)のFourier係数が0でないとき，(1, 0, 0)が1になるよう正規化する．
+    def normalize(self, c = None):
         '''
-        if c is False:
-            a = self.fourier_coefficient(1, 0, 0)
+        Returns a c^(-1) * self.
+        If c is None, this returns self[(1, 0, 0)]^(-1) * self.
+        '''
+        if c is None:
+            a = self[(1, 0, 0)]
         else:
             a = c
         if a != 0:
@@ -599,7 +612,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
 
     def raise_prec(self, bd):
-        '''_constructionなどを使ってprecをあげたものを返す
+        '''
+        Returns the same modular form as self whose prec is raised.
         '''
         if not hasattr(self, "_construction"):
             raise NotImplementedError
@@ -718,6 +732,8 @@ Deg2global_gens_dict = {}
 
 @cached_function
 def load_cached_gens(prec):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    cached_dir = os.path.join(current_dir, "cached_data")
     global Deg2global_gens_dict
     if prec <= 21:
         gens_dct = load(os.path.join(cached_dir, '_fc_dict21.sobj'))
@@ -858,25 +874,20 @@ def _det3(ls):
 
 @cached_function
 def Y12_with_prec(prec):
-    '''井草先生の論文にかいてあったもの．eigenformでない．
+    '''
+    One of Igusa's generators of the ring of Siegel modular forms of degree 2
+    over ZZ.
     '''
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     x12 = x12_with_prec(prec)
     return 1/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**4 * 3**2 * x12
 
-# @cached_function
-# def KS12_with_prec(prec):
-#     '''ラマヌジャンデルタからえられるKlingen Eisenstein級数
-#     '''
-#     es4 = eisenstein_series_degree2(4, prec)
-#     es6 = eisenstein_series_degree2(6, prec)
-#     x12 = x12_with_prec(prec)
-#     return QQ(7)/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**5 * 3**2 * x12
-
 @cached_function
 def tuples_even_wt_modular_forms(wt):
-    '''4p + 6q + 10r +12s = wtとなる，(p, q, r, s)のlistを返す
+    '''
+    Returns the list of tuples (p, q, r, s) such that
+    4p + 6q + 10r +12s = wt.
     '''
     if wt < 0:
         return []
@@ -893,22 +904,12 @@ def dimension_degree2(wt):
     else:
         return len(tuples_even_wt_modular_forms(wt - 35))
 
-def fourier_list(f, l):
-    '''fはq-展開lは(n,r,m)のリスト．fourier係数のlistを返す
-    '''
-    return [f.fourier_coefficient(n, r, m) for n, r, m in l]
-
-def hecke_t2_fourier_list(f, l):
-    return [f.hecke_t2(n, r, m) for n, r, m in l]
-
-
-
-
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 (ple4, ple6, plx10, plx12, plx35) = RDeg2.gens()
 
 class Deg2SpaceOfModularForms(object):
-    '''degree 2のModular Formからなる空間
+    '''
+    The space of Siegel modular forms of degree 2.
     '''
     def __init__(self, wt, prec = False):
         self.__wt = wt
@@ -926,9 +927,10 @@ class Deg2SpaceOfModularForms(object):
         return dimension_degree2(self.wt)
 
     def basis(self):
-        '''基底をリストとして返す．基底は，es4, es6, x10, x12の多項式として返す．
-        その要素は，attribute _constructionをもち，es4, es6, x10, x12から
-        どうやって構成されたかを表している．
+        '''
+        Returns the list of the basis.
+        An element of the basis has an attribute _construction that shows
+        how one can construct the modular form as a polynomial of es4, es6, x10, x12 and x35.
         '''
         prec = self.prec
         if self.dimension() == 0:
@@ -967,7 +969,7 @@ class Deg2SpaceOfModularForms(object):
 
 class KlingenEisensteinAndCuspForms(object):
     '''
-    Klingen-Eisenstein級数とcuspformからなる空間
+    The space of Klingen-Eisenstein series and cupsforms.
     '''
     def __init__(self, wt, prec = False):
         self.__wt = wt
@@ -992,13 +994,20 @@ class KlingenEisensteinAndCuspForms(object):
 
     @cached_method
     def dimensions(self):
-        "全体の次元，Klingen-Eisenstein級数の次元，liftの次元, non-liftの次元"
+        '''
+        Returns a dictionary such that
+        "total" => the total dimension of self,
+        "Klingen" => the dimension of the space of Klingen-Eisenstein series,
+        "lift" => the dimension of the Maass subspace of the space of cusp forms,
+        "non-lift" => the dimension of the non-lift cusp forms.
+        '''
         dim = self.dimension()
         cdim = self.dimension_of_cuspforms()
         kdim = dim - cdim
         nlcdim = self.dimension_of_nolift_cuspforms()
         lcdim = cdim - nlcdim
         return {"total": dim,"Klingen": kdim, "lift": lcdim, "non-lift": nlcdim}
+
     @cached_method
     def dimension_of_cuspforms(self):
         if self.wt%2 == 1:
@@ -1018,7 +1027,9 @@ class KlingenEisensteinAndCuspForms(object):
 
     @cached_method
     def basis(self):
-        '''基底をかえす．Deg2SpaceOfModularForms.basisとにている．
+        '''
+        Returns the list of the basis.
+        It is similar to Deg2SpaceOfModularForms.basis.
         '''
         if self.__basis_cached:
             return self.__cached_basis
@@ -1026,7 +1037,7 @@ class KlingenEisensteinAndCuspForms(object):
         if self.wt%2 == 1:
             M = Deg2SpaceOfModularForms(self.wt, self.prec)
             return M.basis()
-        # wtが偶数のとき
+        # If wt is even,
         es4 = eisenstein_series_degree2(4, prec)
         es6 = eisenstein_series_degree2(6, prec)
         x10 = x10_with_prec(prec)
@@ -1073,12 +1084,9 @@ class KlingenEisensteinAndCuspForms(object):
         self.__cached_basis = basis
 
     def basis_coefficient_matrix(self):
-        '''self.linearly_indep_tuplesで返されたtupleのリストと，
-        self.basisで返されたリストから正方行列を作る
-        '''
         lnindep_tuples = self.linearly_indep_tuples()
         basis = self.basis()
-        return matrix([[b.fourier_coefficient(*t) for t in lnindep_tuples] for b in basis])
+        return matrix([[b[t] for t in lnindep_tuples] for b in basis])
 
     def _cache_lin_indep_tuples(self, l):
         k = self.wt
@@ -1086,9 +1094,10 @@ class KlingenEisensteinAndCuspForms(object):
 
     lin_indep_tuples_cached = {}
     def linearly_indep_tuples(self):
-        '''[f1,..,fn] = self.basis()とするとき，n個のタプルのリスト
-        [t1, .., tn]で(f1(t1),.., f1(tn)), .., (fn(t1),.., fn(tn))が一
-        次独立であるようなものを返す．
+        '''
+        Returns the list of tuples [t1, .., tn] such that
+        (f1(t1),.., f1(tn)), ... , (fn(t1),.., fn(tn))
+        are linearly independent, where f1,..., fn = self.basis().
         '''
         wt = self.wt
         lin_indep_tuples_cached = KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
@@ -1141,7 +1150,9 @@ class KlingenEisensteinAndCuspForms(object):
         return self.hecke_charpoly(2, var='x', algorithm='linbox')
 
     def _to_vector(self, fm):
-        '''basisを標準基底にする列ベクトルを返す
+        '''
+        Returns a vector corresponding to fm.
+        By this method, self.basis() becomes the standard basis.
         '''
         basis = self.basis()
         lin_indep_tuples = self.linearly_indep_tuples()
@@ -1153,15 +1164,17 @@ class KlingenEisensteinAndCuspForms(object):
         return (m1.transpose())**(-1) * v
 
     def _to_form(self, v):
-        '''_to_vectorの逆
+        '''
+        The inverse to _to_vector.
         '''
         n = self.dimension()
         basis = self.basis()
         return reduce(operator.add, [basis[i] * v[i] for i in range(n)])
 
     def hecke_t2_matrix_wrt_basis(self, basis):
-        '''basisではられる空間がT_2で安定しているとして，そのbasisについてのT2の行列表示
-        を返す．
+        '''
+        Assumes the subspace spanned by basis is stable under the action of T(2)
+        and returns the matrix representation of T(2).
         '''
         n = len(basis)
         lin_indep_tuples = self.linearly_indep_tuples()[:n]
@@ -1176,7 +1189,9 @@ class KlingenEisensteinAndCuspForms(object):
         return (m2 * m1**(-1)).transpose()
 
     def hecke_eigen_subspaces_bases_list(self, K = QQ, basis = False):
-        '''T_2の固有多項式のK上既約分解に対応する部分空間分解の基底のリストを返す．
+        '''
+        Returns the list of basis of subspaces corresponding to the decomposition
+        of the characteristic polynomial of T(2) in the field K.
         '''
         if basis is False:
             basis = self.basis()
@@ -1188,28 +1203,25 @@ class KlingenEisensteinAndCuspForms(object):
         pol_list = [f**i for f, i in factor(f)]
         return _subspace_bases_list(A, K, basis, pol_list)
 
-    def eigenform_with_eigenvalue_t2(self, root, basis = False):
+    def eigenform_with_eigenvalue_t2(self, eigenvalue, basis = False):
         '''
-        T(2)がbasisで張られる空間に作用しているとする．
-        basisが与えられなければ，self.basis()になる．
-        root はT(2)の固有多項式の根．
-        T(2)の固有多項式が重根をもたないと仮定し，root がeigen valueとなる，
-        eigen formを返す．
+        Assumes the characteristic polynomial of T(2) has no double eigenvalues
+        and returns an eigenform whose eigenvalue is eigenvalue.
         '''
         if basis is False:
             basis = self.basis()
             A = self.hecke_t2_matrix()
         else:
             A = self.hecke_t2_matrix_wrt_basis(basis)
-        if root in QQ:
+        if eigenvalue in QQ:
             K = QQ
         else:
-            K = root.parent()
+            K = eigenvalue.parent()
         dim = len(basis)
         S = PolynomialRing(K, names = "x")
         x = S.gens()[0]
         f = S(A.charpoly())
-        g = f // (x - root)
+        g = f // (x - eigenvalue)
         B = polynomial_func(g)(A)
         for v in B.columns():
             if v != 0:
@@ -1228,8 +1240,10 @@ class KlingenEisensteinAndCuspForms(object):
         return flatten(self.hecke_eigen_subspaces_bases_list())
 
     def eigen_forms(self, K):
-        '''hecke_t2_matrixがうまく計算できて，それの固有多項式が重根をもたない
-        と仮定するときに，Hecke eigen form のlistを返す. KはT_2の固有多項式の分解体．
+        '''
+        Assuming the characteristic polynomial of T(2) has no double roots,
+        returns the list of eigenforms. K is a decomposition field of the characteristic polynomial
+        of T(2).
         '''
         A = self.hecke_t2_matrix()
         P = diagonalize_matrix(A, K)
@@ -1242,19 +1256,17 @@ class KlingenEisensteinAndCuspForms(object):
             res.append(f)
         return res
 
-    def eigen_forms_of_subspace(self, subspace_basis, K):
-        '''subspace_basisではられる部分空間がT_2で安定している，KがT_2の固有多項式の分解体
-        であると仮定して，eigenformのリストを返す．
-        '''
-        A = self.hecke_t2_matrix_wrt_basis(subspace_basis)
-        P = diagonalize_matrix(A, K)
-        dim = len(subspace_basis)
-        res = []
-        for a in P.columns():
-            f = reduce(operator.add, [a[i] * subspace_basis[i] for i in range(dim)])
-            f._construction = sum([a[i] * subspace_basis[i]._construction for i in range(dim)])
-            res.append(f)
-        return res
+    # obsolete method.
+    # def eigen_forms_of_subspace(self, subspace_basis, K):
+    #     A = self.hecke_t2_matrix_wrt_basis(subspace_basis)
+    #     P = diagonalize_matrix(A, K)
+    #     dim = len(subspace_basis)
+    #     res = []
+    #     for a in P.columns():
+    #         f = reduce(operator.add, [a[i] * subspace_basis[i] for i in range(dim)])
+    #         f._construction = sum([a[i] * subspace_basis[i]._construction for i in range(dim)])
+    #         res.append(f)
+    #     return res
 
     def is_eigen_form(self, f, tupls = False):
         if tupls is False:
@@ -1277,8 +1289,8 @@ class KlingenEisensteinAndCuspForms(object):
                 return f.hecke_operator(a, t)/f.fourier_coefficient(*t)
 
     def subspace_basis_annihilated_by(self, pol, a = 2):
-        '''有理係数の多項式plが与えられたとき，polにT(a)を代入した作用素で，
-        消される部分空間の基底を返す．
+        '''
+        Returns the basis of the subspace annihilated by pol(T(a)).
         '''
         S = PolynomialRing(QQ, names = "x")
         pol = S(pol)
@@ -1292,7 +1304,7 @@ class KlingenEisensteinAndCuspForms(object):
 
 class CuspFormsDegree2(object):
     '''
-    Space of cusp forms of degree 2.  This class assumes that the
+    The space of cusp forms of degree 2.  This class assumes that the
     characteristic polynomial of T(2) acting on
     KlingenEisensteinAndCuspForms has no double roots.
     '''
@@ -1380,8 +1392,10 @@ class CuspFormsDegree2(object):
 
 
 def diagonalize_matrix(mat, K):
-    '''matの固有値がすべて体K内にある，特性多項式が重根をもたないと仮定
-    して，P^(-1)mat Pが対角になるようなPを返す
+    '''
+    Assuming all the eigenvalues of a matrix mat exist in the field K
+    and the characteristic polynomial has no double roots,
+    returns a matrix P such that P^(-1) mat P is a diagonal matrix.
     '''
     n = mat.parent().ncols()
     M = MatrixSpace(K, n)
@@ -1402,9 +1416,8 @@ def polynomial_func(pl):
     return lambda y: sum([y**i * l[i] for i in range(m)])
 
 def block_diagonalize_matrix(mat, pol_list, K = QQ):
-    '''matはK係数, pol_listはK係数の多項式のlist.  matの特性多項式と
-    pol_listのすべての積は等しいと仮定．pol_listが互いに素なとき，
-    P^(-1)mat Pがblock_diagonalになるようなPを返す．
+    '''
+    This function is similar to diagonalize_matrix.
     '''
     R = PolynomialRing(K, "x")
     pol_list = [R(f) for f in pol_list]
@@ -1415,35 +1428,14 @@ def block_diagonalize_matrix(mat, pol_list, K = QQ):
         res += B.kernel().basis()
     return matrix(res).transpose()
 
-# def _an_eigen_vector(A, ev):
-#     '''Aは行列，evは固有値，evが固有値となる列ベクトルを返す．
-#     '''
-#     En = identity_matrix(A.ncols())
-#     return (A.transpose() - ev * En).kernel().basis()[0]
-
-# def _exchange_rows(i, j, A):
-#     rws = A.rows()
-#     rws[i], rws[j] = rws[j], rws[i]
-#     return matrix(rws)
-
-def _delete_rows(i, j, A):
-    '''Aは体係数の行列，(i, j)成分が0でないと仮定し，
-    i行目以外のj列目を消す．
-    '''
-    rws = A.rows()
-    n = len(rws)
-    vi = rws[i]
-    vi = vector(pmap(lambda a: 1/vi[j] * a, vi))
-    l = range(n)
-    l.remove(i)
-    vecs = pmap(lambda k: rws[k] - rws[k][j] * vi, l)
-    vecs.insert(i, vi)
-    return matrix(vecs)
-
 def _subspace_bases_list(A, K, basis, pol_list):
-    '''行列Aがbaisで張られる空間に作用していて，pol_listはAの特性多項式の
-    Kでの分解(既約分解とは限らない)とする．
-    このとき，対応するbasisの部分空間への分解をlistのlistで返す．
+    '''
+    Assume a matrix A acts on the space spanned by basis and
+    pol_list is a list of a K-coefficients polynomials prime to each other
+    whose product is equal to the characteristic polynomial
+    of A.
+    This function returns corresponding decomposition of the space
+    as a list of vectors.
     '''
     P = block_diagonalize_matrix(A, pol_list, K)
     deg_list = [f.degree() for f in pol_list]
@@ -1460,8 +1452,10 @@ def _subspace_bases_list(A, K, basis, pol_list):
 
 @tail_recursive
 def _linearly_indep_cols_index_list(A, r, acc = []):
-    '''Aがrank rで列数rの縦に長い行列に対応するリストのリストとするとき，
-    r個の一次独立な行ベクトルの行番号のリストを返す．
+    '''
+    Assume rank A = r and the number of rows is r.
+    This function returns the list of indices lst such that
+    [A.columns()[i] for i in lst] has length r and linearly independent.
     '''
     if r == 0:
         n = len(acc)
@@ -1492,73 +1486,14 @@ def modulo(x, p, K):
     xl_p = [mod(b, p).lift() for b in xl]
     return sum(list(imap(operator.mul, a_s, xl_p)))
 
-
-def exceptional_primes2(f):
-    '''fがelliptic modular formのとき，type (ii)の5以上のexceptional
-    primeのリストを返す．つまり，theta(f) euiqv theta^((p+1)/2)(f) mod
-    P となるprime PについてPの下にあるpのリストをかえす．
-    '''
-    k = f.weight()
-    F = f.base_ring()
-    pr = prime_range(5, k + 1)
-    for a in [2*k - 3, 2*k - 1]:
-        if is_prime(a):
-            pr.append(a)
-    bd1 = max(3*k, k + 2 * k**2) // 12
-    fl = [0] + f.qexp(bd1 + 1).coefficients()
-    def is_expt_prime2(l):
-        bd = max(k + l + 1, (k + ((l + 1)**2)//2)) // 12
-        fc_list = []
-        for n in range(1, bd + 1):
-            fc_list.append((n - n**((l + 1)//2)) * fl[n])
-        if F == QQ:
-            nrm = QQ(gcd(fc_list))
-        else:
-            nrm = QQ(F.ideal(fc_list).norm())
-        return nrm.numerator()%l == 0
-    return filter(is_expt_prime2, pr)
-
-def exceptional_primes2_of_wt(k):
-    S = CuspForms(1, k)
-    f = S.newforms("a")[0]
-    return exceptional_primes2(f)
-
-def non_ordinary_primes_of_wt(k):
-    S = CuspForms(1, k)
-    f = S.newforms("a")[0]
-    return non_ordinary_primes(f)
-
-def non_ordinary_primes(f, bd = False):
-    '''bd以下のnon_ordinary primeのリストをかえす．
-    '''
-    k = f.weight()
-    if bd == False:
-        bd = 2*k - 1
-    fc_list = [0] + f.qexp(bd + 1).coefficients()
-    res = []
-    for p in prime_range(2, bd + 1):
-        if fc_list[p].norm()%p == 0:
-            res.append(p)
-    return res
-
-def is_p_integral(p, elm):
-    if elm in QQ:
-        return denominator(elm)%p != 0
-    f = elm.minpoly()
-    return all([denominator(x)%p != 0 for x in f.coefficients()])
-
-
 class SymmetricWeightGenericElement(object):
     '''
-    GL2の多項式表現Symm(j)を2変数j次の斉次多項式の空間に実現するとき，
-    u1^j, .. u2^jと基底をとる．このclassのインスタンスは，degree 2のフーリエ展開
-    のj個の組に対応する．
+    Let Symm(j) be the symmetric tensor representation of degree j of GL2.
+    Symm(j) is the space of homogenous polynomials of u1 and u2 of degree j.
+    We take u1^j, .. u2^j as a basis of Symm(j)
+    An instance of this class corresponds to a tuple of j Fourier expansions of degree 2.
     '''
     def __init__(self, forms, prec, base_ring = QQ):
-        '''
-        wtはweight,
-        precはprec,
-        '''
         self.__base_ring = base_ring
         self.__prec = prec
         self.__sym_wt = len(forms) - 1
@@ -1657,7 +1592,7 @@ class SymmetricWeightGenericElement(object):
 
 class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
     '''
-    vector値保型形式に対応するclass
+    An instance of this class corresponding to vector valued Siegel modular form of degree 2.
     '''
     def __init__(self, forms, wt, prec, base_ring = QQ):
         SymmetricWeightGenericElement.__init__(self, forms, prec, base_ring)
@@ -1724,35 +1659,15 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
     def __rmul__(self, other):
         return self.__mul__(other)
 
-# obsolete
-@cached_function
-def _rankin_cohen_pair_func(Q):
-    '''
-    R = [[r11, r12/2], [r12/2, r22]]
-    S = [[s11, s12/2], [s12/2, s22]]
-    u = (u1, u2)
-    とおく．
-    QはR, S, uの係数の多項式でRSU_ringの元．uに関して斉次．
-    Qに対応する微分作用素によるRankin Cohen bracket を計算する関数を返す
-    '''
-    Q = RSU_ring(Q)
-    u_dict = Q.dict()
-    n = sum(u_dict.keys()[0])
-    def rankin_cohen_pair(f, g):
-        res = []
-        for (i, _), pol in u_dict.iteritems():
-            res.append((i, sum([v * f._differential_operator_monomial(a1, b1, c1) * \
-                                g._differential_operator_monomial(a2, b2, c2)\
-                                for (a1, b1, c1, a2, b2, c2), v in pol.dict().iteritems()])))
-        return [x[1] for x in sorted(res, key = lambda x: -x[0])]
-    return rankin_cohen_pair
+
 
 @cached_function
 def _rankin_cohen_bracket_func(Q, rnames = False, unames = False):
     '''
+    Let
     rnames = "r00, r01, r02, ..., r(n-1)0, r(n-1)1, r(n-1)2"
     unames = "u1, u2"
-    とする．
+    Let
     R0 = [[r00, r01/2],
           [r01/2, r02]],
     R1 = [[r10, r11/2],
@@ -1760,8 +1675,10 @@ def _rankin_cohen_bracket_func(Q, rnames = False, unames = False):
     ...
     R(n-1) = [[r(n-1)0, r(n-1)1/2],
               [r(n-1)1/2, r(n-1)2]]
-    を対称行列とし，QはR1,..Rnの多項式を係数にもつ， u1, u2についての斉次多項式とする．
-    n個の保型形式の組から，Qに対応するRankin-Cohen型の微分作用素を計算する関数を返す．
+    be the symmetric matrices.
+    Q is a homogenous polynomial of u1 and u2 whose coefficient is a polynomial of R0, ..., R(n-1).
+    This function returns a Rakin-Cohen type differential operator corresponding to Q.
+    The operator is a function that takes a list of n forms.
     '''
     if rnames is False:
         rnames = ", ".join(["r{i}0, r{i}1, r{i}2".format(i = i) for i in range(n)])
@@ -1785,7 +1702,7 @@ def _rankin_cohen_bracket_func(Q, rnames = False, unames = False):
 
 def rankin_cohen_pair_sym(j, f, g):
     '''
-    jを偶数として，Q_{k, l, j/2}(r, s)に対応するRankin Cohen bracketを返す.
+    Assuming j : even, returns Rankin-Cohen bracket corresponding to Q_{k, l, j/2}(r, s).
     cf. Ibukiyama, Vector valued Siegel modular forms of symmetric tensor
     weight of small degrees, COMMENTARI MATHEMATICI UNIVERSITATIS SANCTI PAULI
     VOL 61, NO 1, 2012.

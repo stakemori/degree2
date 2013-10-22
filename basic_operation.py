@@ -4,9 +4,13 @@ from utils import *
 @cached_function
 def reduced_form_with_sign(tpl):
     '''
-    tplがpositive definite であると仮定して，
-    ((n, r, m), sign)でn <= m, 0 <= r <= nとなるselfと
-    unimodular 同値のものを返す．signは，unimodular同値を与えるGL2(ZZ)の行列の行列式．
+    Assumes the 2-by-2 matrix correspoding to tpl
+    is positive definite and returns
+    ((n, r, m), sgn)
+    where (n, r, m) is unmimodular equivalent to tpl
+    s.t. n <= m and 0 <= r <= n.
+    sgn is the determinant of an element GL2(ZZ) that gives
+    the unimodular equivalence.
     '''
     sign = 1
     (n, r, m) = tpl

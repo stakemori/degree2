@@ -7,11 +7,6 @@ class TestDeg2fcFunctions(unittest.TestCase):
     @skip("OK")
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
-            '''
-            tplがpositive definite であると仮定して，
-            ((n, r, m), sign)でn <= m, 0 <= r <= nとなるselfと
-            unimodular 同値のものを返す．signは，unimodular同値を与えるGL2(ZZ)の行列の行列式．
-            '''
             mat = matrix([[1,0],[0,1]])
             sign = 1
             (n, r, m) = tpl
@@ -74,8 +69,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
 
 def naive_rankin_cohen_pair_symm4(f, g):
     '''
-    f, gはweight k, lのdegree 2のスカラー値ジーゲル保型形式．
-    det ^(k+l) Symm4 になるようなrankin cohen operator
+    f, g is Siegel modular forms of degre 2 , weight k and l respectively.
+    Returns a vector valued Siegel modular form of weight det ^(k+l) Symm(4).
     cf. Ibukiyama, Vector valued Siegel modular forms of symmetric tensor
     weight of small degrees, COMMENTARI MATHEMATICI UNIVERSITATIS SANCTI PAULI
     VOL 61, NO 1, 2012.

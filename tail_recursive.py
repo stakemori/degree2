@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-# 参照 http://code.activestate.com/recipes/496691/
+# Borrowed from http://code.activestate.com/recipes/496691/
 class tail_recursive(object):
 
     def __init__(self, func):
