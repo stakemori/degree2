@@ -4,7 +4,8 @@ import unittest, random
 from unittest import skip
 
 
-global_prec = 10
+# global_prec = 8
+global_prec = [(10, 5, 10), (9, 0, 8)]
 
 es4 = eisenstein_series_degree2(4, global_prec)
 qsres4 = Deg2QsrsElement(es4.fc_dct, global_prec)
@@ -20,6 +21,8 @@ x12 = x12_with_prec(global_prec)
 qsrx12 = Deg2QsrsElement(x12.fc_dct, global_prec, is_cuspidal = True)
 dzx12 = x12.differentiate_wrt_z()
 
+x35 = x35_with_prec(global_prec)
+
 dct_of_forms = {"es4"    : es4,
                 "qsres4" : qsres4,
                 "es6"    : es6,
@@ -30,6 +33,7 @@ dct_of_forms = {"es4"    : es4,
                 "qsrx12" : qsrx12,
                 "dzx10"  : dzx10,
                 "dzx12"  : dzx12,
+                "x35"    : x35,
                 "2"      : 2,
                 "0"      : 0}
 
@@ -98,6 +102,13 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
         f5 = self.mul_is_correct("x10", "dzx10")
         self.assertTrue(f5._is_cuspidal)
         self.assertFalse(isinstance(f5, Deg2ModularFormQseries))
+
+    def test_odd_mul(self):
+        f1 = self.mul_is_correct("es4", "x35")
+        self.assertTrue(f1._is_cuspidal)
+
+        f2 = self.mul_is_correct("x35", "x35")
+        self.assertTrue(f2._is_cuspidal)
 
     # @skip("OK")
     def test_qsr_add(self):
@@ -208,7 +219,7 @@ def pol_to_dict(pl, bd = global_prec):
     (u1,u2,q1,q2) = R.gens()
     S=R.quotient(u1*u2-1)
     (uu1,uu2,qq1,qq2) = S.gens()
-    l = semi_pos_def_matarices(bd)
+    l = PrecisionDeg2(bd)
     pl_lft = pl.lift()
     dct = dict()
     for n, r, m in l:
@@ -228,7 +239,7 @@ def dict_to_pol(dct, bd = global_prec):
     S=R.quotient(u1*u2-1)
     (uu1,uu2,qq1,qq2) = S.gens()
 
-    l = semi_pos_def_matarices(bd)
+    l = PrecisionDeg2(bd)
     if not hasattr(dct, "__getitem__"):
         return dct
     return sum([dct[(n, r, m)]*uu1**(r) * qq1**n * qq2**m if r > 0 else dct[(n, r, m)] * uu2**(-r) * qq1**n * qq2**m\

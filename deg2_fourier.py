@@ -1,9 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 from utils import *
-from basic_operation import semi_pos_def_matarices, _semi_pos_def_matarices_less_than,\
-    _mul_fourier, _add_fourier, _mul_fourier_by_num, _semi_pos_def_mats_odd_grouped,\
-    _semi_pos_def_mats_ev_grouped
-
+from basic_operation import _mul_fourier, _add_fourier, _mul_fourier_by_num,\
+    PrecisionDeg2
 import os
 
 def deg2_fc_set_number_of_threads(a):
@@ -16,6 +14,7 @@ def to_sorted_fc_list(fc_dct):
     keys_sorted = sorted(keys, key = lambda x: (max(x[0],x[2]),
                                                 x[0], x[2], abs(x[1]), x[1]))
     return [(k, dct[k]) for k in keys_sorted]
+
 def _common_base_ring(r1, r2):
     if r1.has_coerce_map_from(r2):
         return r1
@@ -28,7 +27,11 @@ def common_base_ring(forms):
     return reduce(_common_base_ring, [x.base_ring for x in forms])
 
 def common_prec(forms):
-    return min([x.prec for x in forms])
+    a_prec = forms[0].prec
+    if all([a_prec == f.prec for f in forms[1:]]):
+        return a_prec
+    else:
+        raise NotImplementedError
 
 class Deg2QsrsElement(object):
     '''
@@ -36,11 +39,12 @@ class Deg2QsrsElement(object):
     '''
     def __init__(self, fc_dct, prec, base_ring = QQ, is_cuspidal = False):
         '''
-        fc_dct is a dictionary whose set of keys is semi_pos_def_matarices(prec).
+        fc_dct is a dictionary whose set of keys is PrecisionDeg2(prec).
         '''
         self._is_cuspidal = is_cuspidal
         mp1 = fc_dct.copy()
-        diff = semi_pos_def_matarices(prec) - set(mp1.keys())
+        prec = PrecisionDeg2(prec)
+        diff = set(prec) - set(mp1.keys())
         mp1.update({t: base_ring(0) for t in diff})
         self.__mp = mp1
         self.__prec = prec
@@ -53,7 +57,7 @@ class Deg2QsrsElement(object):
             return self - other == 0
 
     def _to_format_dct(self):
-        data_dict = {"prec": self.prec,
+        data_dict = {"prec": self.prec._to_format_dct(),
                      "base_ring": self.base_ring,
                      "fc_dct": self.fc_dct}
         return data_dict
@@ -69,6 +73,7 @@ class Deg2QsrsElement(object):
         else:
             kys = ["fc_dct", "prec", "base_ring"]
         fc_dct, prec, base_ring = [data_dict[ky] for ky in kys]
+        prec = PrecisionDeg2._from_dict_to_object(prec)
         return cls(fc_dct, prec, base_ring)
 
     @classmethod
@@ -118,7 +123,7 @@ class Deg2QsrsElement(object):
             return Deg2QsrsElement(fcmap, self.prec, self.base_ring,
                                    is_cuspidal = cuspidal)
 
-        prec = min(self.prec, other.prec)
+        prec = common_prec([self, other])
         bsring = _common_base_ring(self.base_ring, other.base_ring)
         cuspidal = self._is_cuspidal and other._is_cuspidal
         ms = self.fc_dct
@@ -148,7 +153,7 @@ class Deg2QsrsElement(object):
                                    is_cuspidal = self._is_cuspidal)
 
         elif isinstance(other, Deg2QsrsElement):
-            prec = min(self.prec, other.prec)
+            prec = common_prec([self, other])
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
@@ -226,7 +231,7 @@ class Deg2QsrsElement(object):
                 return x.norm()
         if bd is False:
             bd = self.prec
-        return gcd([QQ(norm(self.fc_dct[t])) for t in semi_pos_def_matarices(bd)])
+        return gcd([QQ(norm(self.fc_dct[t])) for t in PrecisionDeg2(bd)])
 
     def gcd_of_norms_ratio_theta4(self, bd = False):
         return self.theta_operator4().gcd_of_norms(bd)/self.gcd_of_norms(bd)
@@ -369,7 +374,7 @@ def is_number(a):
 def is_hol_mod_form(f):
     return isinstance(f, Deg2ModularFormQseries)
 
-def _number_to_hol_modform(a, prec = infinity):
+def _number_to_hol_modform(a, prec):
     if hasattr(a, 'parent'):
         parent = a.parent()
     else:
@@ -386,13 +391,14 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         '''
         self.__wt = wt
         self._construction = None
+        prec = PrecisionDeg2(prec)
         if given_reduced_tuples_only:
             if is_cuspidal:
-                for rdf, col in _semi_pos_def_mats_odd_grouped(prec).iteritems():
+                for rdf, col in prec.group_by_reduced_forms_with_sgn().iteritems():
                     for t, sgn in col:
                         fc_dct[t] = fc_dct[rdf] * sgn**wt
             else:
-                for rdf, col in _semi_pos_def_mats_ev_grouped(prec).iteritems():
+                for rdf, col in prec.group_by_reduced_forms().iteritems():
                     for t in col:
                         fc_dct[t] = fc_dct[rdf]
         Deg2QsrsElement.__init__(self, fc_dct, prec, base_ring = base_ring,
@@ -401,6 +407,12 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
     @property
     def wt(self):
         return self.__wt
+
+    def __eq__(self, other):
+        if other == 0:
+            return all([x == 0 for x in self.fc_dct.itervalues()])
+        else:
+            return self - other == 0
 
     def __add__(self, other):
         if is_number(other):
@@ -413,7 +425,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
                 return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
         if is_hol_mod_form(other) and self.wt == other.wt:
-            prec = min(self.prec, other.prec)
+            prec = common_prec([self, other])
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
@@ -446,7 +458,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
             return self.__mul__(other[(0, 0, 0)])
 
         if is_hol_mod_form(other):
-            prec = min(self.prec, other.prec)
+            prec = common_prec([self, other])
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
@@ -493,9 +505,6 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         if (n, r, m) == 0:
             return True
         fc_dct = self.fc_dct
-        for k in semi_pos_def_matarices(self.prec):
-            if not k in self.fc_dct.keys():
-                fc_dct[k] = 0
         return fc_dct[(n, r, m)] == sum([d**(self.wt - 1)*fc_dct[(1, r/d, m*n/(d**2))] \
                                          for d in divisors(gcd((n, r, m)))])
 
@@ -652,6 +661,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         else:
             kys = ["wt", "fc_dct", "prec", "base_ring", "construction"]
         wt, fc_dct, prec, base_ring, const =  [data_dict[ky] for ky in kys]
+        prec = PrecisionDeg2._from_dict_to_object(prec)
         f = Deg2ModularFormQseries(wt, fc_dct, prec, base_ring = base_ring)
         f._construction = const
         return f
@@ -666,7 +676,7 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
         self.__wt = wt
         if fc_dct is False:
             fc_dct = {}
-            for (n, r, m) in semi_pos_def_matarices(prec):
+            for (n, r, m) in PrecisionDeg2(prec):
                 fc = self.fourier_coefficient(n, r, m)
                 fc_dct[(n, r, m)] = fc
                 fc_dct[(n, -r, m)] = fc
@@ -731,47 +741,76 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
 Deg2global_gens_dict = {}
 
 @cached_function
-def load_cached_gens(prec):
+def load_cached_gens_from_file(prec):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cached_dir = os.path.join(current_dir, "cached_data")
+    prec39 = PrecisionDeg2(39)
+    prec34_m17_51 = PrecisionDeg2([(34, -17, 51)])
     global Deg2global_gens_dict
-    if prec <= 21:
-        gens_dct = load(os.path.join(cached_dir, '_fc_dict21.sobj'))
-    elif prec <= 39:
-        gens_dct = load(os.path.join(cached_dir, '_fc_dict39.sobj'))
-    es4 = Deg2ModularFormQseries(4, gens_dct[4], prec)
-    es6 = Deg2ModularFormQseries(6, gens_dct[6], prec)
-    x10 = Deg2ModularFormQseries(10, gens_dct[10], prec)
-    x12 = Deg2ModularFormQseries(12, gens_dct[12], prec)
-    x35 = Deg2ModularFormQseries(35, gens_dct[35], prec)
-    Deg2global_gens_dict = {"es4" : es4,
-                            "es6" : es6,
-                            "x10" : x10,
-                            "x12" : x12,
-                            "x35" : x35}
+    if prec <= prec39 or set(prec) <= set(prec39) | set(prec34_m17_51):
+        if prec <= PrecisionDeg2(21):
+            gens_dct = load(os.path.join(cached_dir, '_fc_dict21.sobj'))
+            max_prec = PrecisionDeg2(21)
+        elif prec <= prec39:
+            gens_dct = load(os.path.join(cached_dir, '_fc_dict39.sobj'))
+            max_prec = prec39
+        else:
+            gens_dct1 = load(os.path.join(cached_dir, '_fc_dict39.sobj'))
+            gens_dct2 = load(os.path.join(cached_dir, '_fc_dict_tuples_34_-17_51.sobj'))
+            for k in gens_dct1.keys():
+                gens_dct1[k].update(gens_dct2[k])
+            gens_dct = {k: {t: gens_dct1[k][t] for t in prec} \
+                            for k in gens_dct1.keys()}
+            max_prec = prec
+        es4 = Deg2ModularFormQseries(4, gens_dct[4], max_prec)
+        es6 = Deg2ModularFormQseries(6, gens_dct[6], max_prec)
+        x10 = Deg2ModularFormQseries(10, gens_dct[10], max_prec)
+        x12 = Deg2ModularFormQseries(12, gens_dct[12], max_prec)
+        x35 = Deg2ModularFormQseries(35, gens_dct[35], max_prec)
+        Deg2global_gens_dict = {"es4" : es4,
+                                "es6" : es6,
+                                "x10" : x10,
+                                "x12" : x12,
+                                "x35" : x35}
+
+def load_deg2_cached_gens(key, prec, wt, cuspidal = False):
+    if key in Deg2global_gens_dict.keys():
+        f = Deg2global_gens_dict[key]
+        if f.prec >= prec:
+            fc_dct = {t: f[t] for t in prec}
+            return Deg2ModularFormQseries(wt, fc_dct, prec,
+                                          base_ring = QQ,
+                                          is_cuspidal = cuspidal)
+    else:
+        return False
 
 def eisenstein_series_degree2(k, prec):
-    load_cached_gens(prec)
-    if "es" + str(k) in Deg2global_gens_dict.keys():
-        f = Deg2global_gens_dict["es" + str(k)]
-        keys = set(f.fc_dct.keys())
-        if f.prec >= prec:
-            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2EisensteinQseries(k, prec, QQ, fcmap)
+    return eisenstein_series_degree2_innner(k, PrecisionDeg2(prec))
+
+@cached_function
+def eisenstein_series_degree2_innner(k, prec):
+    prec = PrecisionDeg2(prec)
+    load_cached_gens_from_file(prec)
+    key = "es" + str(k)
+    f = load_deg2_cached_gens(key, prec, k)
+    if f:
+        return f
     f = Deg2EisensteinQseries(k, prec)
     Deg2global_gens_dict["es" + str(k)] = f
     return f
 
 def x10_with_prec(prec):
-    load_cached_gens(prec)
+    return x10_with_prec_inner(PrecisionDeg2(prec))
+
+@cached_function
+def x10_with_prec_inner(prec):
+    prec = PrecisionDeg2(prec)
+    load_cached_gens_from_file(prec)
     k = 10
     key = "x" + str(k)
-    if key in Deg2global_gens_dict.keys():
-        f = Deg2global_gens_dict[key]
-        keys = set(f.fc_dct.keys())
-        if f.prec >= prec:
-            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
+    f = load_deg2_cached_gens(key, prec, k, cuspidal = True)
+    if f:
+        return f
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es10 = eisenstein_series_degree2(10, prec)
@@ -780,17 +819,18 @@ def x10_with_prec(prec):
     res._is_cuspidal = True
     Deg2global_gens_dict[key] = res
     return res
-
 def x12_with_prec(prec):
-    load_cached_gens(prec)
+    return x12_with_prec_inner(PrecisionDeg2(prec))
+
+@cached_function
+def x12_with_prec_inner(prec):
+    prec = PrecisionDeg2(prec)
+    load_cached_gens_from_file(prec)
     k = 12
     key = "x" + str(k)
-    if key in Deg2global_gens_dict.keys():
-        f = Deg2global_gens_dict[key]
-        keys = set(f.fc_dct.keys())
-        if f.prec >= prec:
-            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
+    f = load_deg2_cached_gens(key, prec, k, cuspidal = True)
+    if f:
+        return f
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es12 = eisenstein_series_degree2(12, prec)
@@ -802,15 +842,17 @@ def x12_with_prec(prec):
     return res
 
 def x35_with_prec(prec):
-    load_cached_gens(prec)
+    return x35_with_prec_inner(PrecisionDeg2(prec))
+
+@cached_function
+def x35_with_prec_inner(prec):
+    prec = PrecisionDeg2(prec)
+    load_cached_gens_from_file(prec)
     k = 35
     key = "x" + str(k)
-    if key in Deg2global_gens_dict.keys():
-        f = Deg2global_gens_dict[key]
-        keys = set(f.fc_dct.keys())
-        if f.prec >= prec:
-            fcmap = {t: f.fc_dct[t] for t in semi_pos_def_matarices(prec) & keys}
-            return Deg2ModularFormQseries(k, fcmap, prec, is_cuspidal = True)
+    f = load_deg2_cached_gens(key, prec, k, cuspidal = True)
+    if f:
+        return f
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     x10 = x10_with_prec(prec)
@@ -837,7 +879,7 @@ def x35_with_prec(prec):
 def diff_opetator_4(f1, f2, f3, f4):
     f_s = [f1, f2, f3, f4]
     wt_s = [f.wt for f in f_s]
-    prec_res = min([f.prec for f in f_s])
+    prec_res = common_prec(f_s)
     [x11,x12,x13,x14] = [f.wt * f for f in f_s]
     [x21,x22,x23,x24] = [f.differentiate_wrt_tau() for f in f_s]
     [x31,x32,x33,x34] = [f.differentiate_wrt_w() for f in f_s]
@@ -872,8 +914,7 @@ def _det3(ls):
 #             _det3([l1, l2, l4]),
 #             -_det3([l1, l2, l3])]
 
-@cached_function
-def Y12_with_prec(prec):
+def y12_with_prec(prec):
     '''
     One of Igusa's generators of the ring of Siegel modular forms of degree 2
     over ZZ.
@@ -973,7 +1014,11 @@ class KlingenEisensteinAndCuspForms(object):
     '''
     def __init__(self, wt, prec = False):
         self.__wt = wt
-        self.__prec = wt//10 * 2 if prec is False else prec
+        if prec:
+            self.__prec = PrecisionDeg2(prec)
+        else:
+            self.__prec = PrecisionDeg2(wt//10 * 2)
+
         self.__basis_cached = False
         self.__cached_basis = False
 
@@ -1062,24 +1107,16 @@ class KlingenEisensteinAndCuspForms(object):
 
     def save_basis_as_binary(self, filename):
         basis = self.basis()
-        prec = self.prec
-        dicts = [{"prec": prec,
-                  "wt": self.wt,
-                  "base_ring": QQ,
-                  "construction": b._construction,
-                  "fc_dct": b.fc_dct}\
-                  for b in basis]
+        prec = PrecisionDeg2._to_format_dct(self.prec)
+        dicts = [b._to_format_dct() for b in basis]
         save(dicts, filename)
 
     def load_basis_from(self, filename):
         dicts = load(filename)
         prec = dicts[0]["prec"]
-        if self.prec > prec:
+        if self.prec > PrecisionDeg2._from_dict_to_object(prec):
             raise RuntimeError("self.prec must be less than {prec}".format(prec = prec))
-        basis = [Deg2ModularFormQseries(self.wt, dct["fc_dct"], self.prec) for dct in dicts]
-        for i in range(len(basis)):
-            b = basis[i]
-            b._construction = dicts[i]["construction"]
+        basis = [Deg2ModularFormQseries._from_dict_to_object(dct) for dct in dicts]
         self.__basis_cached = True
         self.__cached_basis = basis
 
@@ -1106,9 +1143,9 @@ class KlingenEisensteinAndCuspForms(object):
         basis = self.basis()
         dim = self.dimension()
         stbd = self.strum_bound()
-        if self.prec < stbd:
+        if self.prec < PrecisionDeg2(stbd):
             raise RuntimeError("prec must be greater than " + str(stbd) + "!")
-        tpls = [(n, r, m) for (n, r, m) in semi_pos_def_matarices(self.prec) if n <= stbd and m <= stbd]
+        tpls = [(n, r, m) for (n, r, m) in self.prec if n <= stbd and m <= stbd]
         ml = [[f.fourier_coefficient(*t) for f in basis] for t in tpls]
         index_list = _linearly_indep_cols_index_list(ml, dim)
         res = [tpls[i] for i in index_list]
@@ -1310,7 +1347,10 @@ class CuspFormsDegree2(object):
     '''
     def __init__(self, wt, prec = False):
         self.__wt = wt
-        self.__prec = wt//10 * 2 if prec is False else prec
+        if prec:
+            self.__prec = PrecisionDeg2(prec)
+        else:
+            self.__prec = PrecisionDeg2(wt//10 * 2)
 
     @property
     def wt(self):
@@ -1494,6 +1534,7 @@ class SymmetricWeightGenericElement(object):
     An instance of this class corresponds to a tuple of j Fourier expansions of degree 2.
     '''
     def __init__(self, forms, prec, base_ring = QQ):
+        prec = PrecisionDeg2(prec)
         self.__base_ring = base_ring
         self.__prec = prec
         self.__sym_wt = len(forms) - 1
@@ -1504,7 +1545,7 @@ class SymmetricWeightGenericElement(object):
 
     def _to_format_dct(self):
         return {"base_ring" : self.base_ring,
-                "prec" : self.prec,
+                "prec" : self.prec._to_format_dct(),
                 "forms" : [f._to_format_dct() for f in self.forms]}
 
     def save_as_binary(self, filename):
@@ -1513,6 +1554,7 @@ class SymmetricWeightGenericElement(object):
     @classmethod
     def _from_dict_to_object(cls, data_dict):
         base_ring, prec, forms_dct = [data_dict[ky] for ky in ["base_ring", "prec", "forms"]]
+        prec = PrecisionDeg2(prec)
         forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, prec, base_ring)
 
@@ -1549,7 +1591,7 @@ class SymmetricWeightGenericElement(object):
             return self
         elif isinstance(other, SymmetricWeightGenericElement) and \
           self.sym_wt == other.sym_wt:
-            prec = min(self.prec, other.prec)
+            prec = common_prec([self, other])
             forms = [sum(tp) for tp in zip(other.forms, self.forms)]
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
             return SymmetricWeightGenericElement(forms, prec, base_ring)
@@ -1570,7 +1612,7 @@ class SymmetricWeightGenericElement(object):
             return SymmetricWeightGenericElement(forms, prec, base_ring)
 
         if isinstance(other, Deg2QsrsElement) or is_number(other):
-            prec = min(self.prec, other.prec)
+            prec = common_prec([self, other])
             forms = [f * other for f in self.forms]
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
             return SymmetricWeightGenericElement(forms, prec, base_ring)
@@ -1613,6 +1655,7 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
                                                                    "wt",
                                                                    "prec",
                                                                    "base_ring"]]
+        prec = PrecisionDeg2(prec)
         forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, wt, prec, base_ring)
 

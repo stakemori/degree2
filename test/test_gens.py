@@ -2,6 +2,7 @@
 from degree2.all import *
 import unittest, random
 from unittest import skip
+from degree2.basic_operation import PrecisionDeg2
 
 fc_dct4 = {(0, 0, 0): 1,
            (0, 0, 1): 240,
@@ -10153,27 +10154,31 @@ fc_dct35 = {(0, 0, 0): 0,
             (10, 19, 10): 0,
             (10, 20, 10): 0}
 
+global_prec = PrecisionDeg2([(34, -17, 51), (8, 35, 39), (12, 33, 27)])
+
 class TestDeg2Gens(unittest.TestCase):
+    def sub_dct(self, form, prec = PrecisionDeg2(10)):
+        return {k : form[k] for k in prec}
 
     def test_es4(self):
-        es4 = eisenstein_series_degree2(4, 10)
-        self.assertTrue(es4.fc_dct == fc_dct4)
+        es4 = eisenstein_series_degree2(4, global_prec)
+        self.assertTrue(self.sub_dct(es4) == fc_dct4)
 
     def test_es6(self):
-        es6 = eisenstein_series_degree2(6, 10)
-        self.assertTrue(es6.fc_dct == fc_dct6)
+        es6 = eisenstein_series_degree2(6, global_prec)
+        self.assertTrue(self.sub_dct(es6) == fc_dct6)
 
     def test_x10(self):
-        x10 = x10_with_prec(10)
-        self.assertTrue(x10.fc_dct == fc_dct10)
+        x10 = x10_with_prec(global_prec)
+        self.assertTrue(self.sub_dct(x10) == fc_dct10)
 
     def test_x12(self):
-        x12 = x12_with_prec(10)
-        self.assertTrue(x12.fc_dct == fc_dct12)
+        x12 = x12_with_prec(global_prec)
+        self.assertTrue(self.sub_dct(x12) == fc_dct12)
 
     def test_x35(self):
-        x35 = x35_with_prec(10)
-        self.assertTrue(x35.fc_dct == fc_dct35)
+        x35 = x35_with_prec(global_prec)
+        self.assertTrue(self.sub_dct(x35) == fc_dct35)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2Gens)
 unittest.TextTestRunner(verbosity = 2).run(suite)

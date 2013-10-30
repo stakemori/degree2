@@ -29,7 +29,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
             return ((n, r, m), sign, mat)
 
         bls = []
-        for t in pos_defs(25):
+        for t in PrecisionDeg2(25).pos_defs():
             (tpl, sign, mat) = reduced_form_with_sign_test(t)
             (n, r, m) = t
             (nd, rd, md) = tpl
@@ -118,10 +118,6 @@ def naive_rankin_cohen_pair_sym2(f, g):
     u1 = k * f * zg - l * g * zf
     u2 = k * f * wg - l * g * wf
     return [u0, u1, u2]
-
-def pos_defs(bd):
-    return [(n, r, m) for n, r, m in semi_pos_def_matarices(bd) if 4*n*m - r**2 != 0]
-
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
 unittest.TextTestRunner(verbosity = 2).run(suite)
