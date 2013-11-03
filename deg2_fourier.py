@@ -61,7 +61,8 @@ class Deg2QsrsElement(object):
     def _to_format_dct(self):
         data_dict = {"prec": self.prec._to_format_dct(),
                      "base_ring": self.base_ring,
-                     "fc_dct": self.fc_dct}
+                     "fc_dct": self.fc_dct,
+                     "is_cuspidal" : self._is_cuspidal}
         return data_dict
 
     def save_as_binary(self, filename):
@@ -71,12 +72,13 @@ class Deg2QsrsElement(object):
     @classmethod
     def _from_dict_to_object(cls, data_dict):
         if "mp" in data_dict.keys():
-            kys = ["mp", "prec", "base_ring"]
+            kys = ["mp", "prec", "base_ring", "is_cuspidal"]
         else:
-            kys = ["fc_dct", "prec", "base_ring"]
-        fc_dct, prec, base_ring = [data_dict[ky] for ky in kys]
+            kys = ["fc_dct", "prec", "base_ring", "is_cuspidal"]
+        fc_dct, prec, base_ring, is_cuspidal = [data_dict[ky] for ky in kys]
         prec = PrecisionDeg2._from_dict_to_object(prec)
-        return cls(fc_dct, prec, base_ring)
+        return cls(fc_dct, prec, base_ring = base_ring,
+                   is_cuspidal = is_cuspidal)
 
     @classmethod
     def load_from(cls, filename):
@@ -703,12 +705,13 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
     @classmethod
     def _from_dict_to_object(cls, data_dict):
         if "mp" in data_dict.keys():
-            kys = ["wt", "mp", "prec", "base_ring", "construction"]
+            kys = ["wt", "mp", "prec", "base_ring", "construction", "is_cuspidal"]
         else:
-            kys = ["wt", "fc_dct", "prec", "base_ring", "construction"]
-        wt, fc_dct, prec, base_ring, const =  [data_dict[ky] for ky in kys]
+            kys = ["wt", "fc_dct", "prec", "base_ring", "construction", "is_cuspidal"]
+        wt, fc_dct, prec, base_ring, const, is_cuspidal =  [data_dict[ky] for ky in kys]
         prec = PrecisionDeg2._from_dict_to_object(prec)
-        f = Deg2ModularFormQseries(wt, fc_dct, prec, base_ring = base_ring)
+        f = Deg2ModularFormQseries(wt, fc_dct, prec, base_ring = base_ring,
+                                   is_cuspidal = is_cuspidal)
         f._construction = const
         return f
 
