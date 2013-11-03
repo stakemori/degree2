@@ -31,12 +31,5 @@ class TestPrecClass(unittest.TestCase):
                 bls.append(sgn_t == sgn_t1 * sgn)
         self.assertTrue(all(bls))
 
-    def test_prec_add(self):
-        prec1 = PrecisionDeg2(8)
-        prec2 = PrecisionDeg2([(10, 0, 10)])
-        prec = prec1 + prec2
-        self.assertTrue(prec1 <= prec and prec2 <= prec)
-        self.assertTrue(set(prec1) | set(prec2) == set(prec))
-
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPrecClass)
 unittest.TextTestRunner(verbosity = 2).run(suite)
