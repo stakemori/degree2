@@ -248,13 +248,13 @@ def _key_of_tuples(prec, cuspidal = False, hol = False):
 @cached_function
 def _partition_add_fourier(prec, cuspidal = False, hol = False):
     lst = _key_of_tuples(prec, cuspidal, hol)
-    return partition_weighted(lst, num_of_threads)
+    return partition_weighted(lst, num_of_proc)
 
 @cached_function
 def _partition_mul_fourier(prec, cuspidal = False, hol = False):
     tpls = _key_of_tuples(prec, cuspidal, hol)
     tpl_alst = [(t, _semi_pos_def_matarices_less_than(t)) for t in tpls]
-    return partition_weighted(tpl_alst, num_of_threads,
+    return partition_weighted(tpl_alst, num_of_proc,
                               lambda ((n, r, m), s): 16.0/9.0 * \
                                   (ZZ(n) * ZZ(m))**(1.5) \
                                   - ZZ(n) * ZZ(m) * abs(r))

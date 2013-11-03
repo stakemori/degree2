@@ -4,9 +4,9 @@ from basic_operation import _mul_fourier, _add_fourier, _mul_fourier_by_num,\
     PrecisionDeg2
 import os
 
-def deg2_fc_set_number_of_threads(a):
-    global num_of_threads
-    num_of_threads = a
+def deg2_fc_set_number_of_procceses(a):
+    global num_of_proc
+    num_of_proc = a
 
 def to_sorted_fc_list(fc_dct):
     dct = {k: v for k, v in fc_dct.iteritems() if v != 0}

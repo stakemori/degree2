@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 from common_import import *
 
-num_of_threads = sage.parallel.ncpus.ncpus()
+num_of_proc = sage.parallel.ncpus.ncpus()
 
 def partition_weighted(l, n, weight_fn = False):
     '''
@@ -28,7 +28,7 @@ def partition_weighted(l, n, weight_fn = False):
     idx_list = [list(v) for k, v in groupby(range(m), lambda i: min(wts[i] // av_wt, n - 1))]
     return [[l[i] for i in idl] for idl in idx_list]
 
-def pmap(fn, l, weight_fn = False, sort = True, num_of_threads = num_of_threads):
+def pmap(fn, l, weight_fn = False, sort = True, num_of_proc = num_of_proc):
     '''
     Parallel map. The meaning of weight_fn is same as the meaning of the argument of
     partition_weighted.
@@ -38,7 +38,7 @@ def pmap(fn, l, weight_fn = False, sort = True, num_of_threads = num_of_threads)
     else:
         wt_fn = lambda x: weight_fn(x[1])
     n = len(l)
-    ls = partition_weighted([(i, l[i]) for i in range(n)], min(n, num_of_threads), wt_fn)
+    ls = partition_weighted([(i, l[i]) for i in range(n)], min(n, num_of_proc), wt_fn)
     @parallel
     def calc(xs):
         return [(x, fn(y)) for x, y in xs]
