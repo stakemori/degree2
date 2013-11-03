@@ -51,6 +51,8 @@ class Deg2QsrsElement(object):
         self.__mp = mp1
         self.__prec = prec
         self.__base_ring = base_ring
+        # Unless self._is_gen, it is a generator's name. e.g "es4", "x12".
+        self._is_gen = False
 
     def __eq__(self, other):
         if other == 0:
@@ -259,12 +261,12 @@ class Deg2QsrsElement(object):
     def gcd_of_coefficients(self):
         K = self.base_ring
         l = [K(v) for v in self.fc_dct.values()]
-        if K == QQ:
-            return reduce(gcd, l)
-        elif isinstance(K, sage.rings.number_field.number_field.NumberField_generic):
+        if isinstance(K, sage.rings.number_field.number_field.NumberField_generic):
             l = [K(v) for v in self.fc_dct.values()]
             R = K.ring_of_integers()
             return R.fractional_ideal(l)
+        else:
+            return reduce(gcd, l)
 
     def gcd_of_norms(self, bd = False):
         '''
@@ -346,14 +348,22 @@ class Deg2QsrsElement(object):
     def sorted_list(self):
         return to_sorted_fc_list(self.fc_dct)
 
-    def change_ring(self, R):
+    def change_ring(self, R, hom = None):
         '''
         Returns a Fourier expansion whose base ring is changed.
         '''
+        if hom is None:
+            hom = lambda x: R(x)
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
-            fc_map[k] = R(v)
-        return Deg2QsrsElement(fc_map, self.prec, R)
+            fc_map[k] = hom(v)
+        if isinstance(self, Deg2ModularFormQseries):
+            res = Deg2ModularFormQseries(self.wt, fc_map, self.prec,
+                                         base_ring = R, is_cuspidal = self._is_cuspidal)
+            return res
+        else:
+            return Deg2QsrsElement(fc_map, self.prec, base_ring = R,
+                                   is_cuspidal = self._is_cuspidal)
 
     def mod_p_map(self, p):
         fcmap = {}
@@ -409,11 +419,14 @@ class HalfIntegralMatrices2():
         return HalfIntegralMatrices2((self._n / a, self._r / a, self._m / a))
 
 def is_number(a):
-    if isinstance(a, (int, float, long, complex)):
+    if isinstance(a, (int, float, long, complex, ZZ)):
         return True
     elif hasattr(a, 'parent'):
-        return CC.has_coerce_map_from(a.parent()) or \
-            isinstance(a.parent(), sage.rings.number_field.number_field.NumberField_generic)
+        parent = a.parent()
+        return CC.has_coerce_map_from(parent) or \
+            isinstance(parent, sage.rings.number_field.number_field.NumberField_generic) or\
+            (hasattr(parent, "is_field") and hasattr(parent, "is_finite")\
+                 and parent.is_field() and parent.is_finite())
     else:
         return False
 
@@ -827,9 +840,11 @@ def load_deg2_cached_gens(key, prec, wt, cuspidal = False):
         f = Deg2global_gens_dict[key]
         if f.prec >= prec:
             fc_dct = {t: f[t] for t in prec}
-            return Deg2ModularFormQseries(wt, fc_dct, prec,
-                                          base_ring = QQ,
-                                          is_cuspidal = cuspidal)
+            res = Deg2ModularFormQseries(wt, fc_dct, prec,
+                                         base_ring = ZZ,
+                                         is_cuspidal = cuspidal)
+            res._is_gen = key
+            return res
     else:
         return False
 
@@ -845,6 +860,12 @@ def eisenstein_series_degree2_innner(k, prec):
     if f:
         return f
     f = Deg2EisensteinQseries(k, prec)
+    f._is_gen = key
+
+    # Eisenstein series of wt 4 and 6 have integral Fourier coefficients.
+    if k == 4 or k == 6:
+        f = f.change_ring(ZZ)
+
     Deg2global_gens_dict["es" + str(k)] = f
     return f
 
@@ -866,8 +887,10 @@ def x10_with_prec_inner(prec):
     chi10 = QQ(43867) * QQ(2**12 * 3**5 * 5**2 * 7 * 53)**(-1) * (es10 - es4*es6)
     res = - 2**2 * chi10
     res._is_cuspidal = True
+    res._is_gen = key
     Deg2global_gens_dict[key] = res
-    return res
+    return res.change_ring(ZZ)
+
 def x12_with_prec(prec):
     return x12_with_prec_inner(PrecisionDeg2(prec))
 
@@ -887,8 +910,9 @@ def x12_with_prec_inner(prec):
         (3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12)
     res = 12 * chi12
     res._is_cuspidal = True
+    res._is_gen = key
     Deg2global_gens_dict[key] = res
-    return res
+    return res.change_ring(ZZ)
 
 def x35_with_prec(prec):
     return x35_with_prec_inner(PrecisionDeg2(prec))
@@ -922,8 +946,9 @@ def x35_with_prec_inner(prec):
     fcmap = (1/QQ(41472) * d).fc_dct
     res = Deg2ModularFormQseries(35, fcmap, prec)
     res._is_cuspidal = True
+    res._is_gen = key
     Deg2global_gens_dict[key] = res
-    return res
+    return res.change_ring(ZZ)
 
 def diff_opetator_4(f1, f2, f3, f4):
     f_s = [f1, f2, f3, f4]
