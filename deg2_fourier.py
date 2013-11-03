@@ -439,7 +439,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         self._construction = None
         prec = PrecisionDeg2(prec)
         if given_reduced_tuples_only:
-            if is_cuspidal:
+            if is_cuspidal or wt%2 == 1: # level 1 specific.
                 for rdf, col in prec.group_by_reduced_forms_with_sgn().iteritems():
                     for t, sgn in col:
                         fc_dct[t] = fc_dct[rdf] * sgn**wt
