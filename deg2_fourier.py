@@ -33,6 +33,8 @@ def common_prec(forms):
     else:
         raise NotImplementedError
 
+cache_gens_power = False
+
 class Deg2QsrsElement(object):
     '''
     A class of formal Fourier series of degree 2.
@@ -143,6 +145,8 @@ class Deg2QsrsElement(object):
 
     def __mul__(self, other):
         if is_number(other):
+            if other == 1:
+                return self
             fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec,
                                         self._is_cuspidal)
             if hasattr(other, "parent"):
@@ -170,26 +174,66 @@ class Deg2QsrsElement(object):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    # dictionary s.t. ("gen_name", prec) => {0: f, 1: f^2, 2: f^4, 3: f^8, ...}
+    gens_powers_cached_dict = {}
+
+    def _calc_pows_lt_nth_pow_of_2(self, n, cached_dict = None):
+        '''
+        If cached_dict is not None, cached_dict is a dictionary s.t.
+        0 => self,
+        1 => self^2,
+        ...
+        m => self^(2^m),
+        where
+        m <= n - 1.
+        This method returns a dictionary
+        0 => self,
+        1 => self^2,
+        ...
+        n-1 => self^(2^(n-1)).
+        '''
+        if cached_dict is not None and cached_dict != {}:
+            m = len(cached_dict) - 1
+            f = cached_dict[m]
+        else:
+            m = 0
+            f = self
+            cached_dict = {0: f}
+        for i in range(m + 1, n):
+            f = f * f
+            cached_dict[i] = f
+        return cached_dict
+
     def __pow__(self, other):
         if other == 0:
             return 1
         elif other == 1:
             return self
+
+        s = format(other, 'b')
+        revs = s[::-1]
+        n = len(s)
+
+        if cache_gens_power and self._is_gen:
+            gens_pws_dcts = Deg2QsrsElement.gens_powers_cached_dict
+            prec = self.prec
+            key = (self._is_gen, prec)
+            if key in gens_pws_dcts:
+                cached_dict = gens_pws_dcts[key]
+            else:
+                cached_dict = {0: self}
+            if not n - 1 in cached_dict.keys():
+                cached_dict = self._calc_pows_lt_nth_pow_of_2(n, cached_dict)
+                Deg2QsrsElement.gens_powers_cached_dict[key] = cached_dict
         else:
-            cached_dict = {0: 1}
-            s = format(other, 'b')
-            revs = s[::-1]
-            n = len(s)
-            f = self
-            for i in range(n):
-                cached_dict[i] = f
-                if i < n - 1:
-                    f = f * f
-            res = 1
-            for i in range(n):
-                if int(revs[i]) != 0:
-                    res *= cached_dict[i]
-            return res
+            cached_dict = self._calc_pows_lt_nth_pow_of_2(n)
+
+        res = 1
+        for i in range(n):
+            if int(revs[i]) != 0:
+                res *= cached_dict[i]
+        return res
+
 
     def __neg__(self):
         fcmap = _mul_fourier_by_num(self.fc_dct, -1, self.prec)
@@ -443,6 +487,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
 
     def __mul__(self, other):
         if is_number(other):
+            if other == 1:
+                return self
             fcmap = _mul_fourier_by_num(self.fc_dct, other, self.prec,
                                         cuspidal = self._is_cuspidal,
                                         hol = True)
@@ -478,9 +524,9 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         return self.__mul__(other)
 
     def __pow__(self, other):
-        res = Deg2QsrsElement.__pow__(self, other)
         if other == 0:
             return 1
+        res = Deg2QsrsElement.__pow__(self, other)
         return Deg2ModularFormQseries(self.wt * other,
                                       res.fc_dct,
                                       res.prec,
