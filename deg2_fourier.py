@@ -1332,12 +1332,20 @@ class KlingenEisensteinAndCuspForms(object):
         S = PolynomialRing(K, names = "x")
         x = S.gens()[0]
         f = S(A.charpoly())
-        g = f // (x - eigenvalue)
-        B = polynomial_func(g)(A)
-        for v in B.columns():
-            if v != 0:
-                egvec = v
+        g = S(f // (x - eigenvalue))
+        cffs_g = map(lambda x: g[x], range(dim))
+        A_pws = []
+        C = identity_matrix(dim)
+        for i in range(dim):
+            A_pws.append(C)
+            C = A*C
+        for i in range(dim):
+            clm_i = [a.columns()[i] for a in A_pws]
+            w = sum([a*v for a, v in zip(cffs_g, clm_i)])
+            if w != 0:
+                egvec = w
                 break
+
         res = sum([egvec[i] * basis[i] for i in range(dim)])
         res._construction = sum([egvec[i] * basis[i]._construction for i in range(dim)])
         return res
