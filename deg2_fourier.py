@@ -649,6 +649,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         Assuming self is eigenform, this method returns p-Euler factor of spinor L as a polynomial.
         '''
         K = self.base_ring
+        if hasattr(K, "fraction_field"):
+            K = K.fraction_field()
         R = PolynomialRing(K, 1, names = var, order='neglex')
         x = R.gens()[0]
         a1 = self.hecke_eigenvalue(p)
@@ -656,6 +658,23 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         wt = self.wt
         return 1 - a1 * x + (a1**2 - a2 - p**(2*wt - 4)) * x**2 - \
           a1 * p**(2*wt - 3) * x**3 + p**(4*wt - 6) * x**4
+
+    def euler_factor_of_standard_l(self, p, var = "x"):
+        '''
+        Assuming self is eigenform, this method returns p-Euler factor of standard L as a polynomial.
+        '''
+        b = p**(2 * self.wt - 3)
+        laml = self.hecke_eigenvalue(p)
+        laml2 = self.hecke_eigenvalue(p**2)
+        a1 = laml**2/b
+        a2 = laml2/b + ZZ(1)/ZZ(p)
+        K = self.base_ring
+        if hasattr(K, "fraction_field"):
+            K = K.fraction_field()
+        R = PolynomialRing(K, 1, names = var, order = 'neglex')
+        x = R.gens()[0]
+        return 1 + (a2 - a1 + 1) * x + a2 * x**2 - a2 * x**3 + (-a2 + a1 - 1)* x**4 - x**5
+
 
     def hecke_t2(self, n, r, m):
         return self.hecke_tp(2, (n, r, m))
