@@ -3,6 +3,7 @@ from utils import *
 from basic_operation import _mul_fourier, _add_fourier, _mul_fourier_by_num,\
     PrecisionDeg2
 import os
+from hecke_module import HeckeModuleElement, HeckeModule
 
 def deg2_fc_set_number_of_procceses(a):
     global num_of_proc
@@ -372,64 +373,6 @@ class Deg2QsrsElement(object):
                 fcmap[k] = modulo(v, p, self.base_ring)
         return fcmap
 
-
-class HalfIntegralMatrices2():
-    '''
-    An instance of this class corresponds to
-    a tuple (n, r, m).
-    '''
-    def __eq__(self, other):
-        return self._t == other._t
-
-    def __repr__(self):
-        return str(self._t)
-
-    def __init__(self, tpl):
-        (self._n, self._r, self._m) = tpl
-        self._t = tpl
-
-    def __add__(self, other):
-        return HalfIntegralMatrices2((self._n + other._n,
-                                      self._r + other._r,
-                                      self._m + other._m))
-    def __neg__(self):
-        return tuple(-x for x in self._t)
-
-    def __sub__(self, other):
-        return self + other.__neg__()
-
-    def __getitem__(self, matlist):
-        '''
-        matlist is a list such as [[a,b], [c,d]] that corresponds to a 2-by-2 matrix.
-        Returns matlist.transpose() * self * matlist.
-        '''
-        ((a, b), (c, d)) = matlist
-        (n, r, m) = self._t
-        return HalfIntegralMatrices2((a**2 * n + a*c*r + c**2 * m,
-                                      2*a*b*n + (a*d + b*c)*r + 2*c*d*m,
-                                      b**2 * n + b*d*r + d**2 * m))
-
-    def is_divisible_by(self, a):
-        return all([x%a == 0 for x in self._t])
-
-    def __rmul__(self, a):
-        return HalfIntegralMatrices2((self._n * a, self._r * a, self._m * a))
-
-    def __div__(self, a):
-        return HalfIntegralMatrices2((self._n / a, self._r / a, self._m / a))
-
-def is_number(a):
-    if isinstance(a, (int, float, long, complex, ZZ)):
-        return True
-    elif hasattr(a, 'parent'):
-        parent = a.parent()
-        return CC.has_coerce_map_from(parent) or \
-            isinstance(parent, sage.rings.number_field.number_field.NumberField_generic) or\
-            (hasattr(parent, "is_field") and hasattr(parent, "is_finite")\
-                 and parent.is_field() and parent.is_finite())
-    else:
-        return False
-
 def is_hol_mod_form(f):
     return isinstance(f, Deg2ModularFormQseries)
 
@@ -440,7 +383,7 @@ def _number_to_hol_modform(a, prec):
         parent = QQ
     return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
 
-class Deg2ModularFormQseries(Deg2QsrsElement):
+class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
     def __init__(self, wt, fc_dct, prec, base_ring = QQ,
                  is_cuspidal = False,
                  given_reduced_tuples_only = False):
@@ -569,112 +512,12 @@ class Deg2ModularFormQseries(Deg2QsrsElement):
         return fc_dct[(n, r, m)] == sum([d**(self.wt - 1)*fc_dct[(1, r/d, m*n/(d**2))] \
                                          for d in divisors(gcd((n, r, m)))])
 
-    def hecke_tp(self, p, tpl):
-        '''
-        Returns tpls-th Fourier coefficient of T(p)(self), where p : prime.
-        cf. Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
-        '''
-        (n, r, m) = tpl
-        k = self.wt
-        fcmap = self.fc_dct
-        if n%p == 0 and m%p == 0 and r%p == 0:
-            a1 = p**(2*k - 3) * fcmap[(n/p, r/p, m/p)]
-        else:
-            a1 = 0
-        a2 = fcmap[(p*n, p*r, p*m)]
-        if m%p == 0:
-            a31 = p**(k - 2) * fcmap[(m/p, -r, p*n)]
-        else:
-            a31 = 0
-        l = [u for u in range(p) if (n + r*u + m*(u**2))%p == 0]
-        a32 = p**(k-2) * reduce(operator.add, [fcmap[((n + r*u + m*(u**2))/p, r + 2*u*m, p*m)] for u in l], 0)
-        return a1 + a2 + a31 + a32
 
-    def hecke_tp2(self, p, tpl):
-        '''
-        Returns tpls-th Fourier coefficient of T(p^2)(self), where p : prime.
-        cf Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
-        '''
-        R = HalfIntegralMatrices2(tpl)
-        k = self.wt
-        def psum(i1, i2, i3):
-            if not R.is_divisible_by(p**i3):
-                return 0
-            a = p**(i2*(k - 2) + i3*(2*k - 3))
-            res = 0
-            for tD in reprs(i2):
-                if R[tD].is_divisible_by(p**(i2 + i3)):
-                    A = p**i1 * R[tD] / p**(i2 + i3)
-                    res += self.fourier_coefficient(*(A._t))
-            return a * res
-
-        def reprs(i2):
-            if i2 == 0:
-                return [[[1, 0],
-                         [0, 1]]]
-            else:
-                l1 = [ [[1, 0],
-                        [u, p**i2]] for u in range(p**i2)]
-                l2 = [ [[p * u, p**i2],
-                        [-1, 0]] for u in range(p**(i2 - 1))]
-                return l1 + l2
-
-        idcs = [(i1, i2, i3) for i1 in range(3) for i2 in range(3) for i3 in range(3) \
-                if i1 + i2 + i3 == 2]
-        return sum([psum(*i) for i in idcs])
-
-    def hecke_operator(self, m, tpl):
-        '''
-        Assumes m is a prime or the square of a prime.
-        '''
-        (p, i) = factor(m)[0]
-        if not (ZZ(m).is_prime_power() and 0 < i < 3):
-            raise RuntimeError("m must be a prime or the square of a prime.")
-        if i == 1:
-            return self.hecke_tp(p, tpl)
-        if i == 2:
-            return self.hecke_tp2(p, tpl)
-
-    def hecke_eigenvalue(self, m):
-        '''
-        Assuming self is an eigenform, this method returns the eigenvalue ass. to T(m).
-        '''
+    def _none_zero_tpl(self):
         keys_sorted = sorted(self.fc_dct.keys(), key = lambda x: (x[0] + x[2]))
         for t in keys_sorted:
-            if self.fourier_coefficient(*t) != 0:
-                return self.hecke_operator(m, t)/(self.fourier_coefficient(*t))
-
-    def euler_factor_of_spinor_l(self, p, var = "x"):
-        '''
-        Assuming self is eigenform, this method returns p-Euler factor of spinor L as a polynomial.
-        '''
-        K = self.base_ring
-        if hasattr(K, "fraction_field"):
-            K = K.fraction_field()
-        R = PolynomialRing(K, 1, names = var, order='neglex')
-        x = R.gens()[0]
-        a1 = self.hecke_eigenvalue(p)
-        a2 = self.hecke_eigenvalue(p**2)
-        wt = self.wt
-        return 1 - a1 * x + (a1**2 - a2 - p**(2*wt - 4)) * x**2 - \
-          a1 * p**(2*wt - 3) * x**3 + p**(4*wt - 6) * x**4
-
-    def euler_factor_of_standard_l(self, p, var = "x"):
-        '''
-        Assuming self is eigenform, this method returns p-Euler factor of standard L as a polynomial.
-        '''
-        b = p**(2 * self.wt - 3)
-        laml = self.hecke_eigenvalue(p)
-        laml2 = self.hecke_eigenvalue(p**2)
-        a1 = laml**2/b
-        a2 = laml2/b + ZZ(1)/ZZ(p)
-        K = self.base_ring
-        if hasattr(K, "fraction_field"):
-            K = K.fraction_field()
-        R = PolynomialRing(K, 1, names = var, order = 'neglex')
-        x = R.gens()[0]
-        return 1 + (a2 - a1 + 1) * x + a2 * x**2 - a2 * x**3 + (-a2 + a1 - 1)* x**4 - x**5
-
+            if self[t] != 0:
+                return t
 
     def hecke_t2(self, n, r, m):
         return self.hecke_tp(2, (n, r, m))
@@ -1101,7 +944,7 @@ class Deg2SpaceOfModularForms(object):
 
 
 
-class KlingenEisensteinAndCuspForms(object):
+class KlingenEisensteinAndCuspForms(HeckeModule):
     '''
     The space of Klingen-Eisenstein series and cupsforms.
     '''
@@ -1160,9 +1003,6 @@ class KlingenEisensteinAndCuspForms(object):
         S = CuspForms(1, (self.wt - 1) * 2)
         return self.dimension_of_cuspforms() - S.dimension()
 
-    def basis_construction(self):
-        return [x._construction for x in self.basis()]
-
     @cached_method
     def basis(self):
         '''
@@ -1213,11 +1053,6 @@ class KlingenEisensteinAndCuspForms(object):
         self.__basis_cached = True
         self.__cached_basis = basis
 
-    def basis_coefficient_matrix(self):
-        lnindep_tuples = self.linearly_indep_tuples()
-        basis = self.basis()
-        return matrix([[b[t] for t in lnindep_tuples] for b in basis])
-
     def _cache_lin_indep_tuples(self, l):
         k = self.wt
         KlingenEisensteinAndCuspForms.lin_indep_tuples_cached[k] = l
@@ -1240,7 +1075,7 @@ class KlingenEisensteinAndCuspForms(object):
             raise RuntimeError("prec must be greater than " + str(stbd) + "!")
         tpls = [(n, r, m) for (n, r, m) in self.prec if n <= stbd and m <= stbd]
         ml = [[f.fourier_coefficient(*t) for f in basis] for t in tpls]
-        index_list = _linearly_indep_cols_index_list(ml, dim)
+        index_list = linearly_indep_cols_index_list(ml, dim)
         res = [tpls[i] for i in index_list]
         lin_indep_tuples_cached[wt] = res
         return res
@@ -1252,32 +1087,6 @@ class KlingenEisensteinAndCuspForms(object):
         basis = self.basis()
         l = [[fm.fourier_coefficient(n, r, m) for n, r, m in tuples] for fm in basis]
         return matrix(l).rank() == len(basis)
-
-    @cached_method
-    def hecke_matrix(self, a):
-        '''
-        Returns the matrix representation of T(a).
-        '''
-        basis = self.basis()
-        lin_indep_tuples = self.linearly_indep_tuples()
-        l1 = []
-        for f in basis:
-            l1.append([f.fourier_coefficient(n, r, m) for n, r, m in lin_indep_tuples])
-        m1 = matrix(l1)
-        l2 = []
-        for f in basis:
-            l2.append([f.hecke_operator(a, tpl) for tpl in lin_indep_tuples])
-        m2 = matrix(l2)
-        return (m2 * m1**(-1)).transpose()
-
-    def hecke_t2_matrix(self):
-        return self.hecke_matrix(2)
-
-    def hecke_charpoly(self, a, var='x', algorithm='linbox'):
-        return self.hecke_matrix(a).charpoly(var, algorithm)
-
-    def hecke_t2_charpoly(self, var='x', algorithm='linbox'):
-        return self.hecke_charpoly(2, var='x', algorithm='linbox')
 
     def _to_vector(self, fm):
         '''
@@ -1301,110 +1110,8 @@ class KlingenEisensteinAndCuspForms(object):
         basis = self.basis()
         return reduce(operator.add, [basis[i] * v[i] for i in range(n)])
 
-    def hecke_t2_matrix_wrt_basis(self, basis):
-        '''
-        Assuming the subspace spanned by basis is stable under the action of T(2),
-        this method returns the matrix representation of T(2).
-        '''
-        n = len(basis)
-        lin_indep_tuples = self.linearly_indep_tuples()[:n]
-        l1 = []
-        for f in basis:
-            l1.append([f.fourier_coefficient(n, r, m) for n, r, m in lin_indep_tuples])
-        m1 = matrix(l1)
-        l2 = []
-        for f in basis:
-            l2.append([f.hecke_tp(2, tpl) for tpl in lin_indep_tuples])
-        m2 = matrix(l2)
-        return (m2 * m1**(-1)).transpose()
-
-    def hecke_eigen_subspaces_bases_list(self, K = QQ, basis = False):
-        '''
-        Returns the list of basis of subspaces corresponding to the decomposition
-        of the characteristic polynomial of T(2) in the field K.
-        '''
-        if basis is False:
-            basis = self.basis()
-            A = self.hecke_t2_matrix()
-        else:
-            A = self.hecke_t2_matrix_wrt_basis(basis)
-        S = PolynomialRing(K, "x")
-        f = S(A.charpoly())
-        pol_list = [f**i for f, i in factor(f)]
-        return _subspace_bases_list(A, K, basis, pol_list)
-
-    def eigenform_with_eigenvalue_t2(self, eigenvalue, basis = False):
-        '''
-        Assuming the characteristic polynomial of T(2) has no double eigenvalues,
-        this method returns an eigenform whose eigenvalue is eigenvalue.
-        '''
-        if basis is False:
-            basis = self.basis()
-            A = self.hecke_t2_matrix()
-        else:
-            A = self.hecke_t2_matrix_wrt_basis(basis)
-        if eigenvalue in QQ:
-            K = QQ
-        else:
-            K = eigenvalue.parent()
-        dim = len(basis)
-        S = PolynomialRing(K, names = "x")
-        x = S.gens()[0]
-        f = S(A.charpoly())
-        g = S(f // (x - eigenvalue))
-        cffs_g = map(lambda x: g[x], range(dim))
-        A_pws = []
-        C = identity_matrix(dim)
-        for i in range(dim):
-            A_pws.append(C)
-            C = A*C
-        for i in range(dim):
-            clm_i = [a.columns()[i] for a in A_pws]
-            w = sum([a*v for a, v in zip(cffs_g, clm_i)])
-            if w != 0:
-                egvec = w
-                break
-
-        res = sum([egvec[i] * basis[i] for i in range(dim)])
-        res._construction = sum([egvec[i] * basis[i]._construction for i in range(dim)])
-        return res
-
     def construction(self, f):
-        v = self._to_vector(f)
-        bc = self.basis_construction()
-        return reduce(operator.add, [v[i] * bc[i] for i in range(self.dimension())])
-
-    def hecke_eigen_subspaces_basis(self):
-        return flatten(self.hecke_eigen_subspaces_bases_list())
-
-    def eigen_forms(self, K):
-        '''
-        Assuming the characteristic polynomial of T(2) has no double roots,
-        returns the list of eigenforms. K is a decomposition field of the characteristic polynomial
-        of T(2).
-        '''
-        A = self.hecke_t2_matrix()
-        P = diagonalize_matrix(A, K)
-        dim = self.dimension()
-        basis = self.basis()
-        res = []
-        for a in P.columns():
-            f = reduce(operator.add, [a[i] * basis[i] for i in range(dim)])
-            f._construction = sum([a[i] * basis[i]._construction for i in range(dim)])
-            res.append(f)
-        return res
-
-    # obsolete method.
-    # def eigen_forms_of_subspace(self, subspace_basis, K):
-    #     A = self.hecke_t2_matrix_wrt_basis(subspace_basis)
-    #     P = diagonalize_matrix(A, K)
-    #     dim = len(subspace_basis)
-    #     res = []
-    #     for a in P.columns():
-    #         f = reduce(operator.add, [a[i] * subspace_basis[i] for i in range(dim)])
-    #         f._construction = sum([a[i] * subspace_basis[i]._construction for i in range(dim)])
-    #         res.append(f)
-    #     return res
+        return sum([a[0] * b._construction for a, b in zip(self._to_vector(f), self.basis())])
 
     def is_eigen_form(self, f, tupls = False):
         if tupls is False:
@@ -1440,7 +1147,7 @@ class KlingenEisensteinAndCuspForms(object):
             f._construction = self.construction(f)
         return res
 
-class CuspFormsDegree2(object):
+class CuspFormsDegree2(HeckeModule):
     '''
     The space of cusp forms of degree 2.  This class assumes that the
     characteristic polynomial of T(2) acting on
@@ -1465,9 +1172,27 @@ class CuspFormsDegree2(object):
     def klingeneisensteinAndCuspForms(self):
         return KlingenEisensteinAndCuspForms(self.wt, self.prec)
 
-    def dimension(self):
+    def eigenform_with_eigenvalue_t2(self, root):
+        '''
+        Returns an eigenform whose eigenvalue is root.  It assumes the
+        characteristic polynomial of T(2) acting on
+        KlingenEisensteinAndCuspForms has no double roots.
+        '''
         N = self.klingeneisensteinAndCuspForms()
-        return N.dimension_of_cuspforms()
+        return N.eigenform_with_eigenvalue_t2(root)
+
+    def dimension(self):
+        return self.klingeneisensteinAndCuspForms().dimension_of_cuspforms()
+
+    @cached_method
+    def linearly_indep_tuples(self):
+        basis = self.basis()
+        dim = self.dimension()
+        stbd = self.klingeneisensteinAndCuspForms().strum_bound()
+        tpls = [(n, r, m) for (n, r, m) in self.prec if n <= stbd and m <= stbd]
+        ml = [[f[t] for f in basis] for t in tpls]
+        index_list = linearly_indep_cols_index_list(ml, dim)
+        return [tpls[i] for i in index_list]
 
     @cached_method
     def basis(self):
@@ -1481,55 +1206,43 @@ class CuspFormsDegree2(object):
             return N.basis()
         return N.subspace_basis_annihilated_by(self.hecke_charpoly(2))
 
-    def hecke_charpoly(self, m):
-        N = self.klingeneisensteinAndCuspForms()
-        p, i = factor(ZZ(m))[0]
-        if self.wt%2 == 1:
-            return N.hecke_charpoly(m)
+    def hecke_charpoly(self, m, var = "x", algorithm='linbox'):
+        p, i = factor(m)[0]
         if not (ZZ(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
         if i == 1:
-            return self._hecke_tp_charpoly(p)
-        else:
-            return self._hecke_tp2_charpoly(p)
+            return self._hecke_tp_charpoly(p, var = var, algorithm = algorithm)
+        if i == 2:
+            return self._hecke_tp2_charpoly(p, var = var, algorithm = algorithm)
 
-    def eigenform_with_eigenvalue_t2(self, root):
-        '''
-        Returns an eigenform whose eigenvalue is root.  It assumes the
-        characteristic polynomial of T(2) acting on
-        KlingenEisensteinAndCuspForms has no double roots.
-        '''
-        N = self.klingeneisensteinAndCuspForms()
-        return N.eigenform_with_eigenvalue_t2(root)
-
-    def _hecke_tp_charpoly(self, p):
+    def _hecke_tp_charpoly(self, p, var='x', algorithm='linbox'):
         a = p**(self.wt - 2) + 1
         N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
-        R = PolynomialRing(QQ, names = "x")
+        R = PolynomialRing(QQ, names = var)
         x = R.gens()[0]
-        f = R(S.hecke_matrix(p).charpoly("x"))
+        f = R(S.hecke_matrix(p).charpoly(var = var, algorithm = algorithm))
         f1 = f.subs({x: a**(-1) * x}) * a**m
-        g = R(N.hecke_matrix(p).charpoly("x"))
-        return g/f1
+        g = R(N.hecke_matrix(p).charpoly(var = var, algorithm = algorithm))
+        return R(g/f1)
 
-    def _hecke_tp2_charpoly(self, p):
+    def _hecke_tp2_charpoly(self, p, var='x', algorithm='linbox'):
         u = p**(self.wt - 2)
         N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
-        R = PolynomialRing(QQ, names = "x")
+        R = PolynomialRing(QQ, names = var)
         x = R.gens()[0]
-        f = R(S.hecke_matrix(p).charpoly("x"))
-        g = R(N.hecke_matrix(p**2).charpoly("x"))
+        f = R(S.hecke_matrix(p).charpoly(var = var, algorithm = algorithm))
+        g = R(N.hecke_matrix(p**2).charpoly(var = var, algorithm = algorithm))
         def morph(a, b, f, m):
             G = (-1)**m * f.subs({x: -x}) * f
             alst = [[k//2, v] for k, v in G.dict().iteritems()]
             F = sum([v * x**k for k, v in alst])
             return a**m * F.subs({x: (x - b)/a})
         f1 = morph(u**2 + u + 1, -p * u**3 - u**2 - p*u, f, m)
-        return g/f1
+        return R(g/f1)
 
 
 def diagonalize_matrix(mat, K):
@@ -1549,12 +1262,6 @@ def diagonalize_matrix(mat, K):
         lam_e = diagonal_matrix(K, [lam]*n)
         pml.append((mat - lam_e).kernel().basis()[0])
     return matrix(pml).transpose()
-
-
-def polynomial_func(pl):
-    l = pl.coefficients()
-    m = len(l)
-    return lambda y: sum([y**i * l[i] for i in range(m)])
 
 def block_diagonalize_matrix(mat, pol_list, K = QQ):
     '''
@@ -1590,34 +1297,6 @@ def _subspace_bases_list(A, K, basis, pol_list):
         res1.append(f)
     index_list = [0] + map(lambda i: sum(deg_list[:i+1]), range(n))
     return [res1[index_list[i]:index_list[i+1]] for i in range(n)]
-
-@tail_recursive
-def _linearly_indep_cols_index_list(A, r, acc = []):
-    '''
-    Assume rank A = r and the number of rows is r.
-    This function returns the list of indices lst such that
-    [A.columns()[i] for i in lst] has length r and linearly independent.
-    '''
-    if r == 0:
-        n = len(acc)
-        return [sum(acc[:i + 1]) + i for i in range(n)]
-    nrws = len(A)
-    ncols = len(A[0])
-    rows = A
-    res = []
-    for j in range(nrws):
-        if not all([x == 0 for x in rows[j]]):
-            i = j
-            first = rows[j]
-            break
-    for j in range(ncols):
-        if first[j] != 0:
-            a = first[j]
-            nonzero_col_index = j
-            break
-    B = [[A[j][k] - first[k] * a**(-1) * A[j][nonzero_col_index] for k in range(ncols)] for j in range(i + 1, nrws)]
-    return _linearly_indep_cols_index_list(B, r - 1, acc + [i])
-
 
 def modulo(x, p, K):
     d = K.degree()
@@ -1802,8 +1481,6 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
 
     def __rmul__(self, other):
         return self.__mul__(other)
-
-
 
 @cached_function
 def _rankin_cohen_bracket_func(Q, rnames = False, unames = False):

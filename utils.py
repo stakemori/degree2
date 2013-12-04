@@ -100,3 +100,74 @@ def naive_det_func(n):
             return (-1)**(n+1) * sum([(-1)**i * _det_func(removed_list_at(i, ls1)) * ls[i][-1] \
                                       for i in range(n)])
     return det
+
+# Borrowed from http://code.activestate.com/recipes/496691/
+class tail_recursive(object):
+
+    def __init__(self, func):
+        self.func = func
+        self.firstcall = True
+        self.CONTINUE = object()
+
+    def __call__(self, *args, **kwd):
+        if self.firstcall:
+            func = self.func
+            CONTINUE = self.CONTINUE
+            self.firstcall = False
+            try:
+                while True:
+                    result = func(*args, **kwd)
+                    if result is CONTINUE: # update arguments
+                        args, kwd = self.argskwd
+                    else: # last call
+                        return result
+            finally:
+                self.firstcall = True
+        else: # return the arguments of the tail call
+            self.argskwd = args, kwd
+            return self.CONTINUE
+
+
+@tail_recursive
+def linearly_indep_cols_index_list(A, r, acc = []):
+    '''
+    Assume rank A = r and the number of rows is r.
+    This function returns the list of indices lst such that
+    [A.columns()[i] for i in lst] has length r and linearly independent.
+    '''
+    if r == 0:
+        n = len(acc)
+        return [sum(acc[:i + 1]) + i for i in range(n)]
+    nrws = len(A)
+    ncols = len(A[0])
+    rows = A
+    res = []
+    for j in range(nrws):
+        if not all([x == 0 for x in rows[j]]):
+            i = j
+            first = rows[j]
+            break
+    for j in range(ncols):
+        if first[j] != 0:
+            a = first[j]
+            nonzero_col_index = j
+            break
+    B = [[A[j][k] - first[k] * a**(-1) * A[j][nonzero_col_index] for k in range(ncols)] for j in range(i + 1, nrws)]
+    return linearly_indep_cols_index_list(B, r - 1, acc + [i])
+
+def polynomial_func(pl):
+    l = pl.coefficients()
+    m = len(l)
+    return lambda y: sum([y**i * l[i] for i in range(m)])
+
+def is_number(a):
+    if isinstance(a, (int, float, long, complex, ZZ)):
+        return True
+    elif hasattr(a, 'parent'):
+        parent = a.parent()
+        return CC.has_coerce_map_from(parent) or \
+            isinstance(parent, sage.rings.number_field.number_field.NumberField_generic) or\
+            (hasattr(parent, "is_field") and hasattr(parent, "is_finite")\
+                 and parent.is_field() and parent.is_finite())
+    else:
+        return False
