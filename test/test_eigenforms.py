@@ -4,7 +4,7 @@ from unittest import skip
 
 from degree2.all import *
 from sage.all import NumberField, QQ, var, Integer, ZZ, PolynomialRing
-
+import operator
 x = var("x")
 
 alpha20_1 = 119538120
@@ -16,6 +16,20 @@ a47 = K47.gens()[0]
 
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
+
+def polynomial_to_form(f, prec):
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    x10 = x10_with_prec(prec)
+    x12 = x12_with_prec(prec)
+    x35 = x35_with_prec(prec)
+    gens = [es4, es6, x10, x12, x35]
+    def monom(t):
+        return reduce(operator.mul, [f**a for f, a in zip(gens, t)])
+    return sum([a * monom(t) for t, a in f.dict().iteritems()])
+
+
+
 
 x47_fc_dct = {(1, 2, 8) : Integer(0),
               (3, 0, 3) : Integer(0),
@@ -1602,11 +1616,11 @@ class TestEigenforms(unittest.TestCase):
         l = [f.normalize(f[(1, 1, 1)]) for f in l]
 
         self.assertTrue(cons20 == [f._construction for f in l])
+        self.assertTrue([polynomial_to_form(c, 4) == f for c, f in zip(cons20, l)])
 
         dcts = [f20_1_dct, f20_2_dct, f20_3_dct]
 
         self.assertTrue(all([d == f.fc_dct for d, f in zip(dcts, l)]))
-
 
     def test_wt_20_cusp_eigen(self):
         S20 = CuspFormsDegree2(20)
@@ -1614,6 +1628,7 @@ class TestEigenforms(unittest.TestCase):
         x = pl.parent().gens()[0]
 
         self.assertTrue(pl == (x + Integer(840960)) * (x**Integer(2) - Integer(1378464)*x + Integer(328189501440)))
+        self.assertTrue(pl == S20.hecke_matrix(2).charpoly("x"))
 
         f20_2 = S20.eigenform_with_eigenvalue_t2(alpha20_2)
         f20_3 = S20.eigenform_with_eigenvalue_t2(alpha20_3)
@@ -1634,6 +1649,7 @@ class TestEigenforms(unittest.TestCase):
         x47 = KS47.eigenform_with_eigenvalue_t2(lambda2)
         x47 = x47.normalize(x47[(2, -1, 3)])
         self.assertTrue(cons47[0] == x47._construction)
+        self.assertTrue(polynomial_to_form(cons47[0], x47.prec) == x47)
 
         self.assertTrue(x47.fc_dct == x47_fc_dct)
 
