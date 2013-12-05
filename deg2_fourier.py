@@ -815,6 +815,7 @@ def diff_opetator_4(f1, f2, f3, f4):
     f_s = [f1, f2, f3, f4]
     wt_s = [f.wt for f in f_s]
     prec_res = common_prec(f_s)
+    base_ring_res = common_base_ring(f_s)
     [x11,x12,x13,x14] = [f.wt * f for f in f_s]
     [x21,x22,x23,x24] = [f.differentiate_wrt_tau() for f in f_s]
     [x31,x32,x33,x34] = [f.differentiate_wrt_w() for f in f_s]
@@ -828,7 +829,8 @@ def diff_opetator_4(f1, f2, f3, f4):
         - x14*x21*x32*x43 + x14*x21*x33*x42 + x14*x22*x31*x43\
         - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
     fcmap = d.fc_dct
-    res = Deg2ModularFormQseries(sum(wt_s) + 3, fcmap, prec_res)
+    res = Deg2ModularFormQseries(sum(wt_s) + 3, fcmap, prec_res,
+                                 base_ring = base_ring)
     return res
 
 def _det3(ls):
