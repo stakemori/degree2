@@ -506,11 +506,10 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         return 'Siegel Modular form of weight ' + str(self.wt)
 
     def satisfies_maass_relation_for(self, n, r, m):
-        if (n, r, m) == 0:
+        if (n, r, m) == (0, 0, 0):
             return True
-        fc_dct = self.fc_dct
-        return fc_dct[(n, r, m)] == sum([d**(self.wt - 1)*fc_dct[(1, r/d, m*n/(d**2))] \
-                                         for d in divisors(gcd((n, r, m)))])
+        return self[(n, r, m)] == sum([d**(self.wt - 1) * self[(1, r/d, m*n/(d**2))] \
+                                           for d in divisors(gcd((n, r, m)))])
 
 
     def _none_zero_tpl(self):
@@ -547,7 +546,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         '''
         Returns the same modular form as self whose prec is raised.
         '''
-        if not hasattr(self, "_construction"):
+        if self._construction is None:
             raise NotImplementedError
         pl = self._construction
         base_ring = self.base_ring
@@ -1074,7 +1073,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         if self.prec < PrecisionDeg2(stbd):
             raise RuntimeError("prec must be greater than " + str(stbd) + "!")
         tpls = [(n, r, m) for (n, r, m) in self.prec if n <= stbd and m <= stbd]
-        ml = [[f.fourier_coefficient(*t) for f in basis] for t in tpls]
+        ml = [[f[t] for f in basis] for t in tpls]
         index_list = linearly_indep_cols_index_list(ml, dim)
         res = [tpls[i] for i in index_list]
         lin_indep_tuples_cached[wt] = res
@@ -1085,7 +1084,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
 
     def _is_linearly_indep_tuples(self, tuples):
         basis = self.basis()
-        l = [[fm.fourier_coefficient(n, r, m) for n, r, m in tuples] for fm in basis]
+        l = [[fm[(n, r, m)] for n, r, m in tuples] for fm in basis]
         return matrix(l).rank() == len(basis)
 
     def _to_vector(self, fm):
@@ -1097,9 +1096,9 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         lin_indep_tuples = self.linearly_indep_tuples()
         l1 = []
         for f in basis:
-            l1.append([f.fourier_coefficient(*t) for t in lin_indep_tuples])
+            l1.append([f[t] for t in lin_indep_tuples])
         m1 = matrix(l1)
-        v = vector([fm.fourier_coefficient(*t) for t in lin_indep_tuples]).column()
+        v = vector([fm[t] for t in lin_indep_tuples]).column()
         return (m1.transpose())**(-1) * v
 
     def _to_form(self, v):
@@ -1116,8 +1115,8 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
     def is_eigen_form(self, f, tupls = False):
         if tupls is False:
             tupls = self.linearly_indep_tuples()
-        evs = [f.hecke_t2(n, r, m)/f.fourier_coefficient(n, r, m) for n, r, m in tupls \
-                   if f.fourier_coefficient(n, r, m) != 0]
+        evs = [f.hecke_t2(n, r, m)/f[(n, r, m)] for n, r, m in tupls \
+                   if f[(n, r, m)] != 0]
         lam = evs[0]
         for l in evs[1:]:
             if l != lam:
@@ -1130,8 +1129,8 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         '''
         ts = self.linearly_indep_tuples()
         for t in ts:
-            if f.fourier_coefficient(*t) != 0:
-                return f.hecke_operator(a, t)/f.fourier_coefficient(*t)
+            if f[t] != 0:
+                return f.hecke_operator(a, t)/f[t]
 
     def subspace_basis_annihilated_by(self, pol, a = 2):
         '''
