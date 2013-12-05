@@ -2,9 +2,9 @@
 from degree2.deg2_fourier import *
 import unittest, random
 from unittest import skip
+from degree2.hecke_module import HalfIntegralMatrices2
 
 class TestDeg2fcFunctions(unittest.TestCase):
-    @skip("OK")
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
             mat = matrix([[1,0],[0,1]])
@@ -29,7 +29,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
             return ((n, r, m), sign, mat)
 
         bls = []
-        for t in PrecisionDeg2(25).pos_defs():
+        for t in PrecisionDeg2(15).pos_defs():
             (tpl, sign, mat) = reduced_form_with_sign_test(t)
             (n, r, m) = t
             (nd, rd, md) = tpl
@@ -66,6 +66,16 @@ class TestDeg2fcFunctions(unittest.TestCase):
         r1  = naive_rankin_cohen_pair_symm4(es4, es6)
         r2 = rankin_cohen_pair_sym(4, es4, es6)
         self.assertTrue(r1 == r2.forms)
+
+    def test_eisenstein(self):
+        prec = 10
+        es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for k in [4, 6, 10, 12]]
+        f10 = es4 * es6 - es10
+        f12 = 3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12
+        f10 = f10 * (f10[(1, 1, 1)])**(-1)
+        f12 = f12 * (f12[(1, 1, 1)])**(-1)
+        self.assertTrue(f10 == x10_with_prec(prec))
+        self.assertTrue(f12 == x12_with_prec(prec))
 
 def naive_rankin_cohen_pair_symm4(f, g):
     '''
