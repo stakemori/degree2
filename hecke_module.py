@@ -211,10 +211,7 @@ class HeckeModule(object):
         '''
         basis = self.basis()
         dim = len(basis)
-        if lm in QQ:
-            K = QQ
-        else:
-            K = lm.parent()
+        K = lm.parent()
         A = self.hecke_matrix(2)
         S = PolynomialRing(K, names = "x")
         x = S.gens()[0]
