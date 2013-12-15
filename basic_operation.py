@@ -188,6 +188,22 @@ class PrecisionDeg2(object):
     def __lt__(self, other):
         return self <= other and self != other
 
+    def _phi_operator_prec(self):
+        '''
+        Used for calculating phi_operator.
+        '''
+        if self.type == "diag_max":
+            for t in range(self.prec + 1):
+                yield t
+        elif self.type == "tuples":
+            mx = max([t[0] for t in self.prec])
+            for t in range(mx + 1):
+                if (t, 0, 0) in self:
+                    yield t
+        else:
+            raise NotImplementedError
+
+
 @cached_function
 def reduced_form_with_sign(tpl):
     '''

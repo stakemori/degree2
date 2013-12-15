@@ -252,12 +252,8 @@ class Deg2QsrsElement(object):
         return Deg2QsrsElement(dic, self.prec, self.base_ring)
 
     def phi_operator(self):
-        fcmap = self.fc_dct
-        res = {}
-        for (n, r, m) , v in fcmap.iteritems():
-            if r == 0 and m == 0 and not v == 0:
-                res[n] = v
-        return res
+        d = {n: self[(n, 0, 0)] for n in self.prec._phi_operator_prec()}
+        return {n: v for n, v in d.iteritems() if v != 0}
 
     def gcd_of_coefficients(self):
         K = self.base_ring
