@@ -45,7 +45,7 @@ class HalfIntegralMatrices2(object):
         return HalfIntegralMatrices2((self._n * a, self._r * a, self._m * a))
 
     def __div__(self, a):
-        return HalfIntegralMatrices2((self._n / a, self._r / a, self._m / a))
+        return HalfIntegralMatrices2((self._n // a, self._r // a, self._m // a))
 
 class HeckeModuleElement(object):
     __metaclass__ = ABCMeta
