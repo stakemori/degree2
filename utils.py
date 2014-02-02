@@ -1,6 +1,4 @@
 # -*- coding: utf-8; mode: sage -*-
-# from common_import import *
-
 from sage.misc.cachefunc import cached_function
 import sage
 from sage.all import ZZ, CC, factorial, parallel

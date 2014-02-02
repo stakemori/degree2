@@ -1,5 +1,4 @@
 # -*- coding: utf-8; mode: sage -*-
-# from utils import *
 from sage.all import Integer, ZZ, gcd, QQ, mod
 from sage.misc.cachefunc import cached_function
 from degree2.utils import list_group_by, parallel_concat, partition_weighted,\
