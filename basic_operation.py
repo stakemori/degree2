@@ -215,22 +215,26 @@ def reduced_form_with_sign(tpl):
     sgn is the determinant of an element GL2(ZZ) that gives
     the unimodular equivalence.
     '''
+    n, r, m = [ZZ(x) for x in tpl]
+    if 4*n*m - r**2 == 0:
+        raise RuntimeError("tpl must be definite.")
     sign = 1
-    (n, r, m) = tpl
-    if n > m:
-        sign *= -1
-        (n, m) = m, n
-    rem = mod(r, 2*n)
-    if rem > n:
-        u = r//(2*n) + 1
-    else:
-        u = r//(2*n)
-    m = n * u**2 - r * u + m
-    r = r - 2*n*u
-    if r < 0:
-        sign *= -1
-        r *= -1
-    return ((n, r, m), sign)
+    while True:
+        if n <= m and 0 <= r and r <= n:
+            return ((n, r, m), sign)
+        if n > m:
+            sign *= -1
+            n, m = m, n
+        rem = mod(r, 2*n)
+        if rem > n:
+            u = r//(2*n) + 1
+        else:
+            u = r//(2*n)
+        m = n * u**2 - r * u + m
+        r = r - 2*n*u
+        if r < 0:
+            sign *= -1
+            r *= -1
 
 @cached_function
 def semi_pos_def_matarices(bd):
