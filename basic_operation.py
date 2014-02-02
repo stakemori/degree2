@@ -30,7 +30,7 @@ class PrecisionDeg2(object):
                             "a collection of tuples of integers.")
 
     def _to_format_dct(self):
-        return {"type" : self.type, "prec" : self.prec}
+        return {"type": self.type, "prec": self.prec}
 
     def __hash__(self):
         return self.prec.__hash__()
@@ -107,10 +107,10 @@ class PrecisionDeg2(object):
             else:
                 r2.append(t)
         res0 = {(0, 0, 0): set(r0)}
-        res1 = {ls[0] : ls for k, ls in
+        res1 = {ls[0]: ls for k, ls in
                 list_group_by(r1, lambda t: gcd([QQ(x) for x in t]))}
-        res2 = {ls[0] : ls for k, ls in
-                list_group_by(r2, lambda x : reduced_form_with_sign(x)[0])}
+        res2 = {ls[0]: ls for k, ls in
+                list_group_by(r2, lambda x: reduced_form_with_sign(x)[0])}
         res = {}
         for dct in [res0, res1, res2]:
             res.update(dct)
@@ -130,7 +130,7 @@ class PrecisionDeg2(object):
         for t in self.pos_defs():
             rdf, sgn = reduced_form_with_sign(t)
             pos_forms.append((t, rdf, sgn))
-        grpd_by_rdf = list_group_by(pos_forms, lambda x : x[1])
+        grpd_by_rdf = list_group_by(pos_forms, lambda x: x[1])
         res = {}
         for k, ls in grpd_by_rdf:
             a_tupl, _, a_sgn = ls[0]
