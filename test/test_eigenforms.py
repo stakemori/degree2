@@ -1661,5 +1661,41 @@ class TestEigenforms(unittest.TestCase):
 
         self.assertTrue(x47.fc_dct == x47_fc_dct)
 
+    def test_wt_35_eigenvalues(self):
+        x35 = x35_with_prec([(12, 33, 27), (8, 35, 39), (34, -17, 51)])
+        d = {2: -25073418240,
+             3: -11824551571578840,
+             4: 138590166352717152256,
+             5: 9470081642319930937500,
+             7: -10370198954152041951342796400,
+             9: -96268467952179923650803475996239,
+             11: -8015071689632034858364818146947656,
+             13: -20232136256107650938383898249808243380,
+             17: 118646313906984767985086867381297558266980}
+        d1 = {m: x35.hecke_eigenvalue(m) for m in d.keys()}
+        self.assertTrue(d == d1)
+
+    def test_es4_eigenvalues(self):
+        es4 = eisenstein_series_degree2(4, 25)
+        d = {2: 45, 3: 280, 4: 1549, 5: 3276, 9: 69049, 25: 10256401}
+        for k, v in d.iteritems():
+            self.assertTrue(es4.hecke_eigenvalue(k) == v)
+
+    def test_cusp_sp_wt28_hecke_charpoly(self):
+        R = PolynomialRing(QQ, names = "x")
+        x = R.gens()[0]
+        pl = x**Integer(7) - Integer(599148384)*x**Integer(6) + Integer(85597740037545984)*x**Integer(5) + Integer(4052196666582552432082944)*x**Integer(4) - Integer(992490558368877866775830593536000)*x**Integer(3) - Integer(7786461340613962559507216233894458163200)*x**Integer(2) + Integer(2554655965904300151500968857660777576875950080000)*x + Integer(2246305351725266922462270484154998253269432286576640000)
+        S = CuspFormsDegree2(28)
+        self.assertTrue(R(S.hecke_charpoly(2)) == pl)
+
+    def test_cusp_sp_even_wts_hecke_charpoly_decomp_deg(self):
+        for k in range(28, 50, 2):
+            S = CuspFormsDegree2(k)
+            dims = S.klingeneisensteinAndCuspForms().dimensions()
+            dgs = set([a.degree() for a, _ in S.hecke_charpoly(2).factor()])
+            dgs1 = set([dims["lift"], dims["non-lift"]])
+            self.assertTrue(dgs == dgs1)
+
+
 suite = unittest.TestLoader().loadTestsFromTestCase(TestEigenforms)
 unittest.TextTestRunner(verbosity = 2).run(suite)
