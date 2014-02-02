@@ -702,6 +702,12 @@ def load_cached_gens_from_file(prec):
     prec39 = PrecisionDeg2(39)
     prec34_m17_51 = PrecisionDeg2([(34, -17, 51)])
     global Deg2global_gens_dict
+
+    if Deg2global_gens_dict != {}:
+        a_ky = Deg2global_gens_dict.keys()[0]
+        if Deg2global_gens_dict[a_ky].prec >= prec:
+            return None
+
     if prec <= prec39 or set(prec) <= set(prec39) | set(prec34_m17_51):
         if prec <= PrecisionDeg2(21):
             gens_dct = load(os.path.join(cached_dir, '_fc_dict21.sobj'))
