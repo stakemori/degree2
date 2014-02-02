@@ -1,7 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
 import unittest
-from degree2.utils import *
-from unittest import skip
 from degree2.basic_operation import PrecisionDeg2, reduced_form_with_sign
 
 class TestPrecClass(unittest.TestCase):

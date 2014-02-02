@@ -1,6 +1,11 @@
 # -*- coding: utf-8; mode: sage -*-
-from degree2.deg2_fourier import *
-import unittest, random
+from degree2.basic_operation import PrecisionDeg2
+from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
+    eisenstein_series_degree2, rankin_cohen_pair_sym, x10_with_prec,\
+    x12_with_prec
+
+from sage.all import matrix, mod
+import unittest
 from unittest import skip
 from degree2.hecke_module import HalfIntegralMatrices2
 
@@ -41,7 +46,6 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertTrue(all(bls))
 
     def save_load_basis(self, wt):
-        bd = 10
         KS = KlingenEisensteinAndCuspForms(wt, 10)
         basis = KS.basis()
         KS.save_basis_as_binary("/tmp/basis_test.sobj")
@@ -55,8 +59,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     def test_wt_34_47_save_load_basis(self):
         self.save_load_basis(34)
         self.save_load_basis(47)
-
-    @skip("OK")
+    
     def test_sym2_rankin_cohen(self):
         es4 = eisenstein_series_degree2(4, 10)
         es6 = eisenstein_series_degree2(6, 10)

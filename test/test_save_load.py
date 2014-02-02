@@ -1,11 +1,9 @@
 # -*- coding: utf-8; mode: sage -*-
 import unittest
-from unittest import skip
-import os
+from degree2.deg2_fourier import eisenstein_series_degree2, x12_with_prec, x35_with_prec,\
+    Deg2ModularFormQseries, Deg2QsrsElement
 import tempfile
-from degree2.all import *
-from degree2.utils import *
-from sage.all import FiniteField
+from sage.all import FiniteField, ZZ
 global_prec = 8
 
 es4 = eisenstein_series_degree2(4, global_prec)

@@ -1,9 +1,15 @@
 # -*- coding: utf-8; mode: sage -*-
-from utils import *
+# from utils import *
+from sage.all import Integer, ZZ, gcd, QQ, mod
+from sage.misc.cachefunc import cached_function
+from degree2.utils import list_group_by, parallel_concat, partition_weighted,\
+    num_of_proc
+
 
 def _is_triple_of_integers(tpl):
     return isinstance(tpl, tuple) and len(tpl) == 3 and \
         all([isinstance(a, (int, Integer)) for a in list(tpl)])
+
 
 class PrecisionDeg2(object):
     '''
@@ -21,7 +27,8 @@ class PrecisionDeg2(object):
             self.__prec = frozenset(prec)
             self.__type = "tuples"
         else:
-            raise TypeError, "self must be an integer or a collection of tuples of integers."
+            raise TypeError("self must be an integer or " +
+                            "a collection of tuples of integers.")
 
     def _to_format_dct(self):
         return {"type" : self.type, "prec" : self.prec}
@@ -41,6 +48,7 @@ class PrecisionDeg2(object):
             return "diag_max " + str(self.prec)
         elif self.type == "tuples":
             return "tuples " + str(list(self.prec))
+
     def __repr__(self):
         return str(self)
 
@@ -62,21 +70,6 @@ class PrecisionDeg2(object):
                 res.update(_semi_pos_def_matarices_less_than(t))
             for t in res:
                 yield t
-
-    # def _to_tuples_prec(self):
-    #     if self.type == "tuples":
-    #         return self
-    #     elif self.type == "diag_max":
-    #         tuples = [(n, r, m) for n, r, m in self if n == self.prec or m == self.prec]
-    #         return PrecisionDeg2(tuples)
-    #     else:
-    #         raise NotImplementedError
-
-    # def __add__(self, other):
-    #     if not isinstance(other, PrecisionDeg2):
-    #         raise NotImplementedError
-    #     prec_set = self._to_tuples_prec().prec | other._to_tuples_prec().prec
-    #     return PrecisionDeg2(prec_set)
 
     def pos_defs(self):
         for t in self:
@@ -115,10 +108,10 @@ class PrecisionDeg2(object):
             else:
                 r2.append(t)
         res0 = {(0, 0, 0): set(r0)}
-        res1 = {ls[0] : ls for k, ls in \
+        res1 = {ls[0] : ls for k, ls in
                 list_group_by(r1, lambda t: gcd([QQ(x) for x in t]))}
-        res2 = {ls[0] : ls for k, ls in \
-                    list_group_by(r2, lambda x : reduced_form_with_sign(x)[0])}
+        res2 = {ls[0] : ls for k, ls in
+                list_group_by(r2, lambda x : reduced_form_with_sign(x)[0])}
         res = {}
         for dct in [res0, res1, res2]:
             res.update(dct)
@@ -236,15 +229,17 @@ def reduced_form_with_sign(tpl):
             sign *= -1
             r *= -1
 
+
 @cached_function
 def semi_pos_def_matarices(bd):
     '''
     Returns the set of tupls (n, r, m) such that 0 <= n, m, 4nm - r^2 and
     n, m <= bd.
     '''
-    s = set([(n, r, m) for n in range(bd + 1) for r in range(2 * bd + 1) \
-                    for m in range(bd + 1) if 4*n*m - r**2 >= 0])
+    s = set([(n, r, m) for n in range(bd + 1) for r in range(2 * bd + 1)
+             for m in range(bd + 1) if 4*n*m - r**2 >= 0])
     return s.union(set([(n, -r, m) for n, r, m in s]))
+
 
 def _semi_pos_def_matarices_less_than(tpl):
     '''
@@ -255,7 +250,8 @@ def _semi_pos_def_matarices_less_than(tpl):
         if n >= n1 and m >= m1 and 4 * (n - n1) * (m - m1) >= (r - r1)**2:
             yield (n1, r1, m1)
 
-def _key_of_tuples(prec, cuspidal = False, hol = False):
+
+def _key_of_tuples(prec, cuspidal=False, hol=False):
     if cuspidal and not hol:
         return list(PrecisionDeg2(prec).pos_defs())
     elif hol and cuspidal:
@@ -265,48 +261,57 @@ def _key_of_tuples(prec, cuspidal = False, hol = False):
     else:
         return list(PrecisionDeg2(prec))
 
+
 @cached_function
-def _partition_add_fourier(prec, cuspidal = False, hol = False):
+def _partition_add_fourier(prec, cuspidal=False, hol=False):
     lst = _key_of_tuples(prec, cuspidal, hol)
     return partition_weighted(lst, num_of_proc)
 
+
 @cached_function
-def _partition_mul_fourier(prec, cuspidal = False, hol = False):
+def _partition_mul_fourier(prec, cuspidal=False, hol=False):
     tpls = _key_of_tuples(prec, cuspidal, hol)
     tpl_alst = [(t, _semi_pos_def_matarices_less_than(t)) for t in tpls]
     return partition_weighted(tpl_alst, num_of_proc,
-                              lambda ((n, r, m), s): 16.0/9.0 * \
-                                  (ZZ(n) * ZZ(m))**(1.5) \
-                                  - ZZ(n) * ZZ(m) * abs(r))
+                              lambda ((n, r, m), s): 16.0/9.0 *
+                              (ZZ(n) * ZZ(m))**(1.5)
+                              - ZZ(n) * ZZ(m) * abs(r))
 
 
-def _mul_fourier(mp1, mp2, prec, cuspidal = False, hol = False):
+def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
     '''
     Returns the dictionary of the product of Fourier series
     correspoding to mp1 and mp2.
     '''
     alsts = _partition_mul_fourier(prec, cuspidal, hol)
-    return dict(_mul_fourier1([(a, mp1, mp2)  for a in alsts]))
+    return dict(_mul_fourier1([(a, mp1, mp2) for a in alsts]))
 
-def _add_fourier(mp1, mp2, prec, cuspidal = False, hol = False):
-    ts_s = _partition_add_fourier(prec, cuspidal = cuspidal,
-                                  hol = hol)
+
+def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
+    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal,
+                                  hol=hol)
     return dict(_add_fourier1([(ts, mp1, mp2) for ts in ts_s]))
+
 
 @parallel_concat
 def _mul_fourier1(alst, mp1, mp2):
     '''
     alst is a list of elements (t, _semi_pos_def_matarices_less_than(t)).
     '''
-    return [((n, r, m), sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)] \
-                                 for n0, r0, m0 in ts])) for (n, r, m), ts in alst]
+    return [((n, r, m), sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
+                             for n0, r0, m0 in ts]))
+            for (n, r, m), ts in alst]
+
+
 @parallel_concat
 def _add_fourier1(ts, mp1, mp2):
     return [(t, mp1[t] + mp2[t]) for t in ts]
 
-def _mul_fourier_by_num(fc_dct, a, prec, cuspidal = False, hol = False):
+
+def _mul_fourier_by_num(fc_dct, a, prec, cuspidal=False, hol=False):
     tss = _partition_add_fourier(prec, cuspidal, hol)
     return dict(_mul_fourier_by_num1([(ts, fc_dct, a) for ts in tss]))
+
 
 @parallel_concat
 def _mul_fourier_by_num1(ts, fc_dct, a):
