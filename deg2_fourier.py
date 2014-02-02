@@ -80,7 +80,7 @@ class Deg2QsrsElement(object):
         data_dict = {"prec": self.prec._to_format_dct(),
                      "base_ring": self.base_ring,
                      "fc_dct": self.fc_dct,
-                     "is_cuspidal" : self._is_cuspidal}
+                     "is_cuspidal": self._is_cuspidal}
         return data_dict
 
     def save_as_binary(self, filename):
@@ -125,7 +125,7 @@ class Deg2QsrsElement(object):
         return self._name() + self._repr_base()
 
     def _repr_base(self):
-        l = [str(k) + ' : ' + str(v) for k, v in self.sorted_list()]
+        l = [str(k) + ': ' + str(v) for k, v in self.sorted_list()]
         return ' with prec = ' + str(self.prec) \
             + ': \n' + '{' + ",\n ".join(l) + '}'
 
@@ -306,7 +306,7 @@ class Deg2QsrsElement(object):
         '''
         del_tau^a del_z^b del_w^c
         '''
-        fcmap = {(n, r, m) : n**a * r**b * m**c * v for (n, r, m), v
+        fcmap = {(n, r, m): n**a * r**b * m**c * v for (n, r, m), v
                  in self.fc_dct.iteritems()}
         res = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring,
                               is_cuspidal=self._is_cuspidal)
@@ -338,7 +338,7 @@ class Deg2QsrsElement(object):
                                 for (a, b, c), v in ply.dict().iteritems()])
         forms = [x for _, x in
                  sorted([(i, v) for i, v in formsdict.iteritems()],
-                        key=lambda x : x[0])]
+                        key=lambda x: x[0])]
         return SymmetricWeightGenericElement(forms, self.prec, self.base_ring)
 
     def differentiate_wrt_tau(self):
@@ -689,7 +689,7 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
         rd2 = p**(k - 2) - 1
         return (r1 - rn2/rd2)/(1 - p**(2*k - 3))
 
-# {"es4" :es4, "es6": es6, "es10": es10, "es12": es12,
+# {"es4":es4, "es6": es6, "es10": es10, "es12": es12,
 # "x10":x10, "x12": x12, "x35": x35}
 Deg2global_gens_dict = {}
 
@@ -728,11 +728,11 @@ def load_cached_gens_from_file(prec):
         x10 = Deg2ModularFormQseries(10, gens_dct[10], max_prec)
         x12 = Deg2ModularFormQseries(12, gens_dct[12], max_prec)
         x35 = Deg2ModularFormQseries(35, gens_dct[35], max_prec)
-        Deg2global_gens_dict = {"es4" : es4,
-                                "es6" : es6,
-                                "x10" : x10,
-                                "x12" : x12,
-                                "x35" : x35}
+        Deg2global_gens_dict = {"es4": es4,
+                                "es6": es6,
+                                "x10": x10,
+                                "x12": x12,
+                                "x35": x35}
 
 
 def load_deg2_cached_gens(key, prec, wt, cuspidal=False):
@@ -1397,9 +1397,9 @@ class SymmetricWeightGenericElement(object):
             j=self.sym_wt, prec=self.prec)
 
     def _to_format_dct(self):
-        return {"base_ring" : self.base_ring,
-                "prec" : self.prec._to_format_dct(),
-                "forms" : [f._to_format_dct() for f in self.forms]}
+        return {"base_ring": self.base_ring,
+                "prec": self.prec._to_format_dct(),
+                "forms": [f._to_format_dct() for f in self.forms]}
 
     def save_as_binary(self, filename):
         save(self._to_format_dct(), filename)
@@ -1606,7 +1606,7 @@ def _rankin_cohen_bracket_func(Q, rnames, unames):
 
 def rankin_cohen_pair_sym(j, f, g):
     '''
-    Assuming j : even, returns Rankin-Cohen bracket
+    Assuming j: even, returns Rankin-Cohen bracket
     corresponding to Q_{k, l, j/2}(r, s).
     cf. Ibukiyama, Vector valued Siegel modular forms of symmetric tensor
     weight of small degrees, COMMENTARI MATHEMATICI UNIVERSITATIS SANCTI PAULI
