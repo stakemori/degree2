@@ -1,8 +1,10 @@
 # -*- coding: utf-8; mode: sage -*-
 from abc import ABCMeta, abstractmethod, abstractproperty
-from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
-                      vector)
+from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix)
+
 from sage.misc.cachefunc import cached_method
+
+from degree2.utils import _is_triple_of_integers
 
 
 class HalfIntegralMatrices2(object):
@@ -23,6 +25,8 @@ class HalfIntegralMatrices2(object):
 
     def __init__(self, tpl):
         (self._n, self._r, self._m) = tpl
+        if not _is_triple_of_integers(tpl):
+            raise TypeError("tpl must be a triple of integers.")
         self._t = tpl
 
     def __hash__(self):
@@ -127,6 +131,38 @@ class HeckeModuleElement(object):
                 if i1 + i2 + i3 == 2]
         return sum([psum(*i) for i in idcs])
 
+    def _hecke_op_vector_vld(self, p, i, tpl):
+        '''
+        Assuming self is a vector valued Siegel modular form, returns
+        tpl th Fourier coefficient of T(p^i)self.
+        cf. Arakawa, vector valued Siegel's modular forms of degree two and
+        the associated Andrianov L-functions, pp 166.
+        '''
+        p = ZZ(p)
+        if isinstance(tpl, tuple):
+            tpl = HalfIntegralMatrices2(tpl)
+
+        def term(al, bt, gm, u):
+            if not (al + bt + gm == i and
+                    tpl.is_divisible_by(p**gm) and
+                    tpl[u].is_divisible_by(p**(gm + bt))):
+                return 0
+            else:
+                t = p**al * (tpl[u] / p**(bt + gm))
+                return (u.transpose() ** (-1)) * self[t]
+
+        res = 0
+        mu = 2 * self.wt + self.sym_wt - 3
+        for al in range(i + 1):
+            for bt in range(i + 1 - al):
+                for gm in range(i + 1 - al - bt):
+                    for u in reprs_of_double_cosets(p, bt):
+                        u = matrix(u)
+                        res += (p**(i*mu + bt - mu * al) * term(al, bt, gm, u))
+
+        return res
+
+    # Fixme
     def hecke_operator(self, m, tpl):
         '''
         Assumes m is a prime or the square of a prime. And returns the tpl th
@@ -136,10 +172,13 @@ class HeckeModuleElement(object):
         p, i = factor(m)[0]
         if not (ZZ(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
-        if i == 1:
-            return self._hecke_tp(p, tpl)
-        if i == 2:
-            return self._hecke_tp2(p, tpl)
+        if self._is_scalar_valued:
+            if i == 1:
+                return self._hecke_tp(p, tpl)
+            elif i == 2:
+                return self._hecke_tp2(p, tpl)
+        else:
+            return self._hecke_op_vector_vld(p, i, tpl)
 
     def hecke_eigenvalue(self, m):
         '''
@@ -271,40 +310,3 @@ def reprs_of_double_cosets(p, i):
         l2 = [[[p * u, p**i],
                [-1, 0]] for u in range(p**(i - 1))]
         return l1 + l2
-
-
-symmetric_tensor_pol_ring = PolynomialRing(QQ, names="u1, u2")
-
-
-class SymmetricTensorRepElement(object):
-    '''
-    An element of Sym(j)\otimes det^{wt}.
-    '''
-    def __init__(self, vec, wt):
-        '''
-        vec is a returned valued of
-        degree2.SymmetricWeightModularFormElement.__getitem__.
-        '''
-        self._vec = vec
-        self._sym_wt = len(vec) - 1
-        self._wt = wt
-
-    def _to_pol(self):
-        u1, u2 = symmetric_tensor_pol_ring.gens()
-        m = self._sym_wt
-        return sum([a * u1**(m - i) * u2**i for a, i in
-                    zip(self._vec, range(m + 1))])
-
-    def group_action(self, mt):
-        '''
-        mt is an element of GL2.
-        Returns a vector corresponding to mt . self,
-        where . means the group action.
-        '''
-        (a, b), (c, d) = mt
-        u1, u2 = symmetric_tensor_pol_ring.gens()
-        vec_pl = self._to_pol()
-        vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
-        dt = (a*d - b*c) ** self._wt
-        return vector([dt * vec_pl[(self._sym_wt - i, i)]
-                       for i in range(self._sym_wt + 1)])
