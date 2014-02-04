@@ -10,7 +10,12 @@ class HalfIntegralMatrices2(object):
     a tuple (n, r, m).
     '''
     def __eq__(self, other):
-        return self._t == other._t
+        if isinstance(other, tuple):
+            return self._t == other
+        elif isinstance(other, HalfIntegralMatrices2):
+            return self._t == other._t
+        else:
+            raise NotImplementedError
 
     def __repr__(self):
         return str(self._t)
@@ -18,6 +23,9 @@ class HalfIntegralMatrices2(object):
     def __init__(self, tpl):
         (self._n, self._r, self._m) = tpl
         self._t = tpl
+
+    def __hash__(self):
+        return self._t.__hash__()
 
     def __add__(self, other):
         return HalfIntegralMatrices2((self._n + other._n,
