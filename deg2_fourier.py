@@ -69,6 +69,7 @@ class Deg2QsrsElement(object):
         self.__base_ring = base_ring
         # Unless self._is_gen, it is a generator's name. e.g "es4", "x12".
         self._is_gen = False
+        self._is_scalar_valued = True
 
     def __eq__(self, other):
         if other == 0:
@@ -1391,6 +1392,8 @@ class SymmetricWeightGenericElement(object):
         self.__prec = prec
         self.__sym_wt = len(forms) - 1
         self.__forms = forms
+
+        self._is_scalar_valued = False
 
     def __repr__(self):
         return "Formal Sym({j}) valued function with prec = {prec}".format(
