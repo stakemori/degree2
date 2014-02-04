@@ -1437,8 +1437,8 @@ class SymmetricWeightGenericElement(object):
         for f in self.forms:
             yield f
 
-    def __getitem__(self, i):
-        return self.forms[i]
+    def __getitem__(self, tpl):
+        return vector([f[tpl] for f in self.forms])
 
     def __add__(self, other):
         if other == 0:
