@@ -1493,7 +1493,7 @@ class SymmetricWeightGenericElement(object):
             return False
 
 
-class SymmetricWeightModularFormElement(SymmetricWeightGenericElement):
+class SymmetricWeightModularFormElement(SymmetricWeightGenericElement, HeckeModuleElement):
     '''
     An instance of this class corresponding to
     vector valued Siegel modular form of degree 2.
