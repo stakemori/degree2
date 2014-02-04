@@ -1408,7 +1408,7 @@ class SymmetricWeightGenericElement(object):
     def _from_dict_to_object(cls, data_dict):
         base_ring, prec, forms_dct = \
             [data_dict[ky] for ky in ["base_ring", "prec", "forms"]]
-        prec = PrecisionDeg2(prec)
+        prec = PrecisionDeg2._from_dict_to_object(prec)
         forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, prec, base_ring)
 
@@ -1519,7 +1519,7 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement, HeckeModu
                                       "wt",
                                       "prec",
                                       "base_ring"]]
-        prec = PrecisionDeg2(prec)
+        prec = PrecisionDeg2._from_dict_to_object(prec)
         forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, wt, prec, base_ring)
 
