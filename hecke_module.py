@@ -107,22 +107,11 @@ class HeckeModuleElement(object):
                 return 0
             a = p**(i2*(k - 2) + i3*(2*k - 3))
             res = 0
-            for tD in reprs(i2):
+            for tD in reprs_of_double_cosets(p, i2):
                 if R[tD].is_divisible_by(p**(i2 + i3)):
                     A = p**i1 * R[tD] / p**(i2 + i3)
                     res += self[A._t]
             return a * res
-
-        def reprs(i2):
-            if i2 == 0:
-                return [[[1, 0],
-                         [0, 1]]]
-            else:
-                l1 = [[[1, 0],
-                       [u, p**i2]] for u in range(p**i2)]
-                l2 = [[[p * u, p**i2],
-                       [-1, 0]] for u in range(p**(i2 - 1))]
-                return l1 + l2
 
         idcs = [(i1, i2, i3) for i1 in range(3) for i2 in range(3)
                 for i3 in range(3)
@@ -257,3 +246,56 @@ class HeckeModule(object):
             res._construction = sum([a * b._construction
                                      for a, b in zip(egvec, basis)])
         return res
+
+
+def reprs_of_double_cosets(p, i):
+    '''
+    p: prime.
+    Returns representatives of GL2(Z)diag(1, p^i)GL2(Z)/GL2(Z).
+    '''
+    if i == 0:
+        return [[[1, 0],
+                 [0, 1]]]
+    else:
+        l1 = [[[1, 0],
+               [u, p**i]] for u in range(p**i)]
+        l2 = [[[p * u, p**i],
+               [-1, 0]] for u in range(p**(i - 1))]
+        return l1 + l2
+
+
+symmetric_tensor_pol_ring = PolynomialRing(QQ, names="u1, u2")
+
+
+class SymmetricTensorRepElement(object):
+    '''
+    An element of Sym(j)\otimes det^{wt}.
+    '''
+    def __init__(self, vec, wt):
+        '''
+        vec is a returned valued of
+        degree2.SymmetricWeightModularFormElement.__getitem__.
+        '''
+        self._vec = vec
+        self._sym_wt = len(vec) - 1
+        self._wt = wt
+
+    def _to_pol(self):
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        m = self._sym_wt
+        return sum([a * u1**(m - i) * u2**i for a, i in
+                    zip(self._vec, range(m + 1))])
+
+    def group_action(self, mt):
+        '''
+        mt is an element of GL2.
+        Returns a vector corresponding to mt . self,
+        where . means the group action.
+        '''
+        (a, b), (c, d) = mt
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        vec_pl = self._to_pol()
+        vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
+        dt = (a*d - b*c) ** self._wt
+        return matrix([dt * vec_pl[(self._sym_wt - i, i)]
+                       for i in range(self._sym_wt + 1)])
