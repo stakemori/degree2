@@ -10,6 +10,7 @@ from sage.all import (QQ, save, load, gcd, PolynomialRing, divisors,
                       prime_factors, fundamental_discriminant, ZZ, CuspForms,
                       floor, matrix, vector, mod, MatrixSpace, factor,
                       valuation, diagonal_matrix)
+import sage.matrix.matrix_space
 
 from degree2.utils import (mul, is_number, combination,
                            linearly_indep_cols_index_list,
@@ -1446,7 +1447,8 @@ class SymmetricWeightGenericElement(object):
             yield f
 
     def __getitem__(self, tpl):
-        return vector([f[tpl] for f in self.forms])
+        vec = vector([f[tpl] for f in self.forms])
+        return SymTensorRepElt(vec, self.wt)
 
     def _none_zero_tpl(self):
         if self[(1, 1, 1)] != 0:
@@ -1577,6 +1579,9 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement, HeckeModu
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def phi_operator(self):
+        return self.forms[0].phi_operator()
 
 
 @cached_function
@@ -1766,3 +1771,86 @@ def rankin_cohen_triple_det_sym4(f, g, h):
     base_ring = common_base_ring(args)
     return SymmetricWeightModularFormElement(forms, f.wt + g.wt + h.wt + 1,
                                              prec, base_ring)
+
+
+symmetric_tensor_pol_ring = PolynomialRing(QQ, names="u1, u2")
+
+
+class SymTensorRepElt(object):
+    '''
+    An element of Sym(j)\otimes det^{wt}.
+    '''
+    def __init__(self, vec, wt):
+        '''
+        vec is a returned valued of
+        degree2.SymmetricWeightModularFormElement.__getitem__.
+        '''
+        self.vec = vec
+        self.sym_wt = len(vec) - 1
+        self.wt = wt
+
+    def __repr__(self):
+        return self.vec.__repr__()
+
+    def _to_pol(self):
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        m = self.sym_wt
+        return sum([a * u1**(m - i) * u2**i for a, i in
+                    zip(self.vec, range(m + 1))])
+
+    def group_action(self, mt):
+        '''
+        mt is an element of GL2.
+        Returns a vector corresponding to mt . self,
+        where . means the group action.
+        '''
+        (a, b), (c, d) = mt
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        vec_pl = self._to_pol()
+        vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
+        dt = (a*d - b*c) ** self.wt
+        vec = vector([dt * vec_pl[(self.sym_wt - i, i)]
+                      for i in range(self.sym_wt + 1)])
+        return SymTensorRepElt(vec, self.wt)
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        elif (isinstance(other, SymTensorRepElt) and
+              self.wt == other.wt):
+            return SymTensorRepElt(self.vec + other.vec, self.wt)
+        else:
+            raise NotImplementedError
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __mul__(self, other):
+        if is_number(other):
+            return SymTensorRepElt(self.vec * other, self.wt)
+        else:
+            raise NotImplementedError
+
+    def __rmul__(self, other):
+        if is_number(other):
+            return self.__mul__(other)
+        elif isinstance(other, list) or (
+                        hasattr(other, "parent") and
+                        isinstance(
+                            other.parent(),
+                            sage.matrix.matrix_space.MatrixSpace)):
+            return self.group_action(other)
+        else:
+            raise NotImplementedError
+
+    def __neg__(self):
+        return self.__mul__(-1)
+
+    def __sub__(self):
+        return self.__add__(self.__neg__())
+
+    def __div__(self, other):
+        if isinstance(other, SymTensorRepElt):
+            return self.vec / other.vec
+        else:
+            raise NotImplementedError
