@@ -1,19 +1,24 @@
 # -*- coding: utf-8; mode: sage -*-
-import sage
-from degree2.utils import mul, is_number, combination, \
-    linearly_indep_cols_index_list, polynomial_func, group
-from sage.all import QQ, save, load, gcd, PolynomialRing, divisors, \
-    quadratic_L_function__exact, zeta, kronecker_character, prime_factors, \
-    fundamental_discriminant, ZZ, CuspForms, floor, matrix, vector,\
-    mod, MatrixSpace, factor, valuation, diagonal_matrix
-from basic_operation import _mul_fourier, _add_fourier, _mul_fourier_by_num,\
-    PrecisionDeg2
 import os
 import operator
-from hecke_module import HeckeModuleElement, HeckeModule
-import basic_operation
-from sage.misc.cachefunc import cached_method, cached_function
 from itertools import imap
+
+import sage
+from sage.misc.cachefunc import cached_method, cached_function
+from sage.all import (QQ, save, load, gcd, PolynomialRing, divisors,
+                      quadratic_L_function__exact, zeta, kronecker_character,
+                      prime_factors, fundamental_discriminant, ZZ, CuspForms,
+                      floor, matrix, vector, mod, MatrixSpace, factor,
+                      valuation, diagonal_matrix)
+
+from degree2.utils import (mul, is_number, combination,
+                           linearly_indep_cols_index_list,
+                           polynomial_func, group)
+from basic_operation import (_mul_fourier, _add_fourier,
+                             _mul_fourier_by_num, PrecisionDeg2)
+from hecke_module import HeckeModuleElement, HeckeModule
+import degree2.basic_operation as basic_operation
+
 
 
 def deg2_fc_set_number_of_procceses(a):

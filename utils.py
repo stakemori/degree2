@@ -1,9 +1,10 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.misc.cachefunc import cached_function
-import sage
-from sage.all import ZZ, CC, factorial, parallel, Integer
 import operator
 from itertools import groupby
+
+import sage
+from sage.misc.cachefunc import cached_function
+from sage.all import ZZ, CC, factorial, parallel, Integer
 
 num_of_proc = sage.parallel.ncpus.ncpus()
 
@@ -199,6 +200,10 @@ def is_number(a):
         return False
 
 
+def is_integer(a):
+    return isinstance(a, (int, Integer))
+
+
 def _is_triple_of_integers(tpl):
     return isinstance(tpl, tuple) and len(tpl) == 3 and \
-        all([isinstance(a, (int, Integer)) for a in list(tpl)])
+        all([is_integer(a) for a in list(tpl)])
