@@ -1,13 +1,8 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import Integer, ZZ, gcd, QQ, mod
 from sage.misc.cachefunc import cached_function
-from degree2.utils import list_group_by, parallel_concat, partition_weighted,\
-    num_of_proc
-
-
-def _is_triple_of_integers(tpl):
-    return isinstance(tpl, tuple) and len(tpl) == 3 and \
-        all([isinstance(a, (int, Integer)) for a in list(tpl)])
+from degree2.utils import (list_group_by, parallel_concat, partition_weighted,
+                           num_of_proc, _is_triple_of_integers)
 
 
 class PrecisionDeg2(object):

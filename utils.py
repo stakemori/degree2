@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.misc.cachefunc import cached_function
 import sage
-from sage.all import ZZ, CC, factorial, parallel
+from sage.all import ZZ, CC, factorial, parallel, Integer
 import operator
 from itertools import groupby
 
@@ -197,3 +197,8 @@ def is_number(a):
              and parent.is_field() and parent.is_finite())
     else:
         return False
+
+
+def _is_triple_of_integers(tpl):
+    return isinstance(tpl, tuple) and len(tpl) == 3 and \
+        all([isinstance(a, (int, Integer)) for a in list(tpl)])
