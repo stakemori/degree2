@@ -1440,6 +1440,12 @@ class SymmetricWeightGenericElement(object):
     def __getitem__(self, tpl):
         return vector([f[tpl] for f in self.forms])
 
+    def _none_zero_tpl(self):
+        if self[(1, 1, 1)] != 0:
+            return (1, 1, 1)
+        else:
+            raise NotImplementedError
+
     def __add__(self, other):
         if other == 0:
             return self
