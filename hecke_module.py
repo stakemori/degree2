@@ -1,6 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 from abc import ABCMeta, abstractmethod, abstractproperty
-from sage.all import factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix
+from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
+                      vector)
 from sage.misc.cachefunc import cached_method
 
 
@@ -305,5 +306,5 @@ class SymmetricTensorRepElement(object):
         vec_pl = self._to_pol()
         vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
         dt = (a*d - b*c) ** self._wt
-        return matrix([dt * vec_pl[(self._sym_wt - i, i)]
+        return vector([dt * vec_pl[(self._sym_wt - i, i)]
                        for i in range(self._sym_wt + 1)])
