@@ -1,10 +1,12 @@
 # -*- coding: utf-8; mode: sage -*-
 from abc import ABCMeta, abstractmethod, abstractproperty
-from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix)
+import sage
+from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
+                      zero_vector, vector)
 
 from sage.misc.cachefunc import cached_method
 
-from degree2.utils import _is_triple_of_integers
+from degree2.utils import _is_triple_of_integers, is_number
 
 
 class HalfIntegralMatrices2(object):
@@ -139,6 +141,8 @@ class HeckeModuleElement(object):
         the associated Andrianov L-functions, pp 166.
         '''
         p = ZZ(p)
+        zero = SymTensorRepElt.zero(self.sym_wt, self.wt)
+
         if isinstance(tpl, tuple):
             tpl = HalfIntegralMatrices2(tpl)
 
@@ -146,12 +150,12 @@ class HeckeModuleElement(object):
             if not (al + bt + gm == i and
                     tpl.is_divisible_by(p**gm) and
                     tpl[u].is_divisible_by(p**(gm + bt))):
-                return 0
+                return zero
             else:
                 t = p**al * (tpl[u] / p**(bt + gm))
                 return (u.transpose() ** (-1)) * self[t]
 
-        res = 0
+        res = zero
         mu = 2 * self.wt + self.sym_wt - 3
         for al in range(i + 1):
             for bt in range(i + 1 - al):
@@ -312,3 +316,98 @@ def reprs_of_double_cosets(p, i):
         l2 = [[[p * u, p**i],
                [-1, 0]] for u in range(p**(i - 1))]
         return l1 + l2
+
+
+symmetric_tensor_pol_ring = PolynomialRing(QQ, names="u1, u2")
+
+
+class SymTensorRepElt(object):
+    '''
+    An element of Sym(j)\otimes det^{wt}.
+    '''
+    def __init__(self, vec, wt):
+        '''
+        vec is a returned valued of
+        degree2.SymmetricWeightModularFormElement.__getitem__.
+        '''
+        self.vec = vec
+        self.sym_wt = len(vec) - 1
+        self.wt = wt
+
+    @classmethod
+    def zero(cls, j, wt):
+        return cls(zero_vector(j + 1), wt)
+
+    def __eq__(self, other):
+        if is_number(other) and other == 0:
+            return self.vec == 0
+        if isinstance(other, SymTensorRepElt):
+            return self.wt == other.wt and self.vec == other.vec
+        else:
+            raise NotImplementedError
+
+    def __repr__(self):
+        return self.vec.__repr__()
+
+    def _to_pol(self):
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        m = self.sym_wt
+        return sum([a * u1**(m - i) * u2**i for a, i in
+                    zip(self.vec, range(m + 1))])
+
+    def group_action(self, mt):
+        '''
+        mt is an element of GL2.
+        Returns a vector corresponding to mt . self,
+        where . means the group action.
+        '''
+        (a, b), (c, d) = mt
+        u1, u2 = symmetric_tensor_pol_ring.gens()
+        vec_pl = self._to_pol()
+        vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
+        dt = (a*d - b*c) ** self.wt
+        vec = vector([dt * vec_pl[(self.sym_wt - i, i)]
+                      for i in range(self.sym_wt + 1)])
+        return SymTensorRepElt(vec, self.wt)
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        elif (isinstance(other, SymTensorRepElt) and
+              self.wt == other.wt):
+            return SymTensorRepElt(self.vec + other.vec, self.wt)
+        else:
+            raise NotImplementedError
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __mul__(self, other):
+        if is_number(other):
+            return SymTensorRepElt(self.vec * other, self.wt)
+        else:
+            raise NotImplementedError
+
+    def __rmul__(self, other):
+        if is_number(other):
+            return self.__mul__(other)
+        elif isinstance(other, list) or (
+            hasattr(other, "parent") and
+            isinstance(
+                other.parent(),
+                sage.matrix.matrix_space.MatrixSpace)):
+            return self.group_action(other)
+        else:
+            raise NotImplementedError
+
+    def __neg__(self):
+        return self.__mul__(-1)
+
+    def __sub__(self):
+        return self.__add__(self.__neg__())
+
+    def __div__(self, other):
+        if isinstance(other, SymTensorRepElt):
+            return self.vec / other.vec
+        else:
+            raise NotImplementedError
