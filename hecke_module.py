@@ -172,7 +172,7 @@ class HeckeModuleElement(object):
         p, i = factor(m)[0]
         if not (ZZ(m).is_prime_power() and 0 < i < 3):
             raise RuntimeError("m must be a prime or the square of a prime.")
-        if self._is_scalar_valued:
+        if self.sym_wt == 0:
             if i == 1:
                 return self._hecke_tp(p, tpl)
             elif i == 2:
@@ -202,10 +202,11 @@ class HeckeModuleElement(object):
         x = R.gens()[0]
         a1 = self.hecke_eigenvalue(p)
         a2 = self.hecke_eigenvalue(p**2)
-        wt = self.wt
-        return 1 - a1 * x + (a1**2 - a2 - p**(2*wt - 4)) * x**2 - \
-            a1 * p**(2*wt - 3) * x**3 + p**(4*wt - 6) * x**4
+        mu = 2 * self.wt + self.sym_wt - 3
+        return (1 - a1 * x + (a1**2 - a2 - p**(mu - 1)) * x**2 -
+                a1 * p**mu * x**3 + p**(2 * mu) * x**4)
 
+    # fixme
     def euler_factor_of_standard_l(self, p, var="x"):
         '''
         Assuming self is eigenform, this method returns p-Euler factor of
@@ -214,7 +215,8 @@ class HeckeModuleElement(object):
         K = self.base_ring
         if hasattr(K, "fraction_field"):
             K = K.fraction_field()
-        b = p**(2 * self.wt - 3)
+        mu = 2 * self.wt + self.sym_wt - 3
+        b = p**mu
         laml = self.hecke_eigenvalue(p)
         laml2 = self.hecke_eigenvalue(p**2)
         a1 = laml**2/QQ(b)
