@@ -550,9 +550,6 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             if self[t] != 0:
                 return t
 
-    def hecke_t2(self, n, r, m):
-        return self.hecke_tp(2, (n, r, m))
-
     def normalize(self, c=None):
         '''
         Returns a c^(-1) * self.
@@ -1188,17 +1185,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
     def construction(self, f):
         return sum([a[0] * b._construction for a, b in zip(self._to_vector(f),
                                                            self.basis())])
-
-    def is_eigen_form(self, f, tupls=False):
-        if tupls is False:
-            tupls = self.linearly_indep_tuples()
-        evs = [f.hecke_t2(n, r, m)/f[(n, r, m)] for n, r, m in tupls
-               if f[(n, r, m)] != 0]
-        lam = evs[0]
-        for l in evs[1:]:
-            if l != lam:
-                return False
-        return True
 
     def hecke_eigenvalue(self, f, a):
         '''

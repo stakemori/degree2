@@ -301,6 +301,12 @@ class HeckeModule(object):
                                      for a, b in zip(egvec, basis)])
         return res
 
+    def is_eigen_form(self, f, tupls=False):
+        if tupls is False:
+            tupls = self.linearly_indep_tuples()
+        lm = f.hecke_eigenvalue(2)
+        return all([f.hecke_operator(2, t) == lm * f[t] for t in tupls])
+
 
 def reprs_of_double_cosets(p, i):
     '''
