@@ -550,20 +550,20 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             if self[t] != 0:
                 return t
 
-    def normalize(self, c=None):
+    def normalize(self, c):
         '''
         Returns a c^(-1) * self.
-        If c is None, this returns self[(1, 0, 0)]^(-1) * self.
+        If c is a tuple (n, r, m), this returns self[(n, r, m)]^(-1) * self.
         '''
-        if c is None:
-            a = self[(1, 0, 0)]
+        if isinstance(c, tuple):
+            a = self[c]
         else:
             a = c
         if a != 0:
             res = self
             pl = 1
-            if hasattr(self, "_construction") and \
-                    self._construction is not None:
+            if (hasattr(self, "_construction") and
+                self._construction is not None):
                 pl = a**(-1) * self._construction
             res = a**(-1) * self
             res._construction = pl
