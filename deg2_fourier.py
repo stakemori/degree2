@@ -697,6 +697,16 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
         rd2 = p**(k - 2) - 1
         return (r1 - rn2/rd2)/(1 - p**(2*k - 3))
 
+
+def degree2_modular_forms_ring_level1_gens(prec):
+    es4 = eisenstein_series_degree2(4, prec)
+    es6 = eisenstein_series_degree2(6, prec)
+    x10 = x10_with_prec(prec)
+    x12 = x12_with_prec(prec)
+    x35 = x35_with_prec(prec)
+    return (es4, es6, x10, x12, x35)
+
+
 # {"es4":es4, "es6": es6, "es10": es10, "es12": es12,
 # "x10":x10, "x12": x12, "x35": x35}
 Deg2global_gens_dict = {}
