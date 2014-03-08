@@ -170,7 +170,6 @@ class HeckeModuleElement(object):
 
         return res
 
-    # Fixme
     def hecke_operator(self, m, tpl):
         '''
         Assumes m is a prime or the square of a prime. And returns the tpl th
@@ -214,7 +213,6 @@ class HeckeModuleElement(object):
         return (1 - a1 * x + (a1**2 - a2 - p**(mu - 1)) * x**2 -
                 a1 * p**mu * x**3 + p**(2 * mu) * x**4)
 
-    # fixme
     def euler_factor_of_standard_l(self, p, var="x"):
         '''
         Assuming self is eigenform, this method returns p-Euler factor of
