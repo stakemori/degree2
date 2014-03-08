@@ -1448,9 +1448,12 @@ class SymmetricWeightGenericElement(object):
         for f in self.forms:
             yield f
 
-    def __getitem__(self, tpl):
-        vec = vector([f[tpl] for f in self.forms])
-        return SymTensorRepElt(vec, self.wt)
+    def __getitem__(self, tpl, i=None):
+        if i is None:
+            vec = vector([f[tpl] for f in self.forms])
+            return SymTensorRepElt(vec, self.wt)
+        else:
+            return self.forms[i][tpl]
 
     def _none_zero_tpl(self):
         if self[(1, 1, 1)] != 0:
