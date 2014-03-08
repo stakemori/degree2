@@ -77,6 +77,10 @@ class HeckeModuleElement(object):
         pass
 
     @abstractproperty
+    def sym_wt(self):
+        pass
+
+    @abstractproperty
     def base_ring(self):
         pass
 
