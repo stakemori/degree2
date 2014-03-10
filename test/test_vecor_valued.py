@@ -4,6 +4,8 @@ import unittest
 
 from unittest import skip
 
+from sage.all import CuspForms, PolynomialRing, QQ
+
 from degree2.deg2_fourier import (
     eisenstein_series_degree2,
     rankin_cohen_pair_sym,
@@ -13,6 +15,8 @@ from degree2.deg2_fourier import (
     rankin_cohen_triple_det_sym4,
     SymmetricWeightModularFormElement)
 
+from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms \
+    as vvvsmf
 from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import naive_det_func
 
@@ -67,6 +71,7 @@ class TestVectorValued(unittest.TestCase):
         self.assertEqual(rankin_cohen_triple_det_sym4(es4, es6, x12),
                          t_det_sym4_e4_e6_x12)
 
+    @skip("OK")
     def test_det_sym2_odd(self):
         prec = 7
         es4, es6, x10, x12, x35 = degree2_modular_forms_ring_level1_gens(prec)
@@ -77,6 +82,38 @@ class TestVectorValued(unittest.TestCase):
         det_form = naive_det_func(3)([f.forms for f in fs])
         det_form = det_form[(4, -2, 6)]**(-1) * det_form
         self.assertEqual(det_form, es4 * x35**2)
+
+    # @skip("OK")
+    # def test_module_of_wt_sym_2_4(self):
+    #     for k, j in [(27, 2), (29, 2), (18, 2), (20, 2),
+    #                  (12, 4), (14, 4), (19, 4), (21, 4)]:
+    #         M = vvvsmf(j, k, k//10 + 3)
+    #         self.assertTrue(M.dimension() > 1)
+    #         self.assertEqual(len(M.linearly_indep_tuples()),
+    #                          M.dimension())
+
+
+    def test_vecor_valued_klingen(self):
+        lst = [(18, 2), (20, 2), (12, 4), (14, 4)]
+        R = PolynomialRing(QQ, names="x")
+        x = R.gens()[0]
+
+        def euler_factor_at_2(f):
+            wt = f.weight()
+            return 1 - f[2] * x + 2**(wt - 1) * x**2
+
+        for k, j in lst:
+            M = vvvsmf(j, k, 4)
+            S = CuspForms(1, j + k)
+            f = S.basis()[0]
+            f = f * f[1]**(-1)
+            pl = euler_factor_at_2(f)
+            lam = (1 + 2**(k - 2)) * f[2]
+            F = M.eigenform_with_eigenvalue_t2(lam)
+            self.assertEqual(R(F.euler_factor_of_spinor_l(2)),
+                             pl * pl.subs({x: 2**(k - 2) * x}))
+
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestVectorValued)
 unittest.TextTestRunner(verbosity=2).run(suite)
