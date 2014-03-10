@@ -1444,12 +1444,15 @@ class SymmetricWeightGenericElement(object):
         for f in self.forms:
             yield f
 
-    def __getitem__(self, tpl, i=None):
-        if i is None:
-            vec = vector([f[tpl] for f in self.forms])
-            return SymTensorRepElt(vec, self.wt)
-        else:
+    def __getitem__(self, t):
+        if (isinstance(t, tuple) and isinstance(t[0], tuple) and
+            is_number(t[1])):
+            tpl, i = t
             return self.forms[i][tpl]
+        else:
+            vec = vector([f[t] for f in self.forms])
+            return SymTensorRepElt(vec, self.wt)
+
 
     def _none_zero_tpl(self):
         if self[(1, 1, 1)] != 0:
@@ -1479,7 +1482,10 @@ class SymmetricWeightGenericElement(object):
         if is_number(other):
             prec = self.prec
             forms = [other * f for f in self.forms]
-            base_ring = self.base_ring
+            if hasattr(other, "parent"):
+                base_ring = _common_base_ring(self.base_ring, other.parent())
+            else:
+                base_ring = self.base_ring
             return SymmetricWeightGenericElement(forms, prec, base_ring)
 
         if isinstance(other, Deg2QsrsElement) or is_number(other):
