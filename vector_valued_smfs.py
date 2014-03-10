@@ -10,6 +10,7 @@ of small degrees.
 import operator
 
 from sage.all import PowerSeriesRing, QQ
+from sage.misc.cachefunc import cached_method
 
 from degree2.hecke_module import HeckeModule
 from degree2.basic_operation import PrecisionDeg2
@@ -18,9 +19,10 @@ from degree2.utils import (linearly_indep_cols_index_list,
 from degree2.deg2_fourier import (tuples_even_wt_modular_forms,
                                   rankin_cohen_pair_sym,
                                   rankin_cohen_triple_det_sym2,
-                                  rankin_cohen_pair_det2_sym)
-from degree2.deg2_fourier \
-    import degree2_modular_forms_ring_level1_gens as deg2_ring_gens
+                                  rankin_cohen_pair_det2_sym,
+                                  rankin_cohen_triple_det_sym4)
+from degree2.deg2_fourier import degree2_modular_forms_ring_level1_gens \
+    as deg2_ring_gens
 
 
 def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
@@ -34,7 +36,7 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     constructor = {2: VectorValuedSMFsSym2,
                    4: VectorValuedSMFsSym4}
 
-    return constructor[sym_wt](wt, prec)
+    return constructor[sym_wt](wt, sym_wt, prec)
 
 
 class VectorValuedSiegelModularForms(HeckeModule):
@@ -90,6 +92,7 @@ class VectorValuedSiegelModularForms(HeckeModule):
 
 
 class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
+    @cached_method
     def basis(self):
         if self.dimension() == 0:
             return []
@@ -142,5 +145,37 @@ class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
 
 
 class VectorValuedSMFsSym4(VectorValuedSiegelModularForms):
+    @cached_method
     def basis(self):
-        pass
+        if self.dimension() == 0:
+            return []
+        es4, es6, x10, x12, _ = deg2_ring_gens(self.prec)
+
+        def basis_of_wt(wt):
+            gens = [es4, es6, x10, x12]
+            res = []
+            for t in tuples_even_wt_modular_forms(wt):
+                res.append(mul([f**i for i, f in zip(t, gens)]))
+            return res
+
+        k = self.wt
+
+        if k%2 == 0:
+            f8 = rankin_cohen_pair_sym(4, es4, es4)
+            f10 = rankin_cohen_pair_sym(4, es4, es6)
+            f12 = rankin_cohen_pair_det2_sym(4, es4, es6)
+            f14 = rankin_cohen_pair_sym(4, es4, x10)
+            f16 = rankin_cohen_pair_sym(4, es6, x10)
+            gens = [f8, f10, f12, f14, f16]
+        else:
+            f15 = rankin_cohen_triple_det_sym4(es4, es4, es6)
+            f17 = rankin_cohen_triple_det_sym4(es4, es6, es6)
+            f19 = rankin_cohen_triple_det_sym4(es4, es4, x10)
+            f21 = rankin_cohen_triple_det_sym4(es4, es4, x12)
+            f23 = rankin_cohen_triple_det_sym4(es4, es6, x12)
+            gens = [f15, f17, f19, f21, f23]
+
+        res = []
+        for f in gens:
+            res.extend([b * f for b in basis_of_wt(k - f.wt)])
+        return res
