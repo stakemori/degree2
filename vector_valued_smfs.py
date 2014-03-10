@@ -81,13 +81,14 @@ class VectorValuedSiegelModularForms(HeckeModule):
     def linearly_indep_tuples(self):
         basis = self.basis()
         dim = self.dimension()
-        tpls = reduce(operator.add,
-                      [[(t, i) for i in range(self.sym_wt + 1)]
-                       for t in self.prec],
-                      [])
-        ml = [[f[t] for f in basis] for t in tpls]
+        tpls = sorted(list(self.prec), key=lambda x: (x[0] + x[2],
+                                                      max(x[0], x[2])))
+        tpls_w_idx = reduce(operator.add,
+                            [[(t, i) for i in range(self.sym_wt + 1)]
+                             for t in tpls], [])
+        ml = [[f.forms[i][t] for f in basis] for t, i in tpls_w_idx]
         index_list = linearly_indep_cols_index_list(ml, dim)
-        res = [tpls[i] for i in index_list]
+        res = [tpls_w_idx[i] for i in index_list]
         return res
 
 
