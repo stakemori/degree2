@@ -17,6 +17,7 @@ from degree2.utils import (linearly_indep_cols_index_list,
                            mul)
 from degree2.deg2_fourier import (tuples_even_wt_modular_forms,
                                   rankin_cohen_pair_sym,
+                                  rankin_cohen_triple_det_sym2,
                                   rankin_cohen_pair_det2_sym)
 from degree2.deg2_fourier \
     import degree2_modular_forms_ring_level1_gens as deg2_ring_gens
@@ -126,7 +127,18 @@ class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
             return res
 
         else:
-            pass
+            f21 = rankin_cohen_triple_det_sym2(es4, es6, x10)
+            f23 = rankin_cohen_triple_det_sym2(es4, es6, x12)
+            f27 = rankin_cohen_triple_det_sym2(es4, x10, x12)
+            f29 = rankin_cohen_triple_det_sym2(es4, x10, x12)
+
+            res = []
+            l1 = [f21, f23, f27]
+            for f in l1:
+                res.extend([b * f for b in basis_of_wt(k - f.wt)])
+            res.extend([b * f29 for b in basis_of_wt(k - f29.wt,
+                                                     ignore_wts=[4])])
+            return res
 
 
 class VectorValuedSMFsSym4(VectorValuedSiegelModularForms):

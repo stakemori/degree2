@@ -1691,6 +1691,39 @@ def rankin_cohen_pair_det2_sym(j, f, g):
                                              prec, base_ring)
 
 
+def rankin_cohen_triple_det_sym2(f, g, h):
+    (k1, k2, k3) = [x.wt for x in [f, g, h]]
+
+    rnames = "r11, r12, r22, s11, s12, s22, t11, t12, t22"
+    unames = "u1, u2"
+
+    R = PolynomialRing(QQ, names=rnames)
+    S = PolynomialRing(R, names=unames)
+
+    (r11, r12, r22, s11, s12, s22, t11, t12, t22) = R.gens()
+    (u1, u2) = S.gens()
+
+    m0 = matrix([[r11, s11, t11],
+                 [2*r12, 2*s12, 2*t12],
+                 [k1, k2, k3]])
+
+    m1 = matrix([[r11, s11, t11],
+                 [k1, k2, k3],
+                 [r22, s22, t22]])
+
+    m2 = matrix([[k1, k2, k3],
+                 [2*r12, 2*s12, 2*t12],
+                 [r22, s22, t22]])
+    Q = m0.det() * u1**2 - 2 * m1.det() * u1 * u2 + m2.det() * u2**2
+    args = [f, g, h]
+    forms = _rankin_cohen_bracket_func(Q, rnames, unames)(args)
+    prec = common_prec(args)
+    base_ring = common_base_ring(args)
+    return SymmetricWeightModularFormElement(forms, f.wt + g.wt + h.wt + 1,
+                                             prec, base_ring)
+
+
+
 def rankin_cohen_triple_det_sym4(f, g, h):
     (k1, k2, k3) = [x.wt for x in [f, g, h]]
 
