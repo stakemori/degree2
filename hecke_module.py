@@ -141,9 +141,14 @@ class HeckeModuleElement(object):
         '''
         Assuming self is a vector valued Siegel modular form, returns
         tpl th Fourier coefficient of T(p^i)self.
+        Here tpl is an triple of integers or a tuple (t, a) with
+        t: triple of integers and a: intger.
         cf. Arakawa, vector valued Siegel's modular forms of degree two and
         the associated Andrianov L-functions, pp 166.
         '''
+        if isinstance(tpl[0], tuple):
+            return self._hecke_op_vector_vld(p, i, tpl[0]).vec[tpl[1]]
+
         p = ZZ(p)
         zero = SymTensorRepElt.zero(self.sym_wt, self.wt)
 
@@ -247,10 +252,14 @@ class HeckeModule(object):
     @abstractmethod
     def linearly_indep_tuples(self):
         '''
-        Should return a list [t_i for i = 0, ..., n-1]
-        t_i should be a triple of integers.
+        Should return a list [t_i for i = 0, ..., n-1] so that
         matrix(b_i[t_j]) must be regular, where
         self.basis() = [b_i for i = 0, ..., n-1].
+        t_i should be a triple of integers in the scalar valued case.
+        In the vector valued case, t_i should be a tuple (t, i)
+        where t is a triple of integers and i is an integer
+        (see the definition of __getitem__ of vector valued Siegel
+        modular forms).
         '''
         pass
 
@@ -370,8 +379,8 @@ class SymTensorRepElt(object):
         where . means the group action.
         '''
         (a, b), (c, d) = mt
-        u1, u2 = symmetric_tensor_pol_ring.gens()
         vec_pl = self._to_pol()
+        u1, u2 = vec_pl.parent().gens()
         vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
         dt = (a*d - b*c) ** self.wt
         vec = vector([dt * vec_pl[(self.sym_wt - i, i)]
