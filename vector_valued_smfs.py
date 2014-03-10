@@ -134,7 +134,7 @@ class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
             f21 = rankin_cohen_triple_det_sym2(es4, es6, x10)
             f23 = rankin_cohen_triple_det_sym2(es4, es6, x12)
             f27 = rankin_cohen_triple_det_sym2(es4, x10, x12)
-            f29 = rankin_cohen_triple_det_sym2(es4, x10, x12)
+            f29 = rankin_cohen_triple_det_sym2(es6, x10, x12)
 
             res = []
             l1 = [f21, f23, f27]
