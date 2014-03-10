@@ -83,6 +83,9 @@ class Deg2QsrsElement(object):
         else:
             return self - other == 0
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def _to_format_dct(self):
         data_dict = {"prec": self.prec._to_format_dct(),
                      "base_ring": self.base_ring,
@@ -447,6 +450,9 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             return all([x == 0 for x in self.fc_dct.itervalues()])
         else:
             return self - other == 0
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __add__(self, other):
         if is_number(other):
@@ -1508,6 +1514,9 @@ class SymmetricWeightGenericElement(object):
             return all([x == y for x, y in zip(self.forms, other.forms)])
         else:
             return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class SymmetricWeightModularFormElement(SymmetricWeightGenericElement, HeckeModuleElement):
