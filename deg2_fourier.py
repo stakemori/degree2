@@ -1464,7 +1464,9 @@ class SymmetricWeightGenericElement(object):
         if self[(1, 1, 1)] != 0:
             return (1, 1, 1)
         else:
-            raise NotImplementedError
+            for t in sorted(self.prec, key=lambda x: max(x[0], x[2])):
+                if self[t] != 0:
+                    return t
 
     def __add__(self, other):
         if other == 0:
