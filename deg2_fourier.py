@@ -15,11 +15,11 @@ import sage.matrix.matrix_space
 from degree2.utils import (mul, is_number, combination,
                            linearly_indep_cols_index_list,
                            polynomial_func, group)
-from basic_operation import (_mul_fourier, _add_fourier,
-                             _mul_fourier_by_num, PrecisionDeg2)
-from hecke_module import HeckeModuleElement, HeckeModule, SymTensorRepElt
+from degree2.basic_operation import (_mul_fourier, _add_fourier,
+                                     _mul_fourier_by_num, PrecisionDeg2)
+from degree2.hecke_module import (HeckeModuleElement, HeckeModule,
+                                  SymTensorRepElt)
 import degree2.basic_operation as basic_operation
-
 
 
 def deg2_fc_set_number_of_procceses(a):
@@ -384,7 +384,7 @@ class Deg2QsrsElement(object):
         Returns a Fourier expansion whose base ring is changed.
         '''
         if hom is None:
-            hom = lambda x: R(x)
+            hom = R
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
@@ -569,7 +569,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             res = self
             pl = 1
             if (hasattr(self, "_construction") and
-                self._construction is not None):
+                 self._construction is not None):
                 pl = a**(-1) * self._construction
             res = a**(-1) * self
             res._construction = pl
@@ -1452,13 +1452,12 @@ class SymmetricWeightGenericElement(object):
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
-            is_number(t[1])):
+             is_number(t[1])):
             tpl, i = t
             return self.forms[i][tpl]
         else:
             vec = vector([f[t] for f in self.forms])
             return SymTensorRepElt(vec, self.wt)
-
 
     def _none_zero_tpl(self):
         if self[(1, 1, 1)] != 0:
@@ -1521,7 +1520,8 @@ class SymmetricWeightGenericElement(object):
         return not self.__eq__(other)
 
 
-class SymmetricWeightModularFormElement(SymmetricWeightGenericElement, HeckeModuleElement):
+class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
+                                        HeckeModuleElement):
     '''
     An instance of this class corresponding to
     vector valued Siegel modular form of degree 2.
@@ -1692,7 +1692,7 @@ def rankin_cohen_pair_det2_sym(j, f, g):
     detR = r11 * r22 - r12**2
     detS = s11 * s22 - s12**2
     # det(R+S)
-    detRpS = (-r12**2 + r11*r22 + r22*s11 - QQ(2) *r12*s12
+    detRpS = (-r12**2 + r11*r22 + r22*s11 - QQ(2) * r12 * s12
                - s12**2 + r11*s22 + s11*s22)
     Q2 = ((2*k - 1) * (2*l - 1) * detRpS - (2*k - 1) * (2*k + 2*l - 1) * detS -
           (2*l - 1)*(2*k + 2*l - 1)*detR)
@@ -1738,7 +1738,6 @@ def rankin_cohen_triple_det_sym2(f, g, h):
     base_ring = common_base_ring(args)
     return SymmetricWeightModularFormElement(forms, f.wt + g.wt + h.wt + 1,
                                              prec, base_ring)
-
 
 
 def rankin_cohen_triple_det_sym4(f, g, h):
