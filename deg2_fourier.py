@@ -16,7 +16,8 @@ from degree2.utils import (mul, is_number, combination,
                            linearly_indep_cols_index_list,
                            polynomial_func, group)
 from degree2.basic_operation import (_mul_fourier, _add_fourier,
-                                     _mul_fourier_by_num, PrecisionDeg2)
+                                     _mul_fourier_by_num, PrecisionDeg2,
+                                     reduced_form_with_sign)
 from degree2.hecke_module import (HeckeModuleElement, HeckeModule,
                                   SymTensorRepElt)
 import degree2.basic_operation as basic_operation
@@ -147,7 +148,11 @@ class Deg2QsrsElement(object):
         return self.fc_dct[(n, r, m)]
 
     def __getitem__(self, idx):
-        return self.fc_dct[idx]
+        try:
+            return self.fc_dct[idx]
+        except KeyError:
+            t, e = reduced_form_with_sign(idx)
+            return self.fc_dct[t] * e**(self.wt) # level 1 specific
 
     def iteritems(self):
         return self.fc_dct.iteritems()
