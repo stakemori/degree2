@@ -228,10 +228,17 @@ def reduced_form_with_sign(tpl):
 def semi_pos_def_matarices(bd):
     '''
     Returns the set of tupls (n, r, m) such that 0 <= n, m, 4nm - r^2 and
-    n, m <= bd.
+    n <= a and m <= b if bd is a tuple and bd = (a, b).
+    If bd is an positive integer, this function returns
+    semi_pos_def_matarices((bd, bd)).
     '''
-    s = set([(n, r, m) for n in range(bd + 1) for r in range(2 * bd + 1)
-             for m in range(bd + 1) if 4*n*m - r**2 >= 0])
+    if isinstance(bd, tuple):
+        a = bd[0]
+        b = bd[1]
+    else:
+        a = b = bd
+    s = set([(n, r, m) for n in range(a + 1) for r in range(2 * a * b + 1)
+             for m in range(b + 1) if 4*n*m - r**2 >= 0])
     return s.union(set([(n, -r, m) for n, r, m in s]))
 
 
@@ -239,8 +246,8 @@ def _semi_pos_def_matarices_less_than(tpl):
     '''
     Returns an iterator of tuples.
     '''
-    (n, r, m) = tpl
-    for n1, r1, m1 in semi_pos_def_matarices(max(n, m)):
+    n, r, m = tpl
+    for n1, r1, m1 in semi_pos_def_matarices((n, m)):
         if n >= n1 and m >= m1 and 4 * (n - n1) * (m - m1) >= (r - r1)**2:
             yield (n1, r1, m1)
 
