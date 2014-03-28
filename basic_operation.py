@@ -1,5 +1,6 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import Integer, ZZ, gcd, QQ, mod
+
 from sage.misc.cachefunc import cached_function
 from degree2.utils import (list_group_by, parallel_concat, partition_weighted,
                            num_of_proc, _is_triple_of_integers)
@@ -191,7 +192,6 @@ class PrecisionDeg2(object):
             raise NotImplementedError
 
 
-@cached_function
 def reduced_form_with_sign(tpl):
     '''
     Assuming the 2-by-2 matrix correspoding to tpl
@@ -224,22 +224,19 @@ def reduced_form_with_sign(tpl):
             r *= -1
 
 
-@cached_function
 def semi_pos_def_matarices(bd):
     '''
-    Returns the set of tupls (n, r, m) such that 0 <= n, m, 4nm - r^2 and
-    n <= a and m <= b if bd is a tuple and bd = (a, b).
-    If bd is an positive integer, this function returns
-    semi_pos_def_matarices((bd, bd)).
+    Generates tuples (n, r, m) such that 0 <= n, m, 4nm - r^2 and
+    n <= bd and m <= bd.
     '''
-    if isinstance(bd, tuple):
-        a = bd[0]
-        b = bd[1]
-    else:
-        a = b = bd
-    s = set([(n, r, m) for n in range(a + 1) for r in range(2 * a * b + 1)
-             for m in range(b + 1) if 4*n*m - r**2 >= 0])
-    return s.union(set([(n, -r, m) for n, r, m in s]))
+    for n in range(bd + 1):
+        for m in range(bd + 1):
+            a = 2 * bd
+            yield (n, 0, m)
+            for r in range(1, a + 1):
+                if r**2 <= 4 * n * m:
+                    yield (n, r, m)
+                    yield (n, -r, m)
 
 
 def _semi_pos_def_matarices_less_than(tpl):
@@ -247,9 +244,18 @@ def _semi_pos_def_matarices_less_than(tpl):
     Returns an iterator of tuples.
     '''
     n, r, m = tpl
-    for n1, r1, m1 in semi_pos_def_matarices((n, m)):
-        if n >= n1 and m >= m1 and 4 * (n - n1) * (m - m1) >= (r - r1)**2:
-            yield (n1, r1, m1)
+    for n1 in range(n + 1):
+        for m1 in range(m + 1):
+            a = 4 * (n - n1) * (m - m1)
+            if r**2 <= a:
+                yield (n1, 0, m1)
+            sq = 2 * max(n1, m1)
+            for r1 in range(1, sq + 1):
+                if r1**2 <= 4 * n1 * m1:
+                    if (r - r1)**2 <= a:
+                        yield (n1, r1, m1)
+                    if (r + r1)**2 <= a:
+                        yield (n1, -r1, m1)
 
 
 def _key_of_tuples(prec, cuspidal=False, hol=False):
