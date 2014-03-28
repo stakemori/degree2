@@ -1,12 +1,19 @@
 # -*- coding: utf-8; mode: sage -*-
-from degree2.basic_operation import PrecisionDeg2
+import unittest
+from unittest import skip
+
+from degree2.basic_operation import (
+    PrecisionDeg2,
+    semi_pos_def_matarices)
+from degree2.basic_operation import _semi_pos_def_matarices_less_than \
+    as semi_pos_mats_lt
+
+
 from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
     eisenstein_series_degree2, rankin_cohen_pair_sym, x10_with_prec,\
     x12_with_prec
 
 from sage.all import matrix, mod
-import unittest
-from unittest import skip
 from degree2.hecke_module import HalfIntegralMatrices2
 
 class TestDeg2fcFunctions(unittest.TestCase):
@@ -59,7 +66,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
     def test_wt_34_47_save_load_basis(self):
         self.save_load_basis(34)
         self.save_load_basis(47)
-    
+
     def test_sym2_rankin_cohen(self):
         es4 = eisenstein_series_degree2(4, 10)
         es6 = eisenstein_series_degree2(6, 10)
@@ -79,6 +86,13 @@ class TestDeg2fcFunctions(unittest.TestCase):
         f12 = f12 * (f12[(1, 1, 1)])**(-1)
         self.assertTrue(f10 == x10_with_prec(prec))
         self.assertTrue(f12 == x12_with_prec(prec))
+
+    def test_semi_pos_mats(self):
+        self.assertEqual(len(list(semi_pos_def_matarices(10))), 2029)
+        self.assertEqual(len(list(semi_pos_def_matarices(14))), 5357)
+        self.assertEqual(len(list(semi_pos_mats_lt((20, 3, 10)))), 2832)
+        self.assertEqual(len(list(semi_pos_mats_lt((10, 0, 10)))), 1021)
+
 
 def naive_rankin_cohen_pair_symm4(f, g):
     '''
