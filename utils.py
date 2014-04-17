@@ -125,6 +125,55 @@ def naive_det_func(n):
     return det
 
 
+def naive_det(m):
+    n = len(list(m))
+    if n == 1:
+        return m[0][0]
+    else:
+        res = 0
+        for i, a in zip(range(n), m[0]):
+            res += (-1)**i * a * naive_det(
+                [[b for j, b in zip(range(n), l) if i != j]
+                 for l in m[1:]])
+        return res
+
+def det(m):
+    m = [list(a) for a in m]
+    n = len(m)
+    if n <= 2:
+        return naive_det(m)
+    i = j = None
+    for a in range(n):
+        for b in range(n):
+            if m[a][b].is_unit():
+                i, j = a, b
+                break
+    if i is None:
+        return naive_det(m)
+
+    def exchange(l, a, b):
+        if a == b:
+            return l
+        d = {a: l[b], b: l[a]}
+        return [x if i != a and i != b else d[i]
+                for x, i in zip(l, range(len(l)))]
+
+    sgn = 1
+
+    m = exchange(m, 0, i)
+    m = [exchange(l, 0, j) for l in m]
+    if i != 0:
+        sgn *= -1
+    if j != 0:
+        sgn *= -1
+    inv = (m[0][0])**(-1)
+    l0 = [a * inv for a in m[0][1:]]
+    m1 = []
+    for v in m[1:]:
+        m1.append([a - b * v[0] for a, b in zip(v[1:], l0)])
+    return sgn * det(m1) * m[0][0]
+
+
 # Borrowed from http://code.activestate.com/recipes/496691/
 class tail_recursive(object):
 
