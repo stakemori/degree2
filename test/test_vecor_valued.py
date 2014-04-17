@@ -18,7 +18,7 @@ from degree2.deg2_fourier import (
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms \
     as vvvsmf
 from degree2.basic_operation import PrecisionDeg2
-from degree2.utils import naive_det_func
+from degree2.utils import det
 
 class TestVectorValued(unittest.TestCase):
     @skip("OK")
@@ -79,7 +79,7 @@ class TestVectorValued(unittest.TestCase):
         f23 = rankin_cohen_triple_det_sym2(es4, es6, x12)
         f27 = rankin_cohen_triple_det_sym2(es4, x10, x12)
         fs = [f21, f23, f27]
-        det_form = naive_det_func(3)([f.forms for f in fs])
+        det_form = det([f.forms for f in fs])
         det_form = det_form[(4, -2, 6)]**(-1) * det_form
         self.assertEqual(det_form, es4 * x35**2)
 
