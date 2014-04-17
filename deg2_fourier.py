@@ -14,10 +14,16 @@ import sage.matrix.matrix_space
 
 from degree2.utils import (mul, is_number, combination,
                            linearly_indep_cols_index_list,
-                           polynomial_func, group)
+                           polynomial_func, group, list_group_by)
+
 from degree2.basic_operation import (_mul_fourier, _add_fourier,
                                      _mul_fourier_by_num, PrecisionDeg2,
                                      reduced_form_with_sign)
+
+from degree2.basic_operation import _semi_pos_def_matarices_less_than\
+    as spd_mats_lt
+
+
 from degree2.hecke_module import (HeckeModuleElement, HeckeModule,
                                   SymTensorRepElt)
 import degree2.basic_operation as basic_operation
@@ -249,6 +255,8 @@ class Deg2QsrsElement(object):
             return 1
         elif other == 1:
             return self
+        elif other == -1:
+            return self._inverse()
 
         s = format(other, 'b')
         revs = s[::-1]
@@ -408,6 +416,38 @@ class Deg2QsrsElement(object):
             if v != 0:
                 fcmap[k] = modulo(v, p, self.base_ring)
         return fcmap
+
+    def is_unit(self):
+        '''
+        Returns true if the constant term of self is not zero.
+        '''
+        return self[(0, 0, 0)] != 0
+
+    def _inverse(self):
+        a = self[(0, 0, 0)]
+        if a == 0:
+            raise ZeroDivisionError
+        prec = self.prec
+        R = self.base_ring
+        if a != R(1):
+            return (self * a**(-1))._inverse() * a**(-1)
+        res_dict = {(0, 0, 0): R(1)}
+
+        def norm(t):
+            return t[0] + t[2]
+
+        prec_dict = dict(list_group_by(list(prec), norm))
+        prec_d_keys = sorted(prec_dict.keys())[1:]
+        for a in prec_d_keys:
+            for t in prec_dict[a]:
+                l = list(spd_mats_lt(t))
+                l.remove(t)
+                res_dict[t] = - sum([res_dict[u] *
+                                     self[(t[0] - u[0],
+                                           t[1] - u[1],
+                                           t[2] - u[2])] for u in l])
+        return Deg2QsrsElement(res_dict, prec, base_ring=self.base_ring)
+
 
 
 def is_hol_mod_form(f):
