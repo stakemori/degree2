@@ -15,7 +15,7 @@ def partition_weighted(l, n, weight_fn=False):
     Divides l into n lists so that the sum of weight_fn of each list
     is almost same.
     '''
-    if n == 1 or len(l) <= n:
+    if n == 1:
         return [l]
     if weight_fn is False:
         m = len(l)//n
