@@ -12,6 +12,7 @@ from degree2.utils import _is_triple_of_integers, is_number, uniq
 
 from degree2.basic_operation import reduced_form_with_sign
 
+
 class HalfIntegralMatrices2(object):
     '''
     An instance of this class corresponds to
@@ -106,6 +107,7 @@ class HeckeModuleElement(object):
     def _hecke_tp_psum(self, p, tpl):
         return sum([self[t] * v for t, v in self._hecke_tp_psum_alst(p, tpl)])
 
+    @cached_method
     def _hecke_tp_psum_alst(self, p, tpl):
         n, r, m = tpl
         k = self.wt
@@ -132,11 +134,13 @@ class HeckeModuleElement(object):
         lmp = self.hecke_eigenvalue(p)
         # Assume we know the Hecke eigenvalue for T(p), and return p**i * t th
         # Fourier coeff.
+
         def fc(i, t):
             if i == 0:
                 return self[t]
             else:
                 tp = tuple([p**(i - 1)*x for x in t])
+
                 def idc(n, r, m):
                     e = min(valuation(reduce(gcd, (n, r, m)), p), i - 1)
                     return (e, tuple([x//p**e for x in (n, r, m)]))
@@ -150,6 +154,7 @@ class HeckeModuleElement(object):
         return sum([v * fc(i, t)
                     for i, t, v in self._hecke_tp2_sum_alst(p, tpl)])
 
+    @cached_method
     def _hecke_tp2_sum_alst(self, p, tpl):
         '''
         Returns alist of elms (i, (n, r, m), v) s.t.
@@ -157,6 +162,7 @@ class HeckeModuleElement(object):
         '''
         R = HalfIntegralMatrices2(tpl)
         k = self.wt
+
         def psum_alst(i1, i2, i3):
             if not R.is_divisible_by(p**i3):
                 return []
