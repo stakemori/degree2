@@ -451,6 +451,12 @@ class Deg2QsrsElement(object):
         return Deg2QsrsElement(res_dict, prec, base_ring=self.base_ring)
 
 
+    def _down_prec(self, prec):
+        prec = PrecisionDeg2(prec)
+        d = self._to_format_dct()
+        d["prec"] = prec._to_format_dct()
+        return Deg2QsrsElement._from_dict_to_object(d)
+
 
 def is_hol_mod_form(f):
     return isinstance(f, Deg2ModularFormQseries)
@@ -1625,6 +1631,13 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
 
     def phi_operator(self):
         return self.forms[0].phi_operator()
+
+    def _down_prec(self, prec):
+        prec = PrecisionDeg2(prec)
+        forms_res = [f._down_prec(prec) for f in self.forms]
+        return SymmetricWeightModularFormElement(forms_res, self.wt, prec,
+                                                 base_ring=self.base_ring)
+
 
 
 @cached_function
