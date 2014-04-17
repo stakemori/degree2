@@ -14,7 +14,9 @@ import sage.matrix.matrix_space
 
 from degree2.utils import (mul, is_number, combination,
                            linearly_indep_cols_index_list,
-                           polynomial_func, group, list_group_by)
+                           polynomial_func, group, list_group_by, pmap)
+
+from degree2.utils import det as deg2_det
 
 from degree2.basic_operation import (_mul_fourier, _add_fourier,
                                      _mul_fourier_by_num, PrecisionDeg2,
@@ -904,25 +906,10 @@ def x35_with_prec_inner(prec):
     f = load_deg2_cached_gens(key, prec, k, cuspidal=True)
     if f:
         return f
-    es4 = eisenstein_series_degree2(4, prec)
-    es6 = eisenstein_series_degree2(6, prec)
-    x10 = x10_with_prec(prec)
-    x12 = x12_with_prec(prec)
-    l = [es4, es6, x10, x12]
-    [x11, x12, x13, x14] = [a.wt * a for a in l]
-    [x21, x22, x23, x24] = [a.differentiate_wrt_tau() for a in l]
-    [x31, x32, x33, x34] = [a.differentiate_wrt_w() for a in l]
-    [x41, x42, x43, x44] = [a.differentiate_wrt_z() for a in l]
-    d = x11*x22*x33*x44 - x11*x22*x34*x43 - x11*x23*x32*x44\
-        + x11*x23*x34*x42 + x11*x24*x32*x43 - x11*x24*x33*x42\
-        - x12*x21*x33*x44 + x12*x21*x34*x43 + x12*x23*x31*x44\
-        - x12*x23*x34*x41 - x12*x24*x31*x43 + x12*x24*x33*x41\
-        + x13*x21*x32*x44 - x13*x21*x34*x42 - x13*x22*x31*x44\
-        + x13*x22*x34*x41 + x13*x24*x31*x42 - x13*x24*x32*x41\
-        - x14*x21*x32*x43 + x14*x21*x33*x42 + x14*x22*x31*x43\
-        - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
-    fcmap = (1/QQ(41472) * d).fc_dct
-    res = Deg2ModularFormQseries(35, fcmap, prec)
+    l = pmap(lambda k: eisenstein_series_degree2(k, prec), [4, 6, 10, 12])
+    res = diff_opetator_4(*l)
+    a = res[(2, -1, 3)]
+    res = res * a**(-1)
     res._is_cuspidal = True
     res._is_gen = key
     Deg2global_gens_dict[key] = res
@@ -930,24 +917,17 @@ def x35_with_prec_inner(prec):
 
 
 def diff_opetator_4(f1, f2, f3, f4):
-    f_s = [f1, f2, f3, f4]
-    wt_s = [f.wt for f in f_s]
-    prec_res = common_prec(f_s)
-    base_ring = common_base_ring(f_s)
-    [x11, x12, x13, x14] = [f.wt * f for f in f_s]
-    [x21, x22, x23, x24] = [f.differentiate_wrt_tau() for f in f_s]
-    [x31, x32, x33, x34] = [f.differentiate_wrt_w() for f in f_s]
-    [x41, x42, x43, x44] = [f.differentiate_wrt_z() for f in f_s]
-    d = x11*x22*x33*x44 - x11*x22*x34*x43 - x11*x23*x32*x44\
-        + x11*x23*x34*x42 + x11*x24*x32*x43 - x11*x24*x33*x42\
-        - x12*x21*x33*x44 + x12*x21*x34*x43 + x12*x23*x31*x44\
-        - x12*x23*x34*x41 - x12*x24*x31*x43 + x12*x24*x33*x41\
-        + x13*x21*x32*x44 - x13*x21*x34*x42 - x13*x22*x31*x44\
-        + x13*x22*x34*x41 + x13*x24*x31*x42 - x13*x24*x32*x41\
-        - x14*x21*x32*x43 + x14*x21*x33*x42 + x14*x22*x31*x43\
-        - x14*x22*x33*x41 - x14*x23*x31*x42 + x14*x23*x32*x41
-    fcmap = d.fc_dct
-    res = Deg2ModularFormQseries(sum(wt_s) + 3, fcmap, prec_res,
+    l = [f1, f2, f3, f4]
+    wt_s = [f.wt for f in l]
+    prec_res = common_prec(l)
+    base_ring = common_base_ring(l)
+    m = [[a.wt * a for a in l],
+         pmap(lambda a: a.differentiate_wrt_tau(), l),
+         pmap(lambda a: a.differentiate_wrt_w(), l),
+         pmap(lambda a: a.differentiate_wrt_z(), l)]
+    res = deg2_det(m)
+    res = Deg2ModularFormQseries(sum(wt_s) + 3, res.fc_dct,
+                                 prec_res,
                                  base_ring=base_ring)
     return res
 
