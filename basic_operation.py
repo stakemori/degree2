@@ -2,8 +2,8 @@
 from sage.all import Integer, ZZ, gcd, QQ, mod
 
 from sage.misc.cachefunc import cached_function
-from degree2.utils import (list_group_by, parallel_concat, partition_weighted,
-                           num_of_proc, _is_triple_of_integers)
+from degree2.utils import (list_group_by, partition_weighted,
+                           num_of_proc, _is_triple_of_integers, pmap)
 
 
 class PrecisionDeg2(object):
@@ -128,7 +128,7 @@ class PrecisionDeg2(object):
             pos_forms.append((t, rdf, sgn))
         grpd_by_rdf = list_group_by(pos_forms, lambda x: x[1])
         res = {}
-        for k, ls in grpd_by_rdf:
+        for _, ls in grpd_by_rdf:
             a_tupl, _, a_sgn = ls[0]
             res[a_tupl] = [(t, sgn * a_sgn) for t, _, sgn in ls]
         return res
@@ -285,41 +285,38 @@ def _partition_mul_fourier(prec, cuspidal=False, hol=False):
                               - ZZ(n) * ZZ(m) * abs(r))
 
 
+def _dict_parallel(f, ls):
+    res = {}
+    for d in pmap(f, ls):
+        res.update(d)
+    return res
+
+
 def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
     '''
     Returns the dictionary of the product of Fourier series
     correspoding to mp1 and mp2.
     '''
     alsts = _partition_mul_fourier(prec, cuspidal, hol)
-    return dict(_mul_fourier1([(a, mp1, mp2) for a in alsts]))
+
+    def _mul_fourier1(alst):
+        return {(n, r, m): sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
+                                for n0, r0, m0 in ts])
+                for (n, r, m), ts in alst}
+    return _dict_parallel(_mul_fourier1, alsts)
 
 
 def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
-    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal,
-                                  hol=hol)
-    return dict(_add_fourier1([(ts, mp1, mp2) for ts in ts_s]))
+    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol)
 
-
-@parallel_concat
-def _mul_fourier1(alst, mp1, mp2):
-    '''
-    alst is a list of elements (t, _semi_pos_def_matarices_less_than(t)).
-    '''
-    return [((n, r, m), sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
-                             for n0, r0, m0 in ts]))
-            for (n, r, m), ts in alst]
-
-
-@parallel_concat
-def _add_fourier1(ts, mp1, mp2):
-    return [(t, mp1[t] + mp2[t]) for t in ts]
+    def _add_fourier1(ts):
+        return {t: mp1[t] + mp2[t] for t in ts}
+    return _dict_parallel(_add_fourier1, ts_s)
 
 
 def _mul_fourier_by_num(fc_dct, a, prec, cuspidal=False, hol=False):
     tss = _partition_add_fourier(prec, cuspidal, hol)
-    return dict(_mul_fourier_by_num1([(ts, fc_dct, a) for ts in tss]))
 
-
-@parallel_concat
-def _mul_fourier_by_num1(ts, fc_dct, a):
-    return [(t, a*fc_dct[t]) for t in ts]
+    def _mul_fourier_by_num1(ts):
+        return {t: a*fc_dct[t] for t in ts}
+    return _dict_parallel(_mul_fourier_by_num1, tss)
