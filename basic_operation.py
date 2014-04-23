@@ -1,4 +1,6 @@
 # -*- coding: utf-8; mode: sage -*-
+from math import sqrt
+
 from sage.all import Integer, ZZ, gcd, QQ, mod
 
 from sage.misc.cachefunc import cached_function
@@ -249,13 +251,12 @@ def _semi_pos_def_matarices_less_than(tpl):
             a = 4 * (n - n1) * (m - m1)
             if r**2 <= a:
                 yield (n1, 0, m1)
-            sq = 2 * max(n1, m1)
+            sq = int(2 * sqrt(n1 * m1))
             for r1 in range(1, sq + 1):
-                if r1**2 <= 4 * n1 * m1:
-                    if (r - r1)**2 <= a:
-                        yield (n1, r1, m1)
-                    if (r + r1)**2 <= a:
-                        yield (n1, -r1, m1)
+                if (r - r1)**2 <= a:
+                    yield (n1, r1, m1)
+                if (r + r1)**2 <= a:
+                    yield (n1, -r1, m1)
 
 
 def _key_of_tuples(prec, cuspidal=False, hol=False):
