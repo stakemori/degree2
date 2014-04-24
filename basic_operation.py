@@ -196,6 +196,25 @@ class PrecisionDeg2(object):
             raise NotImplementedError
 
 
+class WithNumOfProc(object):
+
+    def __init__(self, n):
+        self.n = n
+        self.save = num_of_proc
+
+    def __enter__(self):
+        global num_of_proc
+        num_of_proc = self.n
+
+    def __exit__(self, err_type, value, traceback):
+        global num_of_proc
+        num_of_proc = self.save
+
+
+def number_of_proc(n):
+    return WithNumOfProc(n)
+
+
 def reduced_form_with_sign(tpl):
     '''
     Assuming the 2-by-2 matrix correspoding to tpl
