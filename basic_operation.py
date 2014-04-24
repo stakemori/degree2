@@ -273,22 +273,28 @@ def _key_of_tuples(prec, cuspidal=False, hol=False):
 
 
 @cached_function
-def _partition_add_fourier(prec, cuspidal=False, hol=False):
+def _partition_add_fourier(prec, cuspidal=False, hol=False,
+                           num_of_proc=num_of_proc):
     lst = _key_of_tuples(prec, cuspidal, hol)
     return partition_weighted(lst, num_of_proc)
 
 
 @cached_function
-def _partition_mul_fourier(prec, cuspidal=False, hol=False):
+def _partition_mul_fourier(prec, cuspidal=False, hol=False,
+                           num_of_proc=num_of_proc):
     tpls = _key_of_tuples(prec, cuspidal, hol)
-    tpl_alst = [(t, _spos_def_mats_lt(t)) for t in tpls]
-    return partition_weighted(tpl_alst, num_of_proc,
-                              lambda ((n, r, m), s): 16.0/9.0 *
-                              (ZZ(n) * ZZ(m))**(1.5)
-                              - ZZ(n) * ZZ(m) * abs(r))
+
+    def weight_fn(x):
+        n, r, m = x
+        return 16.0/9.0 * (ZZ(n) * ZZ(m))**(1.5) - ZZ(n) * ZZ(m) * abs(r)
+
+    return partition_weighted(tpls, num_of_proc, weight_fn)
 
 
 def _dict_parallel(f, ls):
+    if num_of_proc == 1:
+        return f(ls[0])
+
     res = {}
     for d in pmap(f, ls):
         res.update(d)
@@ -300,17 +306,20 @@ def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
     Returns the dictionary of the product of Fourier series
     correspoding to mp1 and mp2.
     '''
-    alsts = _partition_mul_fourier(prec, cuspidal, hol)
+    tupls_s = _partition_mul_fourier(prec, cuspidal=cuspidal, hol=hol,
+                                   num_of_proc=num_of_proc)
 
-    def _mul_fourier1(alst):
+    def _mul_fourier1(tupls):
         return {(n, r, m): sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
-                                for n0, r0, m0 in ts])
-                for (n, r, m), ts in alst}
-    return _dict_parallel(_mul_fourier1, alsts)
+                                for n0, r0, m0
+                                in _spos_def_mats_lt((n, r, m))])
+                for (n, r, m) in tupls}
+    return _dict_parallel(_mul_fourier1, tupls_s)
 
 
 def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
-    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol)
+    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol,
+                                  num_of_proc=num_of_proc)
 
     def _add_fourier1(ts):
         return {t: mp1[t] + mp2[t] for t in ts}
@@ -318,7 +327,8 @@ def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
 
 
 def _mul_fourier_by_num(fc_dct, a, prec, cuspidal=False, hol=False):
-    tss = _partition_add_fourier(prec, cuspidal, hol)
+    tss = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol,
+                                 num_of_proc=num_of_proc)
 
     def _mul_fourier_by_num1(ts):
         return {t: a*fc_dct[t] for t in ts}
