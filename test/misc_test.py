@@ -4,10 +4,7 @@ from unittest import skip
 
 from degree2.basic_operation import (
     PrecisionDeg2,
-    semi_pos_def_matarices)
-from degree2.basic_operation import _semi_pos_def_matarices_less_than \
-    as semi_pos_mats_lt
-
+    semi_pos_def_matarices, _spos_def_mats_lt)
 
 from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
     eisenstein_series_degree2, rankin_cohen_pair_sym, x10_with_prec,\
@@ -90,8 +87,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
     def test_semi_pos_mats(self):
         self.assertEqual(len(list(semi_pos_def_matarices(10))), 2029)
         self.assertEqual(len(list(semi_pos_def_matarices(14))), 5357)
-        self.assertEqual(len(list(semi_pos_mats_lt((20, 3, 10)))), 2832)
-        self.assertEqual(len(list(semi_pos_mats_lt((10, 0, 10)))), 1021)
+        self.assertEqual(len(list(_spos_def_mats_lt((20, 3, 10)))), 2832)
+        self.assertEqual(len(list(_spos_def_mats_lt((10, 0, 10)))), 1021)
 
 
 def naive_rankin_cohen_pair_symm4(f, g):

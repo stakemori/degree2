@@ -1,12 +1,14 @@
 # -*- coding: utf-8; mode: sage -*-
 from math import sqrt
 
+import sage
 from sage.all import Integer, ZZ, gcd, QQ, mod
 
 from sage.misc.cachefunc import cached_function
 from degree2.utils import (list_group_by, partition_weighted,
-                           num_of_proc, _is_triple_of_integers, pmap)
+                           _is_triple_of_integers, pmap)
 
+num_of_proc = sage.parallel.ncpus.ncpus()
 
 class PrecisionDeg2(object):
     '''
@@ -64,7 +66,7 @@ class PrecisionDeg2(object):
         elif self.type == "tuples":
             res = set([])
             for t in self.prec:
-                res.update(_semi_pos_def_matarices_less_than(t))
+                res.update(_spos_def_mats_lt(t))
             for t in res:
                 yield t
 
@@ -241,7 +243,7 @@ def semi_pos_def_matarices(bd):
                     yield (n, -r, m)
 
 
-def _semi_pos_def_matarices_less_than(tpl):
+def _spos_def_mats_lt(tpl):
     '''
     Returns an iterator of tuples.
     '''
@@ -279,7 +281,7 @@ def _partition_add_fourier(prec, cuspidal=False, hol=False):
 @cached_function
 def _partition_mul_fourier(prec, cuspidal=False, hol=False):
     tpls = _key_of_tuples(prec, cuspidal, hol)
-    tpl_alst = [(t, _semi_pos_def_matarices_less_than(t)) for t in tpls]
+    tpl_alst = [(t, _spos_def_mats_lt(t)) for t in tpls]
     return partition_weighted(tpl_alst, num_of_proc,
                               lambda ((n, r, m), s): 16.0/9.0 *
                               (ZZ(n) * ZZ(m))**(1.5)

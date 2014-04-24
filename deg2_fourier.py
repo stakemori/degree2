@@ -20,11 +20,8 @@ from degree2.utils import det as deg2_det
 
 from degree2.basic_operation import (_mul_fourier, _add_fourier,
                                      _mul_fourier_by_num, PrecisionDeg2,
-                                     reduced_form_with_sign)
-
-from degree2.basic_operation import _semi_pos_def_matarices_less_than\
-    as spd_mats_lt
-
+                                     reduced_form_with_sign,
+                                     _spos_def_mats_lt)
 
 from degree2.hecke_module import (HeckeModuleElement, HeckeModule,
                                   SymTensorRepElt)
@@ -442,7 +439,7 @@ class Deg2QsrsElement(object):
         prec_d_keys = sorted(prec_dict.keys())[1:]
         for a in prec_d_keys:
             for t in prec_dict[a]:
-                l = list(spd_mats_lt(t))
+                l = list(_spos_def_mats_lt(t))
                 l.remove(t)
                 res_dict[t] = - sum([res_dict[u] *
                                      self[(t[0] - u[0],

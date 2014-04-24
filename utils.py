@@ -6,7 +6,7 @@ import sage
 from sage.misc.cachefunc import cached_function
 from sage.all import ZZ, CC, factorial, parallel, Integer
 
-num_of_proc = sage.parallel.ncpus.ncpus()
+default_num_of_proc = sage.parallel.ncpus.ncpus()
 
 
 def partition_weighted(l, n, weight_fn=False):
@@ -31,12 +31,12 @@ def partition_weighted(l, n, weight_fn=False):
     fn_vals = pmap(weight_fn, l)
     wts = pmap(lambda i: sum(fn_vals[:i+1]), range(m))
     av_wt = max(wts[-1] // n, 1)
-    idx_list = [list(v) for k, v in
+    idx_list = [list(v) for _, v in
                 groupby(range(m), lambda i: min(wts[i] // av_wt, n - 1))]
     return [[l[i] for i in idl] for idl in idx_list]
 
 
-def pmap(fn, l, weight_fn=False, sort=True, num_of_proc=num_of_proc):
+def pmap(fn, l, weight_fn=False, sort=True, num_of_proc=default_num_of_proc):
     '''
     Parallel map. The meaning of weight_fn is same as the meaning
     of the argument of partition_weighted.
@@ -46,8 +46,8 @@ def pmap(fn, l, weight_fn=False, sort=True, num_of_proc=num_of_proc):
     else:
         wt_fn = lambda x: weight_fn(x[1])
     n = len(l)
-    ls = partition_weighted([(i, l[i]) for i in range(n)], min(n, num_of_proc),
-                            wt_fn)
+    ls = partition_weighted([(i, l[i]) for i in range(n)],
+                            min(n, default_num_of_proc), wt_fn)
 
     @parallel
     def calc(xs):
@@ -93,10 +93,6 @@ def list_group_by(ls, key_func):
 
 def uniq(ls):
     return list(set(ls))
-
-
-def sum(lst):
-    return reduce(operator.add, lst, 0)
 
 
 def combination(n, m):
