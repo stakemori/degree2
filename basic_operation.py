@@ -8,7 +8,6 @@ from sage.misc.cachefunc import cached_function
 from degree2.utils import (list_group_by, partition_weighted,
                            _is_triple_of_integers, pmap)
 
-num_of_proc = sage.parallel.ncpus.ncpus()
 
 class PrecisionDeg2(object):
     '''
@@ -200,19 +199,33 @@ class WithNumOfProc(object):
 
     def __init__(self, n):
         self.n = n
-        self.save = num_of_proc
+        self.save = current_num_of_procs.num_of_procs
 
     def __enter__(self):
-        global num_of_proc
-        num_of_proc = self.n
+        current_num_of_procs.set_num_of_procs(self.n)
 
     def __exit__(self, err_type, value, traceback):
-        global num_of_proc
-        num_of_proc = self.save
+        current_num_of_procs.set_num_of_procs(self.save)
 
 
 def number_of_proc(n):
     return WithNumOfProc(n)
+
+
+class CurrentNumOfProcs(object):
+
+    def __init__(self):
+        self._procs = sage.parallel.ncpus.ncpus()
+
+    @property
+    def num_of_procs(self):
+        return self._procs
+
+    def set_num_of_procs(self, num):
+        self._procs = num
+
+
+current_num_of_procs = CurrentNumOfProcs()
 
 
 def reduced_form_with_sign(tpl):
@@ -293,25 +306,25 @@ def _key_of_tuples(prec, cuspidal=False, hol=False):
 
 @cached_function
 def _partition_add_fourier(prec, cuspidal=False, hol=False,
-                           num_of_proc=num_of_proc):
+                           num_of_procs=current_num_of_procs.num_of_procs):
     lst = _key_of_tuples(prec, cuspidal, hol)
-    return partition_weighted(lst, num_of_proc)
+    return partition_weighted(lst, num_of_procs)
 
 
 @cached_function
 def _partition_mul_fourier(prec, cuspidal=False, hol=False,
-                           num_of_proc=num_of_proc):
+                           num_of_procs=current_num_of_procs.num_of_procs):
     tpls = _key_of_tuples(prec, cuspidal, hol)
 
     def weight_fn(x):
         n, r, m = x
         return 16.0/9.0 * (ZZ(n) * ZZ(m))**(1.5) - ZZ(n) * ZZ(m) * abs(r)
 
-    return partition_weighted(tpls, num_of_proc, weight_fn)
+    return partition_weighted(tpls, num_of_procs, weight_fn)
 
 
 def _dict_parallel(f, ls):
-    if num_of_proc == 1:
+    if current_num_of_procs.num_of_procs == 1:
         return f(ls[0])
 
     res = {}
@@ -325,8 +338,9 @@ def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
     Returns the dictionary of the product of Fourier series
     correspoding to mp1 and mp2.
     '''
-    tupls_s = _partition_mul_fourier(prec, cuspidal=cuspidal, hol=hol,
-                                   num_of_proc=num_of_proc)
+    tupls_s = _partition_mul_fourier(
+        prec, cuspidal=cuspidal, hol=hol,
+        num_of_procs=current_num_of_procs.num_of_procs)
 
     def _mul_fourier1(tupls):
         return {(n, r, m): sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
@@ -337,8 +351,9 @@ def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
 
 
 def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
-    ts_s = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol,
-                                  num_of_proc=num_of_proc)
+    ts_s = _partition_add_fourier(
+        prec, cuspidal=cuspidal, hol=hol,
+        num_of_procs=current_num_of_procs.num_of_procs)
 
     def _add_fourier1(ts):
         return {t: mp1[t] + mp2[t] for t in ts}
@@ -346,8 +361,9 @@ def _add_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
 
 
 def _mul_fourier_by_num(fc_dct, a, prec, cuspidal=False, hol=False):
-    tss = _partition_add_fourier(prec, cuspidal=cuspidal, hol=hol,
-                                 num_of_proc=num_of_proc)
+    tss = _partition_add_fourier(
+        prec, cuspidal=cuspidal, hol=hol,
+        num_of_procs=current_num_of_procs.num_of_procs)
 
     def _mul_fourier_by_num1(ts):
         return {t: a*fc_dct[t] for t in ts}
