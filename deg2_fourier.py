@@ -25,11 +25,6 @@ from degree2.basic_operation import (_mul_fourier, _add_fourier,
 
 from degree2.hecke_module import (HeckeModuleElement, HeckeModule,
                                   SymTensorRepElt)
-import degree2.basic_operation as basic_operation
-
-
-def deg2_fc_set_number_of_procceses(a):
-    basic_operation.num_of_proc = a
 
 
 def to_sorted_fc_list(fc_dct):
