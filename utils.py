@@ -6,10 +6,8 @@ import sage
 from sage.misc.cachefunc import cached_function
 from sage.all import ZZ, CC, factorial, parallel, Integer
 
-default_num_of_proc = sage.parallel.ncpus.ncpus()
 
-
-def partition_weighted(l, n, weight_fn=False):
+def partition_weighted(l, n, weight_fn=None):
     '''
     weight_fn is a function defined on an element of l.
     Divides l into n lists so that the sum of weight_fn of each list
@@ -17,7 +15,7 @@ def partition_weighted(l, n, weight_fn=False):
     '''
     if n == 1:
         return [l]
-    if weight_fn is False:
+    if weight_fn is None:
         m = len(l)//n
         rl = [l[i:i+m] for i in range(0, len(l), m)]
         if len(l)%n == 0:
@@ -28,26 +26,30 @@ def partition_weighted(l, n, weight_fn=False):
             rl1[-1] = rl1[-1] + a
             return rl1
     m = len(l)
-    fn_vals = pmap(weight_fn, l)
-    wts = pmap(lambda i: sum(fn_vals[:i+1]), range(m))
+    fn_vals = pmap(weight_fn, l, num_of_procs=sage.parallel.ncpus.ncpus())
+    wts = [sum(fn_vals[:i+1]) for i in range(m)]
     av_wt = max(wts[-1] // n, 1)
     idx_list = [list(v) for _, v in
                 groupby(range(m), lambda i: min(wts[i] // av_wt, n - 1))]
     return [[l[i] for i in idl] for idl in idx_list]
 
 
-def pmap(fn, l, weight_fn=False, sort=True, num_of_proc=default_num_of_proc):
+def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
     '''
     Parallel map. The meaning of weight_fn is same as the meaning
     of the argument of partition_weighted.
     '''
-    if weight_fn is False:
-        wt_fn = False
+    if weight_fn is None:
+        wt_fn = None
     else:
         wt_fn = lambda x: weight_fn(x[1])
     n = len(l)
-    ls = partition_weighted([(i, l[i]) for i in range(n)],
-                            min(n, default_num_of_proc), wt_fn)
+    if not num_of_procs is None:
+        num = min(n, num_of_procs)
+    else:
+        num = n
+    ls = partition_weighted([(i, l[i]) for i in range(n)], num,
+                            weight_fn=wt_fn)
 
     @parallel
     def calc(xs):

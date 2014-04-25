@@ -195,7 +195,7 @@ class PrecisionDeg2(object):
             raise NotImplementedError
 
 
-class WithNumOfProc(object):
+class WithNumOfProcs(object):
 
     def __init__(self, n):
         self.n = n
@@ -208,8 +208,8 @@ class WithNumOfProc(object):
         current_num_of_procs.set_num_of_procs(self.save)
 
 
-def number_of_proc(n):
-    return WithNumOfProc(n)
+def number_of_procs(n):
+    return WithNumOfProcs(n)
 
 
 class CurrentNumOfProcs(object):
