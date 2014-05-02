@@ -7,8 +7,9 @@ from degree2.basic_operation import (
     semi_pos_def_matarices, _spos_def_mats_lt)
 
 from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
-    eisenstein_series_degree2, rankin_cohen_pair_sym, x10_with_prec,\
-    x12_with_prec
+    eisenstein_series_degree2, x10_with_prec, x12_with_prec
+
+from degree2.all import rankin_cohen_pair_sym
 
 from sage.all import matrix, mod
 from degree2.hecke_module import HalfIntegralMatrices2

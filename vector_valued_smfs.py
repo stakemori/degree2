@@ -16,11 +16,13 @@ from degree2.hecke_module import HeckeModule
 from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import (linearly_indep_cols_index_list,
                            mul)
-from degree2.deg2_fourier import (tuples_even_wt_modular_forms,
-                                  rankin_cohen_pair_sym,
-                                  rankin_cohen_triple_det_sym2,
-                                  rankin_cohen_pair_det2_sym,
-                                  rankin_cohen_triple_det_sym4)
+from degree2.deg2_fourier import tuples_even_wt_modular_forms
+
+from degree2.all import (rankin_cohen_pair_sym,
+                         rankin_cohen_triple_det_sym2,
+                         rankin_cohen_pair_det2_sym,
+                         rankin_cohen_triple_det_sym4)
+
 from degree2.deg2_fourier import degree2_modular_forms_ring_level1_gens \
     as deg2_ring_gens
 
