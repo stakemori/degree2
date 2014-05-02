@@ -930,6 +930,63 @@ def diff_opetator_4(f1, f2, f3, f4):
     return res
 
 
+@cached_function
+def x5_jacobi_pwsr(prec):
+    mx = int(ceil(sqrt(8 * prec)/QQ(2)) + 1)
+    mn = int(floor(-(sqrt(8 * prec) - 1)/QQ(2)))
+    mx1 = int(ceil((sqrt(8 * prec + 1) - 1)/QQ(2)) + 1)
+    mn1 = int(floor((-sqrt(8 * prec + 1) - 1)/QQ(2)))
+    R = LaurentPolynomialRing(QQ, names="t")
+    t = R.gens()[0]
+    S = PowerSeriesRing(R, names="q1")
+    q1 = S.gens()[0]
+    eta_3 = sum([QQ(-1)**n * (2*n + 1) * q1**(n*(n + 1)//2)
+                 for n in range(mn1, mx1)]) + bigO(q1**(prec + 1))
+    theta = sum([QQ(-1)**n * q1**(((2*n + 1)**2 - 1)//8) * t**(n + 1)
+                 for n in range(mn, mx)])
+    # ct = qexp_eta(ZZ[['q1']], prec + 1)
+    return theta * eta_3**3 * QQ(8)**(-1)
+
+def x5_jacobi_g(n, r, prec=40):
+    if n%2 == 0 or r%2 == 0:
+        return QQ(0)
+    if n > prec:
+        raise RuntimeError
+    psr = x5_jacobi_pwsr((prec - 1)//2)
+    l_pol = psr[(n - 1)//2]
+    d = {k[0]: v for k, v in l_pol.dict().iteritems()}
+    return d.get((r + 1)//2, 0)
+
+@cached_function
+def x5__with_prec(prec):
+    '''
+    Returns formal q-expansion f s.t. f * q1^(-1/2)*t^(1/2)*q2^(^1/2)
+    equals to x5 (x10 == x5^2).
+    '''
+    pwsr_prec = (2*prec - 1)**2
+
+    def jacobi_g(n, r):
+        return x5_jacobi_g(n, r, pwsr_prec)
+
+    prec = PrecisionDeg2(prec)
+
+    fc_dct = {}
+    for n, r, m in prec:
+        if 4*n*m - r**2 == 0:
+            fc_dct[(n, r, m)] = 0
+        else:
+            n1 = 2*n - 1
+            r1 = 2*r + 1
+            m1 = 2*m - 1
+            if 4 * n1 * m1 - r1**2 > 0:
+                fc_dct[(n, r, m)] = sum([d**4 * jacobi_g(n1*m1//(d**2),
+                                                         r1//d)
+                                         for d in
+                                         gcd([n1, r1, m1]).divisors()])
+    res = Deg2QsrsElement(fc_dct, prec)
+    return res
+
+
 def _det3(ls):
     (l1, l2, l3) = ls
     (x11, x12, x13) = l1
