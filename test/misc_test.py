@@ -13,6 +13,8 @@ from degree2.all import rankin_cohen_pair_sym
 
 from sage.all import matrix, mod
 from degree2.hecke_module import HalfIntegralMatrices2
+from degree2.utils import linearly_indep_rows_index_list
+
 
 class TestDeg2fcFunctions(unittest.TestCase):
     def test_reduced_form(self):
@@ -91,6 +93,11 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertEqual(len(list(_spos_def_mats_lt((20, 3, 10)))), 2832)
         self.assertEqual(len(list(_spos_def_mats_lt((10, 0, 10)))), 1021)
 
+    def test_lin_indep(self):
+        A = [[1, 0, 0], [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 1, 0], [0, 0, 1]]
+        self.assertEqual(linearly_indep_rows_index_list(A, 3), [0, 3, 5])
+        A = [[1, 0], [0, 0], [1, 0], [0, 1]]
+        self.assertEqual(linearly_indep_rows_index_list(A, 2), [0, 3])
 
 def naive_rankin_cohen_pair_symm4(f, g):
     '''
