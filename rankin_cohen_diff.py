@@ -1,6 +1,4 @@
 # -*- coding: utf-8; mode: sage -*-
-from itertools import repeat
-
 import sage
 from sage.all import QQ, PolynomialRing, matrix, log
 
@@ -130,10 +128,9 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     u_dict = Q.dict()
 
     if monom_diff_funcs is None:
-        monom_diff_funcs = repeat(monom_diff_normal, len(R.gens())//3)
+        monom_diff_funcs = [monom_diff_normal for _ in range(len(R.gens())//3)]
 
     def rankin_cohen(flist):
-        res = []
 
         def monom_mul(longtpl, v):
             tpls = group(longtpl, 3)
@@ -141,14 +138,15 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
                 [QQ(2)**(-t[1]) * func(f, t)
                  for f, t, func in zip(flist, tpls, monom_diff_funcs)])
 
+        def _form(t, pol):
+            return sum(pmap(lambda x: monom_mul(x[0], x[1]),
+                            list(pol.dict().iteritems()),
+                            num_of_procs=sage.parallel.ncpus.ncpus()))
+
         with operator_num_of_procs(1):
-            for (i, _), pol in u_dict.iteritems():
-                psum = 0
-                psum += sum(pmap(lambda x: monom_mul(x[0], x[1]),
-                                 list(pol.dict().iteritems()),
-                                 num_of_procs=sage.parallel.ncpus.ncpus()))
-                res.append((i, psum))
-        return [x[1] for x in sorted(res, key=lambda x: -x[0])]
+            dct = {t[1]: _form(t, pol) for t, pol in u_dict.iteritems()}
+        return [dct[a] for a in range(len(dct))]
+
     return rankin_cohen
 
 
