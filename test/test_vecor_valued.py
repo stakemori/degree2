@@ -20,6 +20,10 @@ from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms \
 from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import det
 
+from degree2.rankin_cohen_diff import (rankin_cohen_triple_x5,
+                                       m_operator)
+
+
 class TestVectorValued(unittest.TestCase):
     # @skip("OK")
     def test_vector_vald_klingen_hecke_pol(self):
@@ -58,6 +62,18 @@ class TestVectorValued(unittest.TestCase):
             "triple_det_sym4_e4_e4_e6_prec10.sobj")
         t_det_sym4_e4_e6_x12 = load_cache(
             "triple_det_sym4_e4_e6_x12_prec10.sobj")
+        t_det_sym6_x5_x5_e6 = load_cache("triple_det_sym6_x5_x5_e6_prec5.sobj")
+
+        # x5 triple
+        r, _,  t = PolynomialRing(QQ,  names="r, s, t").gens()
+        sym6_17_pol = m_operator(5, 5, 6)(
+            QQ(1)/QQ(48)*r**2 - QQ(1)/QQ(24)*r*t + QQ(1)/QQ(64)*t**2)
+        self.assertEqual(
+            rankin_cohen_triple_x5(
+                sym6_17_pol,
+                eisenstein_series_degree2(6, 6), 5),
+            t_det_sym6_x5_x5_e6)
+
         # prec 7
         es4, es6, x10, x12, _ = degree2_modular_forms_ring_level1_gens(7)
         self.assertEqual(rankin_cohen_pair_sym(4, es4, es4), p_e4_e4)
@@ -82,6 +98,7 @@ class TestVectorValued(unittest.TestCase):
         det_form = det([f.forms for f in fs])
         det_form = det_form[(4, -2, 6)]**(-1) * det_form
         self.assertEqual(det_form, es4 * x35**2)
+
 
     # @skip("OK")
     # def test_module_of_wt_sym_2_4(self):
