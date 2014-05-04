@@ -16,7 +16,7 @@ from sage.all import O as bigO
 
 import sage.matrix.matrix_space
 
-from degree2.utils import (is_number, linearly_indep_cols_index_list,
+from degree2.utils import (is_number, linearly_indep_rows_index_list,
                            polynomial_func, list_group_by, pmap)
 
 from degree2.utils import det as deg2_det
@@ -151,11 +151,7 @@ class Deg2QsrsElement(object):
         return self.fc_dct[(n, r, m)]
 
     def __getitem__(self, idx):
-        try:
-            return self.fc_dct[idx]
-        except KeyError:
-            t, e = reduced_form_with_sign(idx)
-            return self.fc_dct[t] * e**(self.wt) # level 1 specific
+        return self.fc_dct[idx]
 
     def iteritems(self):
         return self.fc_dct.iteritems()
@@ -398,14 +394,8 @@ class Deg2QsrsElement(object):
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
-        if isinstance(self, Deg2ModularFormQseries):
-            res = Deg2ModularFormQseries(self.wt, fc_map, self.prec,
-                                         base_ring=R,
-                                         is_cuspidal=self._is_cuspidal)
-            return res
-        else:
-            return Deg2QsrsElement(fc_map, self.prec, base_ring=R,
-                                   is_cuspidal=self._is_cuspidal)
+        return Deg2QsrsElement(fc_map, self.prec, base_ring=R,
+                               is_cuspidal=self._is_cuspidal)
 
     def mod_p_map(self, p):
         fcmap = {}
@@ -444,7 +434,6 @@ class Deg2QsrsElement(object):
                                            t[1] - u[1],
                                            t[2] - u[2])] for u in l])
         return Deg2QsrsElement(res_dict, prec, base_ring=self.base_ring)
-
 
     def _down_prec(self, prec):
         prec = PrecisionDeg2(prec)
@@ -531,6 +520,13 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
 
     def __radd__(self, other):
         return self.__add__(other)
+
+    def __getitem__(self, idx):
+        try:
+            return self.fc_dct[idx]
+        except KeyError:
+            t, e = reduced_form_with_sign(idx)
+            return self.fc_dct[t] * e**(self.wt) # level 1 specific
 
     def __mul__(self, other):
         if is_number(other):
@@ -686,6 +682,23 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
     def load_from(cls, filename):
         data_dict = load(filename)
         return cls._from_dict_to_object(data_dict)
+
+    def change_ring(self, R, hom=None):
+        '''
+        Returns a Fourier expansion whose base ring is changed.
+        '''
+        if hom is None:
+            hom = R
+        fc_map = {}
+        for k, v in self.fc_dct.iteritems():
+            fc_map[k] = hom(v)
+        res = Deg2ModularFormQseries(self.wt, fc_map, self.prec,
+                                     base_ring=R,
+                                     is_cuspidal=self._is_cuspidal)
+        return res
+
+    def _set_construction(self, c):
+        self._construction = c
 
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
@@ -952,6 +965,7 @@ def x5_jacobi_pwsr(prec):
     # ct = qexp_eta(ZZ[['q1']], prec + 1)
     return theta * eta_3**3 * QQ(8)**(-1)
 
+
 def x5_jacobi_g(n, r, prec=40):
     if n%2 == 0 or r%2 == 0:
         return QQ(0)
@@ -961,6 +975,7 @@ def x5_jacobi_g(n, r, prec=40):
     l_pol = psr[(n - 1)//2]
     d = {k[0]: v for k, v in l_pol.dict().iteritems()}
     return d.get((r + 1)//2, 0)
+
 
 @cached_function
 def x5__with_prec(prec):
@@ -1080,11 +1095,11 @@ class Deg2SpaceOfModularForms(object):
             return []
         if self.wt == 0:
             a = _number_to_hol_modform(QQ(1), prec)
-            a._construction = RDeg2(1)
+            a._set_construction(RDeg2(1))
             return [a]
         elif self.wt == 35:
             x35 = x35_with_prec(prec)
-            x35._construction = plx35
+            x35._set_construction(plx35)
             return [x35]
         elif self.wt%2 == 1:
             x35 = x35_with_prec(prec)
@@ -1092,7 +1107,7 @@ class Deg2SpaceOfModularForms(object):
             l = []
             for a in bs:
                 b = x35 * a
-                b._construction = a._construction * plx35
+                b._set_construction(a._construction * plx35)
                 l.append(b)
             return l
         # if wt is even
@@ -1237,8 +1252,8 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         wt = self.wt
         lin_indep_tuples_cached = \
             KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
-        if wt in lin_indep_tuples_cached.keys() \
-                and lin_indep_tuples_cached[wt] != []:
+        if (wt in lin_indep_tuples_cached.keys() and
+            lin_indep_tuples_cached[wt] != []):
             return lin_indep_tuples_cached[wt]
         basis = self.basis()
         dim = self.dimension()
@@ -1248,7 +1263,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         tpls = [(n, r, m) for (n, r, m) in self.prec
                 if n <= stbd and m <= stbd]
         ml = [[f[t] for f in basis] for t in tpls]
-        index_list = linearly_indep_cols_index_list(ml, dim)
+        index_list = linearly_indep_rows_index_list(ml, dim)
         res = [tpls[i] for i in index_list]
         lin_indep_tuples_cached[wt] = res
         return res
@@ -1355,7 +1370,7 @@ class CuspFormsDegree2(HeckeModule):
         tpls = [(n, r, m) for (n, r, m) in self.prec
                 if n <= stbd and m <= stbd]
         ml = [[f[t] for f in basis] for t in tpls]
-        index_list = linearly_indep_cols_index_list(ml, dim)
+        index_list = linearly_indep_rows_index_list(ml, dim)
         return [tpls[i] for i in index_list]
 
     @cached_method
@@ -1462,7 +1477,7 @@ def _subspace_bases_list(A, K, basis, pol_list):
         l = [a[i] * (basis[i]._construction) for i in range(dim)]
         f._construction = sum(l)
         res1.append(f)
-    index_list = [0] + map(lambda i: sum(deg_list[:i+1]), range(n))
+    index_list = [0] + [sum(deg_list[:i+1]) for i in range(n)]
     return [res1[index_list[i]:index_list[i+1]] for i in range(n)]
 
 
@@ -1542,7 +1557,7 @@ class SymmetricWeightGenericElement(object):
             return self.forms[i][tpl]
         else:
             vec = vector([f[t] for f in self.forms])
-            return SymTensorRepElt(vec, self.wt)
+            return vec
 
     def _none_zero_tpl(self):
         if self[(1, 1, 1)] != 0:
@@ -1691,3 +1706,12 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
         forms_res = [f._down_prec(prec) for f in self.forms]
         return SymmetricWeightModularFormElement(forms_res, self.wt, prec,
                                                  base_ring=self.base_ring)
+
+    def __getitem__(self, t):
+        if (isinstance(t, tuple) and isinstance(t[0], tuple) and
+             is_number(t[1])):
+            tpl, i = t
+            return self.forms[i][tpl]
+        else:
+            vec = vector([f[t] for f in self.forms])
+            return SymTensorRepElt(vec, self.wt)

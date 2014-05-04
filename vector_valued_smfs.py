@@ -14,7 +14,7 @@ from sage.misc.cachefunc import cached_method
 
 from degree2.hecke_module import HeckeModule
 from degree2.basic_operation import PrecisionDeg2
-from degree2.utils import (linearly_indep_cols_index_list,
+from degree2.utils import (linearly_indep_rows_index_list,
                            mul)
 from degree2.deg2_fourier import tuples_even_wt_modular_forms
 
@@ -89,7 +89,7 @@ class VectorValuedSiegelModularForms(HeckeModule):
                             [[(t, i) for i in range(self.sym_wt + 1)]
                              for t in tpls], [])
         ml = [[f.forms[i][t] for f in basis] for t, i in tpls_w_idx]
-        index_list = linearly_indep_cols_index_list(ml, dim)
+        index_list = linearly_indep_rows_index_list(ml, dim)
         res = [tpls_w_idx[i] for i in index_list]
         return res
 

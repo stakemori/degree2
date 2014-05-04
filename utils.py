@@ -58,7 +58,7 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
     if sort is False:
         return [x[1] for x in calc_res]
     else:
-        return map(lambda x: x[1], sorted(calc_res, key=lambda x: x[0]))
+        return [a[1] for a in sorted(calc_res, key=lambda x: x[0])]
 
 
 def parallel_concat(func):
@@ -110,7 +110,7 @@ def naive_det_func(n):
     def removed_list_at(i, l):
         return [l[j] for j in range(len(l)) if i != j]
 
-    def det(ls):
+    def _det(ls):
         if n == 1:
             return ls[0][0]
         else:
@@ -120,7 +120,7 @@ def naive_det_func(n):
                 sum([(-1)**i *
                      _det_func(removed_list_at(i, ls1)) * ls[i][-1]
                      for i in range(n)])
-    return det
+    return _det
 
 
 def naive_det(m):
@@ -134,6 +134,7 @@ def naive_det(m):
                 [[b for j, b in zip(range(n), l) if i != j]
                  for l in m[1:]])
         return res
+
 
 def det(m):
     m = [list(a) for a in m]
@@ -172,59 +173,36 @@ def det(m):
     return sgn * det(m1) * m[0][0]
 
 
-# Borrowed from http://code.activestate.com/recipes/496691/
-class tail_recursive(object):
-
-    def __init__(self, func):
-        self.func = func
-        self.firstcall = True
-        self.CONTINUE = object()
-
-    def __call__(self, *args, **kwd):
-        if self.firstcall:
-            func = self.func
-            CONTINUE = self.CONTINUE
-            self.firstcall = False
-            try:
-                while True:
-                    result = func(*args, **kwd)
-                    if result is CONTINUE: # update arguments
-                        args, kwd = self.argskwd
-                    else: # last call
-                        return result
-            finally:
-                self.firstcall = True
-        else: # return the arguments of the tail call
-            self.argskwd = args, kwd
-            return self.CONTINUE
-
-
-@tail_recursive
-def linearly_indep_cols_index_list(A, r, acc=[]):
+def linearly_indep_rows_index_list(A, r):
     '''
-    Assume rank A = r and the number of rows is r.
+    Assume rank A = r and the number of columns is r.
     This function returns the list of indices lst such that
-    [A.columns()[i] for i in lst] has length r and linearly independent.
+    [A.rows()[i] for i in lst] has length r and linearly independent.
     '''
-    if r == 0:
-        n = len(acc)
-        return [sum(acc[:i + 1]) + i for i in range(n)]
-    nrws = len(A)
-    ncols = len(A[0])
-    rows = A
-    for j in range(nrws):
-        if not all([x == 0 for x in rows[j]]):
-            i = j
-            first = rows[j]
-            break
-    for j in range(ncols):
-        if first[j] != 0:
-            a = first[j]
-            nonzero_col_index = j
-            break
-    B = [[A[j][k] - first[k] * a**(-1) * A[j][nonzero_col_index]
-          for k in range(ncols)] for j in range(i + 1, nrws)]
-    return linearly_indep_cols_index_list(B, r - 1, acc + [i])
+    acc = []
+    while True:
+        if r == 0:
+            return acc
+        nrws = len(A)
+        rows = A
+        for j in range(nrws):
+            if not all([x == 0 for x in rows[j]]):
+                i = j
+                first = rows[j]
+                break
+        for j in range(r):
+            if first[j] != 0:
+                a = first[j]
+                nonzero_col_index = j
+                break
+        A = [[A[j][k] - first[k] * a**(-1) * A[j][nonzero_col_index]
+              for k in range(r) if k != nonzero_col_index]
+             for j in range(i + 1, nrws)]
+        r -= 1
+        if acc == []:
+            acc.append(i)
+        else:
+            acc.append(i + acc[-1] + 1)
 
 
 def polynomial_func(pl):
