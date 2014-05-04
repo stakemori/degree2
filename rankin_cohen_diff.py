@@ -61,17 +61,17 @@ def rankin_cohen_triple_x5(Q, f, prec):
 
 
 def rankin_cohen_pair_x5(Q, prec):
-    x5 = x5__with_prec(prec + 1)
+    '''
+    Let D be the differential operator ass. to Q.
+    Returns D(x5, x5).
+    Decrease prec by 1.
+    '''
+    x5 = x5__with_prec(prec)
     funcs = [diff_op_monom_x5, diff_op_monom_x5]
     k = _inc_weight(Q)
     forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5])
     forms = [_mul_q_half_monom(a) for a in forms]
     return SWMFE(forms, 10 + k, prec)
-
-
-def _rankin_cohen_bracket_func_x5_pair(Q):
-    funcs = [diff_op_monom_x5, diff_op_monom_x5]
-    return _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)
 
 
 def _inc_weight(Q):
