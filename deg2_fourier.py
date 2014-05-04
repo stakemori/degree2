@@ -450,6 +450,8 @@ class Deg2QsrsElement(object):
         prec = PrecisionDeg2(prec)
         d = self._to_format_dct()
         d["prec"] = prec._to_format_dct()
+        fc_dct = {t: d["fc_dct"][t] for t in prec}
+        d["fc_dct"] = fc_dct
         return Deg2QsrsElement._from_dict_to_object(d)
 
 
