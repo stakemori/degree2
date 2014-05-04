@@ -2,15 +2,16 @@
 from itertools import repeat
 
 import sage
-from sage.all import cached_function, QQ, PolynomialRing, matrix
+from sage.all import QQ, PolynomialRing, matrix, log
 
 from degree2.utils import mul, combination, group, pmap
-from degree2.deg2_fourier import common_prec, common_base_ring
+from degree2.deg2_fourier import (common_prec, common_base_ring,
+                                  x5__with_prec, Deg2QsrsElement)
 from degree2.deg2_fourier import SymmetricWeightModularFormElement \
     as SWMFE
 
 from degree2.basic_operation import number_of_procs as operator_num_of_procs
-
+from degree2.basic_operation import PrecisionDeg2
 
 def diff_op_monom_x5(f, t):
     al = QQ(-1)/QQ(2)
@@ -25,7 +26,78 @@ def diff_op_monom_x5(f, t):
                 for k in range(c + 1)])
 
 
-@cached_function
+def monom_diff_normal(f, t):
+    return f._differential_operator_monomial(*t)
+
+
+def _mul_q_half_monom(f):
+    '''
+    Let f be a formal Fourier expansion:
+    f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
+    This function returns f * q1^(-1) * t * q2^(-1).
+    Decrease prec by 1.
+    '''
+    prec = PrecisionDeg2(f.prec.prec-1)
+    res_dc = {}
+    fc_dct = f.fc_dct
+    for n, r, m in prec:
+        if 4*(n+1)*(m+1)-(r-1)**2 <= 0:
+            res_dc[(n, r, m)] = 0
+        else:
+            res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
+    return Deg2QsrsElement(res_dc, prec.prec, base_ring=f.base_ring)
+
+
+def rankin_cohen_triple_x5(Q, f, prec):
+    '''
+    Let D be the differential operator ass. to Q.
+    Returns D(x5, x5, f).
+    Decrease prec by 1.
+    '''
+    x5 = x5__with_prec(prec)
+    funcs = [diff_op_monom_x5, diff_op_monom_x5, monom_diff_normal]
+    k = _inc_weight(Q)
+    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5, f])
+    forms = [_mul_q_half_monom(a) for a in forms]
+    return SWMFE(forms, 10 + f.wt + k, prec)
+
+
+def rankin_cohen_pair_x5(Q, prec):
+    x5 = x5__with_prec(prec + 1)
+    funcs = [diff_op_monom_x5, diff_op_monom_x5]
+    k = _inc_weight(Q)
+    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5])
+    forms = [_mul_q_half_monom(a) for a in forms]
+    return SWMFE(forms, 10 + k, prec)
+
+
+def _rankin_cohen_bracket_func_x5_pair(Q):
+    funcs = [diff_op_monom_x5, diff_op_monom_x5]
+    return _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)
+
+
+def _inc_weight(Q):
+    '''
+    Let D be the differential operator ass. to Q.
+    Let f_1, .., f_t be vector valued modular forms of determinant
+    weights k_1, ..., k_t.
+    If the determinant weight of D(f_1, ..., f_t) is equal to
+    k_1 + ... + k_t + k,
+    this function returns k.
+    '''
+    S = Q.parent()
+    R = S.base_ring()
+    u1, _ = S.gens()
+    rs = R.gens()
+    rdct = {}
+    for r11, r12, _ in group(rs, 3):
+        rdct[r11] = 4 * r11
+        rdct[r12] = 2 * r12
+    t = [t for t, v in Q.dict().iteritems() if v != 0][0]
+    a = Q.map_coefficients(lambda f: f.subs(rdct))[t] / Q.subs({u1: 2*u1})[t]
+    return int(log(a)/log(2))
+
+
 def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
                                monom_diff_funcs=None):
     '''
@@ -56,9 +128,6 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     S = PolynomialRing(R, names=unames)
     Q = S(Q)
     u_dict = Q.dict()
-
-    def monom_diff_normal(f, t):
-        return f._differential_operator_monomial(*t)
 
     if monom_diff_funcs is None:
         monom_diff_funcs = repeat(monom_diff_normal, len(R.gens())//3)
