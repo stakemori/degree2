@@ -330,3 +330,44 @@ def _rankin_cohen_triple_det_sym4_pol(k1, k2, k3):
 
     Q = Q0*u1**4 + Q1*u1**3*u2 + Q2*u1**2*u2**2 + Q3*u1*u2**3 + Q4*u2**4
     return Q
+
+def m_operator(k1, k2, k3):
+    '''The operator M_k
+    (cf. CH van Dorp Generators for a module of vector-valued Siegel modular
+    forms).
+    '''
+    gens_triple = _triple_gens()
+    r11, r12, r22, s11, s12, s22, t11, t12, t22 = gens_triple[0]
+    rs = (r11, r12, r22)
+    ss = (s11, s12, s22)
+    ts = (t11, t12, t22)
+    u1, u2 = gens_triple[1]
+
+    def bracket_op(rs):
+        r1, r2, r3 = rs
+        return r1 * u1**2 + 2 * r2*u1*u2 + r3 * u2**2
+
+    def x_op_val(f):
+        r, s, t = f.parent().gens()
+        return f.subs({r: bracket_op(rs),
+                       s: bracket_op(ss),
+                       t: bracket_op(ts)})
+    def cross_prod(v1, v2):
+        a, b, c = v1
+        ad, bd, cd = v2
+
+        return (2 * (a * bd - b * ad),
+                a * cd - c * ad,
+                2 * (b * cd - c * bd))
+
+    def m_op_val(f):
+        r, s, t = f.parent().gens()
+        x_val = x_op_val(f)
+        xs = [k * x_val for k in [k3, k2, k1]]
+        brxs = [bracket_op(a) * x_op_val(f.derivative(b))
+                for a, b in zip([ts, ss, rs], [t, s, r])]
+        brcks = [bracket_op(cross_prod(a, b))
+                 for a, b in zip([rs, ts, ss], [ss, rs, ts])]
+        return sum([a * (b + c) for a, b, c in zip(brcks, xs, brxs)])
+
+    return m_op_val
