@@ -2,7 +2,7 @@
 import sage
 from sage.all import QQ, PolynomialRing, matrix, log
 
-from degree2.utils import mul, combination, group, pmap
+from degree2.utils import mul, combination, group, pmap, list_group_by
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, Deg2QsrsElement)
 from degree2.deg2_fourier import SymmetricWeightModularFormElement \
@@ -132,6 +132,7 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     S = PolynomialRing(R, names=unames)
     Q = S(Q)
     u_dict = Q.dict()
+    j = Q.degree()
 
     if monom_diff_funcs is None:
         monom_diff_funcs = [monom_diff_normal for _ in range(len(R.gens())//3)]
@@ -144,14 +145,20 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
                 [QQ(2)**(-t[1]) * func(f, t)
                  for f, t, func in zip(flist, tpls, monom_diff_funcs)])
 
-        def _form(t, pol):
-            return sum(pmap(lambda x: monom_mul(x[0], x[1]),
-                            list(pol.dict().iteritems()),
-                            num_of_procs=sage.parallel.ncpus.ncpus()))
+        ls = []
+        for t in u_dict:
+            for tpl, v in u_dict[t].dict().items():
+                ls.append((t[1], tpl, v))
+
+        def _f(x):
+            a, tpl, v = x
+            return (a, monom_mul(tpl, v))
 
         with operator_num_of_procs(1):
-            dct = {t[1]: _form(t, pol) for t, pol in u_dict.iteritems()}
-        return [dct[a] for a in range(len(dct))]
+            res_ls = pmap(_f, ls, num_of_procs=sage.parallel.ncpus.ncpus())
+        d = dict(list_group_by(res_ls, lambda x: x[0]))
+
+        return [sum([f for _, f in d[a]]) for a in range(j + 1)]
 
     return rankin_cohen
 
