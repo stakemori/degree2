@@ -9,8 +9,6 @@ from degree2.basic_operation import (
 from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
     eisenstein_series_degree2, x10_with_prec, x12_with_prec, x5__with_prec
 
-from degree2.all import rankin_cohen_pair_sym
-
 from sage.all import matrix, mod
 from degree2.hecke_module import HalfIntegralMatrices2
 from degree2.utils import linearly_indep_rows_index_list
@@ -2099,16 +2097,6 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.save_load_basis(34)
         self.save_load_basis(47)
 
-    def test_sym2_rankin_cohen(self):
-        es4 = eisenstein_series_degree2(4, 10)
-        es6 = eisenstein_series_degree2(6, 10)
-        r1 = naive_rankin_cohen_pair_sym2(es4, es6)
-        r2 = rankin_cohen_pair_sym(2, es4, es6)
-        self.assertTrue(r1 == r2.forms)
-        r1  = naive_rankin_cohen_pair_symm4(es4, es6)
-        r2 = rankin_cohen_pair_sym(4, es4, es6)
-        self.assertTrue(r1 == r2.forms)
-
     def test_eisenstein(self):
         prec = 10
         es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for k in [4, 6, 10, 12]]
@@ -2131,57 +2119,6 @@ class TestDeg2fcFunctions(unittest.TestCase):
         A = [[1, 0], [0, 0], [1, 0], [0, 1]]
         self.assertEqual(linearly_indep_rows_index_list(A, 2), [0, 3])
 
-def naive_rankin_cohen_pair_symm4(f, g):
-    '''
-    f, g is Siegel modular forms of degre 2 , weight k and l respectively.
-    Returns a vector valued Siegel modular form of weight det ^(k+l) Symm(4).
-    cf. Ibukiyama, Vector valued Siegel modular forms of symmetric tensor
-    weight of small degrees, COMMENTARI MATHEMATICI UNIVERSITATIS SANCTI PAULI
-    VOL 61, NO 1, 2012.
-    '''
-    k = f.wt
-    l = g.wt
-    tauf = f.differentiate_wrt_tau()
-    wf = f.differentiate_wrt_w()
-    zf = f.differentiate_wrt_z()
-    (tau2f, tauwf, tauzf) = [x.differentiate_wrt_tau() for x in [tauf, wf, zf]]
-    (w2f, wzf) = [x.differentiate_wrt_w() for x in [wf, zf]]
-    z2f = zf.differentiate_wrt_z()
-
-    taug = g.differentiate_wrt_tau()
-    wg = g.differentiate_wrt_w()
-    zg = g.differentiate_wrt_z()
-    (tau2g, tauwg, tauzg) = [x.differentiate_wrt_tau() for x in [taug, wg, zg]]
-    (w2g, wzg) = [x.differentiate_wrt_w() for x in [wg, zg]]
-    z2g = zg.differentiate_wrt_z()
-
-    ll = l * (l + 1)
-    kk = k * (k + 1)
-    kl = (k + 1) * (l + 1)
-
-
-    u0 = ll//2 * tau2f * g - kl * tauf * taug + kk//2 * f * tau2g
-    u1 = ll * tauzf * g - kl * (zf * taug + tauf * zg) + kk * f * tauzg
-    u2 = ll//2 * z2f * g + ll * tauwf * g - kl * wf * taug - kl * zf * zg + kk//2 * f * z2g - kl * tauf * wg + kk * f * tauwg
-    u3 = ll * wzf * g - kl * (wf * zg + zf * wg) + kk * f * wzg
-    u4 = ll//2 * w2f * g - kl * wf * wg + kk//2 * f * w2g
-
-    return [u0, u1, u2, u3, u4]
-
-def naive_rankin_cohen_pair_sym2(f, g):
-    k = f.wt
-    l = g.wt
-    tf = f.differentiate_wrt_tau()
-    zf = f.differentiate_wrt_z()
-    wf = f.differentiate_wrt_w()
-    tg = g.differentiate_wrt_tau()
-    zg = g.differentiate_wrt_z()
-    wg = g.differentiate_wrt_w()
-
-    u0 = k * f * tg - l * g * tf
-    u1 = k * f * zg - l * g * zf
-    u2 = k * f * wg - l * g * wf
-    return [u0, u1, u2]
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
 unittest.TextTestRunner(verbosity = 2).run(suite)
