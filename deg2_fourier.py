@@ -973,7 +973,17 @@ def x5_jacobi_g(n, r, prec=40):
         raise RuntimeError
     psr = x5_jacobi_pwsr((prec - 1)//2)
     l_pol = psr[(n - 1)//2]
-    d = {k[0]: v for k, v in l_pol.dict().iteritems()}
+    d = {}
+    a_key = l_pol.dict().keys()[0]
+    is_int_key = isinstance(a_key, int)
+    is_etuple = isinstance(a_key, sage.rings.polynomial.polydict.ETuple)
+    for k, v in l_pol.dict().items():
+        if is_int_key:
+            d[k] = v
+        elif is_etuple:
+            d[k[0]] = v
+        else:
+            raise RuntimeError
     return d.get((r + 1)//2, 0)
 
 
