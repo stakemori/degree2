@@ -7,6 +7,8 @@ from degree2.deg2_fourier import (
     Deg2QsrsElement, Deg2ModularFormQseries)
 from degree2.utils import mul, pmap, group
 
+import sage
+
 
 def _to_polynomial(f, val1):
     prec = f.prec.prec
@@ -23,7 +25,7 @@ def _to_polynomial(f, val1):
     return S(res)
 
 
-def det_deg2(mat, wt, num_of_procs=1):
+def det_deg2(mat, wt, num_of_procs=sage.parallel.ncpus.ncpus()):
     '''
     Returns det(mat) by interpolatation.
     Result is a Siegel modular form.
@@ -78,7 +80,8 @@ def interpolate_deg2(dct, bd, autom=True, parity=None):
     return fc_dct
 
 
-def calc_forms(func, forms, prec, autom=True, wt=None, num_of_procs=1):
+def calc_forms(func, forms, prec, autom=True, wt=None,
+               num_of_procs=sage.parallel.ncpus.ncpus()):
     '''
     func is a function which takes forms as an argument.
     Calculate func(forms) by interpolation.
@@ -91,7 +94,7 @@ def calc_forms(func, forms, prec, autom=True, wt=None, num_of_procs=1):
     elif parity == 0:
         t_vals = [QQ(a) for a in range(1, 2*bd + 2)]
     else:
-        t_vals = [QQ(a) for a in range(1, 2*bd + 1)]
+        t_vals = [QQ(a) for a in range(2, 2*bd + 2)]
     t_dct = dict(pmap(lambda r: (r, func([_to_polynomial(f, r)
                                           for f in forms])),
                       t_vals, num_of_procs=num_of_procs))
