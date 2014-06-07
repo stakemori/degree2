@@ -16,15 +16,11 @@ def partition_weighted(l, n, weight_fn=None):
     if n == 1:
         return [l]
     if weight_fn is None:
-        m = len(l)//n
-        rl = [l[i:i+m] for i in range(0, len(l), m)]
-        if len(l)%n == 0:
-            return [l[i:i+m] for i in range(0, len(l), m)]
-        else:
-            a = rl[-1]
-            rl1 = rl[:-1]
-            rl1[-1] = rl1[-1] + a
-            return rl1
+        res = [[] for i in range(n)]
+        for el, i in zip(l, range(len(l))):
+            res[i%n].append(el)
+        return res
+
     m = len(l)
     fn_vals = pmap(weight_fn, l, num_of_procs=sage.parallel.ncpus.ncpus())
     wts = [sum(fn_vals[:i+1]) for i in range(m)]
