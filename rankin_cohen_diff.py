@@ -189,6 +189,7 @@ def rankin_cohen_pair_sym(j, f, g):
     cf. Ibukiyama, Vector valued Siegel modular forms of symmetric tensor
     weight of small degrees, COMMENTARI MATHEMATICI UNIVERSITATIS SANCTI PAULI
     VOL 61, NO 1, 2012.
+    Use rankin_cohen_pair_x5 if f or g is equal to x5.
     '''
     Q = _rankin_cohen_pair_sym_pol(j, f.wt, g.wt)
     args = [f, g]
@@ -199,6 +200,11 @@ def rankin_cohen_pair_sym(j, f, g):
 
 
 def rankin_cohen_pair_det2_sym(j, f, g):
+    '''
+    Returns a vector valued Siegel modular form of
+    weight det^(f.wt + g.wt + 2) Sym(j).
+    Use rankin_cohen_pair_x5 if f or g is equal to x5.
+    '''
     Q = _rankin_cohen_pair_det2_sym_pol(j, f.wt, g.wt)
     args = [f, g]
     forms = _rankin_cohen_bracket_func(Q)(args)
