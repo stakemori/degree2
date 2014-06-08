@@ -21,7 +21,11 @@ from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import det
 
 from degree2.rankin_cohen_diff import (rankin_cohen_triple_x5,
-                                       m_operator)
+                                       m_operator, vector_valued_rankin_cohen)
+
+from degree2.vector_valued_smfs \
+    import vector_valued_siegel_modular_forms \
+    as vvld_smfs
 
 
 class TestVectorValued(unittest.TestCase):
@@ -129,6 +133,17 @@ class TestVectorValued(unittest.TestCase):
             F = M.eigenform_with_eigenvalue_t2(lam)
             self.assertEqual(R(F.euler_factor_of_spinor_l(2)),
                              pl * pl.subs({x: 2**(k - 2) * x}))
+
+    def test_vector_valued_rankin_cohen(self):
+        prec = 5
+        M4_10 = vvld_smfs(4, 10, prec)
+        f4_10 = M4_10.basis()[0]
+        f4_15 = vvld_smfs(4, 15, prec).basis()[0]
+        e4 = eisenstein_series_degree2(4, prec)
+        g4_15 = vector_valued_rankin_cohen(e4, f4_10)
+        t = (1, 0, 1)
+        self.assertTrue(f4_15[t].vec != 0)
+        self.assertEqual(f4_15 * QQ(-766402560), g4_15 * QQ(8294400))
 
 
 

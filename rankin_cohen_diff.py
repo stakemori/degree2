@@ -4,7 +4,13 @@ from sage.all import QQ, PolynomialRing, matrix, log
 
 from degree2.utils import mul, combination, group, pmap, list_group_by
 from degree2.deg2_fourier import (common_prec, common_base_ring,
-                                  x5__with_prec, Deg2QsrsElement)
+                                  x5__with_prec, Deg2QsrsElement,
+                                  _common_base_ring)
+
+from degree2.deg2_fourier import SymmetricWeightGenericElement\
+    as SWGElt
+
+
 from degree2.deg2_fourier import SymmetricWeightModularFormElement \
     as SWMFE
 
@@ -395,6 +401,125 @@ def _rankin_cohen_triple_det_sym8_pol(k1, k2, k3):
     return sum([Q0_subs[(8-i, 0)] * u1**(8-i) * u2**i for i in range(9)])
 
 
+def _bracket_vec_val(vecs):
+    if isinstance(vecs[0], SWGElt):
+        v1, v2, v3 = [a.forms for a in vecs]
+    else:
+        v1, v2, v3 = vecs
+    j = len(v1) - 1
+
+    def _names(s):
+        return ", ".join([s + str(i) for i in range(j + 1)])
+
+    R = PolynomialRing(QQ, names=", ".join([_names(s) for s in
+                                            ["x", "y", "z"]]))
+    gens_x = R.gens()[: j + 1]
+    gens_y = R.gens()[j + 1: 2 * (j + 1)]
+    gens_z = R.gens()[2 * (j + 1):]
+    S = PolynomialRing(R, names="u, v")
+    u, v = S.gens()
+
+    def _pol(gens):
+        return sum([a * u**(j - i) * v**i
+                    for i, a in zip(range(j + 1), gens)])
+
+    f_x, f_y, f_z = [_pol(gens) for gens in [gens_x, gens_y, gens_z]]
+    A = matrix([[f_x, f_y],
+                [f_y, f_z]])
+    vec = matrix([u, v]).transpose()
+    g = (vec.transpose() * A * vec)[0][0]
+    pol_dc = {(i, j + 2 - i): g[(i, j + 2 - i)] for i in range(j + 3)}
+
+    def pol_to_val(f):
+        dct = {}
+
+        def _dct(gens, v):
+            return {a: b for a, b in zip(gens, v)}
+
+        dct.update(_dct(gens_x, v1))
+        dct.update(_dct(gens_y, v2))
+        dct.update(_dct(gens_z, v3))
+        return f.subs(dct)
+
+    res_dc = {k: pol_to_val(v) for k, v in pol_dc.iteritems()}
+    return [res_dc[(j + 2 - i, i)] for i in range(j + 3)]
+
+
+def vector_valued_rankin_cohen(f, vec_val):
+    '''
+    Rankin-Cohen type differential operator defined by van Dorp.
+    Let f be a scalar valued Siegel modular form of weight det^k
+    and vec_val be a vector valued Siegel modular form of weight
+    det^l Sym(j).
+    This function returns a vector valued Siegel modular form
+    of weight det^(k + l + 1) Sym(j).
+    '''
+    sym_wt = vec_val.sym_wt
+    prec = f.prec
+    base_ring = _common_base_ring(f.base_ring, vec_val.base_ring)
+    diff_tau = (f.differentiate_wrt_tau(),
+                f.differentiate_wrt_z() * QQ(2)**(-1),
+                f.differentiate_wrt_w())
+
+    def diff_v(vec_val):
+        forms = [i * f for f, i in zip(vec_val.forms[1:],
+                                       range(1, vec_val.sym_wt + 1))]
+        return SWGElt(forms, vec_val.prec, vec_val.base_ring)
+
+    def diff_d(vec_val):
+        return [diff_u(diff_u(vec_val)),
+                diff_u(diff_v(vec_val)),
+                diff_v(diff_v(vec_val))]
+
+    def diff_u(vec_val):
+        forms = [i * f for f, i in zip(vec_val.forms,
+                                       reversed(range(1, vec_val.sym_wt + 1)))]
+        return SWGElt(forms, vec_val.prec, vec_val.base_ring)
+
+    crs_prd1 = _cross_prod(diff_tau, diff_d(vec_val))
+    forms1 = _bracket_vec_val(crs_prd1)
+    res1 = (vec_val.wt + sym_wt//2 - 1) * SWGElt(forms1, prec,
+                                                 base_ring=base_ring)
+
+    forms2 = _bracket_vec_val(_cross_prod_diff(diff_d(vec_val)))
+    res2 = f.wt * f * SWGElt(forms2, prec, base_ring=base_ring)
+
+    res = SWMFE((res1 - res2).forms, f.wt + vec_val.wt + 1,
+                prec, base_ring=base_ring)
+    return res
+
+
+def _cross_prod_diff(vec_vals):
+    f1, f2, f3 = vec_vals
+
+    def differential_monom(vec_val, a, b, c):
+        forms = [f._differential_operator_monomial(a, b, c)
+                 for f in vec_val.forms]
+        return SWGElt(forms, vec_val.prec, vec_val.base_ring)
+
+    def d1(f):
+        return differential_monom(f, 1, 0, 0)
+
+    def d2(f):
+        return differential_monom(f, 0, 1, 0) * QQ(2)**(-1)
+
+    def d3(f):
+        return differential_monom(f, 0, 0, 1)
+
+    return [2 * (d1(f2) - d2(f1)),
+            d1(f3) - d3(f1),
+            2 * (d2(f3) - d3(f2))]
+
+
+def _cross_prod(v1, v2):
+    a, b, c = v1
+    ad, bd, cd = v2
+
+    return (2 * (a * bd - b * ad),
+            a * cd - c * ad,
+            2 * (b * cd - c * bd))
+
+
 def m_operator(k1, k2, k3):
     '''The operator M_k
     (cf. CH van Dorp Generators for a module of vector-valued Siegel modular
@@ -417,21 +542,13 @@ def m_operator(k1, k2, k3):
                        s: bracket_op(ss),
                        t: bracket_op(ts)})
 
-    def cross_prod(v1, v2):
-        a, b, c = v1
-        ad, bd, cd = v2
-
-        return (2 * (a * bd - b * ad),
-                a * cd - c * ad,
-                2 * (b * cd - c * bd))
-
     def m_op_val(f):
         r, s, t = f.parent().gens()
         x_val = x_op_val(f)
         xs = [k * x_val for k in [k3, k2, k1]]
         brxs = [bracket_op(a) * x_op_val(f.derivative(b))
                 for a, b in zip([ts, ss, rs], [t, s, r])]
-        brcks = [bracket_op(cross_prod(a, b))
+        brcks = [bracket_op(_cross_prod(a, b))
                  for a, b in zip([rs, ts, ss], [ss, rs, ts])]
         return sum([a * (b + c) for a, b, c in zip(brcks, xs, brxs)])
 
