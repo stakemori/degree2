@@ -231,6 +231,15 @@ def rankin_cohen_triple_det_sym4(f, g, h):
     return SWMFE(forms, f.wt + g.wt + h.wt + 1, prec, base_ring)
 
 
+def rankin_cohen_triple_det_sym8(f, g, h):
+    Q = _rankin_cohen_triple_det_sym8_pol(f.wt, g.wt, h.wt)
+    args = [f, g, h]
+    forms = _rankin_cohen_bracket_func(Q)(args)
+    prec = common_prec(args)
+    base_ring = common_base_ring(args)
+    return SWMFE(forms, f.wt + g.wt + h.wt + 1, prec, base_ring)
+
+
 def _rankin_cohen_pair_sym_pol(j, k, l):
     _, _, (r, s) = _pair_gens_r_s()
     m = j//2
@@ -349,6 +358,41 @@ def _rankin_cohen_triple_det_sym4_pol(k1, k2, k3):
 
     Q = Q0*u1**4 + Q1*u1**3*u2 + Q2*u1**2*u2**2 + Q3*u1*u2**3 + Q4*u2**4
     return Q
+
+
+def _rankin_cohen_triple_det_sym8_pol(k1, k2, k3):
+    (r11, r12, r22, s11, s12, s22, t11, t12, t22), (u1, u2) = _triple_gens()
+
+    def _mat_det(l):
+        return matrix([[r11, s11, t11],
+                       [r12, s12, t12],
+                       l + [2*k3]]).det()
+
+    ls = [[2*k1 + 6, 2*k2],
+          [2*k1 + 4, 2*k2 + 2],
+          [2*k1 + 2, 2*k2 + 4],
+          [2*k1, 2*k2 + 6]]
+
+    coeffs = [(2*k2 + 2) * (2*k2 + 4) * (2*k2 + 6) * r11**3,
+              -3 * (2*k1 + 6) * (2*k2 + 4) * (2*k2 + 6) * r11**2 * s11,
+              3 * (2*k1 + 4) * (2*k1 + 6) * (2*k2 + 6) * r11 * s11**2,
+              -(2 * k1 + 2) * (2*k1 + 4) * (2*k1 + 6) * s11**3]
+    Q0 = sum([c * _mat_det(l) for c, l in zip(coeffs, ls)])
+    A = matrix([[1, u1], [0, 1]])
+
+    def bracketA(a, b, c):
+        R = matrix([[a, b], [b, c]])
+        a1, b1, _, c1 = (A * R * A.transpose()).list()
+        return (a1, b1, c1)
+
+    def _subs_dct(rs):
+        return {a: b for a, b in zip(rs, bracketA(*rs))}
+
+    subs_dct = {}
+    for rs in [[r11, r12, r22], [s11, s12, s22], [t11, t12, t22]]:
+        subs_dct.update(_subs_dct(rs))
+    Q0_subs = Q0.subs(subs_dct)
+    return sum([Q0_subs[(8-i, 0)] * u1**(8-i) * u2**i for i in range(9)])
 
 
 def m_operator(k1, k2, k3):
