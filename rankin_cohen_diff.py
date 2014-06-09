@@ -398,7 +398,7 @@ def _rankin_cohen_triple_det_sym8_pol(k1, k2, k3):
     for rs in [[r11, r12, r22], [s11, s12, s22], [t11, t12, t22]]:
         subs_dct.update(_subs_dct(rs))
     Q0_subs = Q0.subs(subs_dct)
-    return sum([Q0_subs[(8-i, 0)] * u1**(8-i) * u2**i for i in range(9)])
+    return sum([Q0_subs[(i, 0)] * u1**(8-i) * u2**i for i in range(9)])
 
 
 def _bracket_vec_val(vecs):
