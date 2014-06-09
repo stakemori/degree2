@@ -25,7 +25,8 @@ def _to_polynomial(f, val1):
     return S(res)
 
 
-def det_deg2(mat, wt, num_of_procs=sage.parallel.ncpus.ncpus()):
+def det_deg2(mat, autom=True,
+             wt=None, num_of_procs=sage.parallel.ncpus.ncpus()):
     '''
     Returns det(mat) by interpolatation.
     Result is a Siegel modular form.
@@ -33,8 +34,13 @@ def det_deg2(mat, wt, num_of_procs=sage.parallel.ncpus.ncpus()):
     n = len(mat)
     bd = mat[0][0].prec.prec
     forms_flatten = reduce(lambda x, y: x + y, mat)
-    return calc_forms(lambda l: matrix(group(l, n)).det(), forms_flatten,
-                      bd, autom=True, wt=wt, num_of_procs=num_of_procs)
+    func = lambda l: matrix(group(l, n)).det()
+    if autom:
+        return calc_forms(func, forms_flatten,
+                          bd, autom=True, wt=wt, num_of_procs=num_of_procs)
+    else:
+        return calc_forms(func, forms_flatten,
+                          bd, autom=False, num_of_procs=num_of_procs)
 
 
 def interpolate_deg2(dct, bd, autom=True, parity=None):
