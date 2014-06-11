@@ -1623,8 +1623,10 @@ class SymmetricWeightGenericElement(object):
         if isinstance(other, SymmetricWeightGenericElement) \
                 and self.sym_wt == other.sym_wt:
             return all([x == y for x, y in zip(self.forms, other.forms)])
+        elif other == 0:
+            return all([f == 0 for f in self.forms])
         else:
-            return False
+            raise NotImplementedError
 
     def __ne__(self, other):
         return not self.__eq__(other)
