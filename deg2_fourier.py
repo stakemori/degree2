@@ -1270,7 +1270,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         stbd = self.strum_bound()
         if self.prec < PrecisionDeg2(stbd):
             raise RuntimeError("prec must be greater than " + str(stbd) + "!")
-        tpls = [(n, r, m) for (n, r, m) in self.prec
+        tpls = [(n, r, m) for (n, r, m) in self.prec.group_by_reduced_forms()
                 if n <= stbd and m <= stbd]
         ml = [[f[t] for f in basis] for t in tpls]
         index_list = linearly_indep_rows_index_list(ml, dim)
@@ -1377,7 +1377,7 @@ class CuspFormsDegree2(HeckeModule):
         basis = self.basis()
         dim = self.dimension()
         stbd = self.klingeneisensteinAndCuspForms().strum_bound()
-        tpls = [(n, r, m) for (n, r, m) in self.prec
+        tpls = [(n, r, m) for (n, r, m) in self.prec.group_by_reduced_forms()
                 if n <= stbd and m <= stbd]
         ml = [[f[t] for f in basis] for t in tpls]
         index_list = linearly_indep_rows_index_list(ml, dim)
