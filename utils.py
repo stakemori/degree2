@@ -4,7 +4,7 @@ from itertools import groupby
 
 import sage
 from sage.misc.cachefunc import cached_function
-from sage.all import ZZ, CC, factorial, parallel, Integer
+from sage.all import ZZ, CC, factorial, parallel, Integer, vector
 
 
 def partition_weighted(l, n, weight_fn=None):
@@ -176,29 +176,36 @@ def linearly_indep_rows_index_list(A, r):
     [A.rows()[i] for i in lst] has length r and linearly independent.
     '''
     acc = []
+    ncls = r
+    if isinstance(A[0], list):
+        A = [vector(a) for a in A]
     while True:
         if r == 0:
             return acc
         nrws = len(A)
-        rows = A
-        for j in range(nrws):
-            if not all([x == 0 for x in rows[j]]):
-                i = j
-                first = rows[j]
+        for a, i in zip(A, range(nrws)):
+            if a != 0:
+                first = a
+                first_r_idx = i
                 break
-        for j in range(r):
-            if first[j] != 0:
+
+        for j in range(ncls):
+            if not first[j] == 0:
                 a = first[j]
+                v = a**(-1) * first
                 nonzero_col_index = j
                 break
-        A = [[A[j][k] - first[k] * a**(-1) * A[j][nonzero_col_index]
-              for k in range(r) if k != nonzero_col_index]
-             for j in range(i + 1, nrws)]
+
+        B = []
+        for j in range(first_r_idx + 1, nrws):
+            w = A[j]
+            B.append(w - w[nonzero_col_index] * v)
+        A = B
         r -= 1
         if acc == []:
-            acc.append(i)
+            acc.append(first_r_idx)
         else:
-            acc.append(i + acc[-1] + 1)
+            acc.append(first_r_idx + acc[-1] + 1)
 
 
 def polynomial_func(pl):
