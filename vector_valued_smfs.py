@@ -32,7 +32,7 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     Returns the space of vector valued Siegel modular forms of degree 2
     and weight \det^{wt} \otimes sym(sym_wt).
     '''
-    if not sym_wt in [2, 4]:
+    if sym_wt not in [2, 4]:
         raise NotImplementedError
 
     constructor = {2: VectorValuedSMFsSym2,

@@ -40,7 +40,7 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
     else:
         wt_fn = lambda x: weight_fn(x[1])
     n = len(l)
-    if not num_of_procs is None:
+    if num_of_procs is not None:
         num = min(n, num_of_procs)
     else:
         num = n
