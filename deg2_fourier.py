@@ -700,6 +700,12 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
     def _set_construction(self, c):
         self._construction = c
 
+    def _inverse(self):
+        res = Deg2QsrsElement._inverse(self)
+        return Deg2ModularFormQseries(-self.wt, res.fc_dct, res.prec,
+                                       base_ring=res.base_ring)
+
+
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
     def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=False):
