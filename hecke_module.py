@@ -96,6 +96,10 @@ class HeckeModuleElement(object):
     def __getitem__(self, t):
         pass
 
+    @abstractmethod
+    def hecke_operator_acted(self, m, prec=None):
+        pass
+
     def _hecke_tp(self, p, tpl):
         '''
         Returns tpls-th Fourier coefficient of T(p)(self), where p : prime.
