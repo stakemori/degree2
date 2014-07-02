@@ -6,8 +6,14 @@ from degree2.basic_operation import (
     PrecisionDeg2,
     semi_pos_def_matarices, _spos_def_mats_lt)
 
-from degree2.deg2_fourier import KlingenEisensteinAndCuspForms,\
-    eisenstein_series_degree2, x10_with_prec, x12_with_prec, x5__with_prec
+from degree2.deg2_fourier import (KlingenEisensteinAndCuspForms,
+                                  eisenstein_series_degree2,
+                                  x10_with_prec,
+                                  x12_with_prec,
+                                  x5__with_prec,
+                                  degree2_modular_forms_ring_level1_gens)
+
+from degree2.rankin_cohen_diff import rankin_cohen_pair_sym
 
 from sage.all import matrix, mod
 from degree2.hecke_module import HalfIntegralMatrices2
@@ -2118,6 +2124,14 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertEqual(linearly_indep_rows_index_list(A, 3), [0, 3, 5])
         A = [[1, 0], [0, 0], [1, 0], [0, 1]]
         self.assertEqual(linearly_indep_rows_index_list(A, 2), [0, 3])
+
+    def test_hecke_operator(self):
+        es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(10)
+        self.assertEqual(es4.hecke_operator_acted(2, 5),
+                         45 * es4._down_prec(5))
+        f10 = rankin_cohen_pair_sym(2, es4, es6)
+        self.assertEqual(f10.hecke_operator_acted(2, 5),
+                         -6168 * f10._down_prec(5))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)

@@ -705,6 +705,15 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         return Deg2ModularFormQseries(-self.wt, res.fc_dct, res.prec,
                                        base_ring=res.base_ring)
 
+    def hecke_operator_acted(self, m, prec=None):
+        '''
+        Returns T(m)self with precision prec.
+        '''
+        prec = PrecisionDeg2(prec)
+        fc_dct = {t: self.hecke_operator(m, t) for t in prec}
+        return Deg2ModularFormQseries(self.wt, fc_dct, prec,
+                                      base_ring=self.base_ring,
+                                      is_cuspidal=self._is_cuspidal)
 
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
@@ -1733,3 +1742,13 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
         else:
             vec = vector([f[t] for f in self.forms])
             return SymTensorRepElt(vec, self.wt)
+
+    def hecke_operator_acted(self, m, prec=None):
+        prec = PrecisionDeg2(prec)
+        fc_dct = {t: self.hecke_operator(m, t) for t in prec}
+        dcts = [{t: v.vec[i] for t, v in fc_dct.items()}
+                for i in range(self.sym_wt + 1)]
+        forms = [Deg2QsrsElement(d, prec, base_ring=self.base_ring)
+                 for d in dcts]
+        return SymmetricWeightModularFormElement(forms, self.wt, prec,
+                                                 base_ring=self.base_ring)
