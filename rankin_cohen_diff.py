@@ -1,8 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
-import sage
 from sage.all import QQ, PolynomialRing, matrix, log
 
-from degree2.utils import mul, combination, group, pmap, list_group_by
+from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, Deg2QsrsElement,
                                   _common_base_ring)
@@ -14,7 +13,6 @@ from degree2.deg2_fourier import SymmetricWeightGenericElement\
 from degree2.deg2_fourier import SymmetricWeightModularFormElement \
     as SWMFE
 
-from degree2.basic_operation import number_of_procs as operator_num_of_procs
 from degree2.basic_operation import PrecisionDeg2
 
 
@@ -137,34 +135,28 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     R = PolynomialRing(QQ, names=rnames)
     S = PolynomialRing(R, names=unames)
     Q = S(Q)
-    u_dict = Q.dict()
     j = Q.degree()
 
     if monom_diff_funcs is None:
         monom_diff_funcs = [monom_diff_normal for _ in range(len(R.gens())//3)]
 
+
+    def monom_mul(tpl, v, flist):
+        tpls = group(tpl, 3)
+        l = zip(flist, tpls, monom_diff_funcs)
+        return ((v * mul([QQ(2)**(-t[1]) for _, t, _ in l])) *
+                mul([func(f, t) for f, t, func in l]))
+
     def rankin_cohen(flist):
+        res = []
 
-        def monom_mul(longtpl, v):
-            tpls = group(longtpl, 3)
-            return v * mul(
-                [QQ(2)**(-t[1]) * func(f, t)
-                 for f, t, func in zip(flist, tpls, monom_diff_funcs)])
+        for a in range(j, -1, -1):
+            p_sum = QQ(0)
+            for tpl, v in Q[(a, j - a)].dict().items():
+                p_sum += monom_mul(tpl, v, flist)
+            res.append(p_sum)
 
-        ls = []
-        for t in u_dict:
-            for tpl, v in u_dict[t].dict().items():
-                ls.append((t[1], tpl, v))
-
-        def _f(x):
-            a, tpl, v = x
-            return (a, monom_mul(tpl, v))
-
-        with operator_num_of_procs(1):
-            res_ls = pmap(_f, ls, num_of_procs=sage.parallel.ncpus.ncpus())
-        d = dict(list_group_by(res_ls, lambda x: x[0]))
-
-        return [sum([f for _, f in d[a]]) for a in range(j + 1)]
+        return res
 
     return rankin_cohen
 
