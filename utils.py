@@ -35,6 +35,9 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
     Parallel map. The meaning of weight_fn is same as the meaning
     of the argument of partition_weighted.
     '''
+    if num_of_procs == 1:
+        return [fn(a) for a in l]
+    
     if weight_fn is None:
         wt_fn = None
     else:
