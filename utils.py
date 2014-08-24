@@ -37,7 +37,7 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
     '''
     if num_of_procs == 1:
         return [fn(a) for a in l]
-    
+
     if weight_fn is None:
         wt_fn = None
     else:
@@ -58,19 +58,6 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
         return [x[1] for x in calc_res]
     else:
         return [a[1] for a in sorted(calc_res, key=lambda x: x[0])]
-
-
-def parallel_concat(func):
-    '''
-    func returns a list of results.
-    '''
-    pfunc = parallel(func)
-
-    def f(*args, **kwargs):
-        return reduce(operator.add,
-                      [x[1] for x in list(pfunc(*args, **kwargs))],
-                      [])
-    return f
 
 
 def group(ls, n):
