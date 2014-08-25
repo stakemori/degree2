@@ -1,14 +1,12 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import PolynomialRing, QQ, matrix, ZZ
 from math import sqrt
+import multiprocessing
 
 from degree2.basic_operation import PrecisionDeg2
 from degree2.deg2_fourier import (
     Deg2QsrsElement, Deg2ModularFormQseries)
 from degree2.utils import mul, pmap, group
-
-import sage
-
 
 def _to_polynomial(f, val1):
     prec = f.prec.prec
@@ -26,7 +24,7 @@ def _to_polynomial(f, val1):
 
 
 def det_deg2(mat, autom=True,
-             wt=None, num_of_procs=sage.parallel.ncpus.ncpus()):
+             wt=None, num_of_procs=multiprocessing.cpu_count()):
     '''
     Returns det(mat) by interpolatation.
     Result is a Siegel modular form.
@@ -87,7 +85,7 @@ def interpolate_deg2(dct, bd, autom=True, parity=None):
 
 
 def calc_forms(func, forms, prec, autom=True, wt=None,
-               num_of_procs=sage.parallel.ncpus.ncpus()):
+               num_of_procs=multiprocessing.cpu_count()):
     '''
     func is a function which takes forms as an argument.
     Calculate func(forms) by interpolation.
@@ -101,9 +99,10 @@ def calc_forms(func, forms, prec, autom=True, wt=None,
         t_vals = [QQ(a) for a in range(1, 2*bd + 2)]
     else:
         t_vals = [QQ(a) for a in range(2, 2*bd + 2)]
-    t_dct = dict(pmap(lambda r: (r, func([_to_polynomial(f, r)
-                                          for f in forms])),
-                      t_vals, num_of_procs=num_of_procs))
+
+    def _f(r):
+        return (r, func([_to_polynomial(f, r) for f in forms]))
+    t_dct = dict(pmap(_f, t_vals, num_of_procs=num_of_procs))
     fc_dct = interpolate_deg2(t_dct, bd, autom=autom, parity=parity)
     if not autom:
         return Deg2QsrsElement(fc_dct, bd)
