@@ -1,10 +1,11 @@
 # -*- coding: utf-8; mode: sage -*-
+from multiprocessing import Process, Pipe
 import operator
 from itertools import groupby
 
 import sage
 from sage.misc.cachefunc import cached_function
-from sage.all import ZZ, CC, factorial, parallel, Integer, vector
+from sage.all import ZZ, CC, factorial, Integer, vector
 
 
 def partition_weighted(l, n, weight_fn=None):
@@ -22,7 +23,7 @@ def partition_weighted(l, n, weight_fn=None):
         return res
 
     m = len(l)
-    fn_vals = pmap(weight_fn, l, num_of_procs=sage.parallel.ncpus.ncpus())
+    fn_vals = [weight_fn(x) for x in l]
     wts = [sum(fn_vals[:i+1]) for i in range(m)]
     av_wt = max(wts[-1] // n, 1)
     idx_list = [list(v) for _, v in
@@ -30,7 +31,9 @@ def partition_weighted(l, n, weight_fn=None):
     return [[l[i] for i in idl] for idl in idx_list]
 
 
-def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
+# Borrowed from http://stackoverflow.com/questions/3288595/
+# multiprocessing-using-pool-map-on-a-function-defined-in-a-class
+def pmap(fn, l, weight_fn=None, num_of_procs=None):
     '''
     Parallel map. The meaning of weight_fn is same as the meaning
     of the argument of partition_weighted.
@@ -47,17 +50,22 @@ def pmap(fn, l, weight_fn=None, sort=True, num_of_procs=None):
         num = min(n, num_of_procs)
     else:
         num = n
-    ls = partition_weighted([(i, l[i]) for i in range(n)], num,
-                            weight_fn=wt_fn)
+    ls = partition_weighted(l, num, weight_fn=wt_fn)
+    pipes = [Pipe() for _ in ls]
+    procs = [Process(target=spawn(lambda x: [fn(a) for a in x]), args=(c, x))
+             for x, (_, c) in zip(ls, pipes)]
+    for p in procs:
+        p.start()
+    for p in procs:
+        p.join()
+    return reduce(operator.add, [parent.recv() for (parent, _) in pipes], [])
 
-    @parallel
-    def calc(xs):
-        return [(x, fn(y)) for x, y in xs]
-    calc_res = reduce(operator.add, [x[1] for x in list(calc(ls))], [])
-    if sort is False:
-        return [x[1] for x in calc_res]
-    else:
-        return [a[1] for a in sorted(calc_res, key=lambda x: x[0])]
+
+def spawn(f):
+    def fun(pipe, x):
+        pipe.send(f(x))
+        pipe.close()
+    return fun
 
 
 def group(ls, n):
