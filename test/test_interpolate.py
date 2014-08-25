@@ -24,7 +24,7 @@ class TestInterpolate(unittest.TestCase):
              [a.differentiate_wrt_tau() for a in l],
              [a.differentiate_wrt_w() for a in l],
              [a.differentiate_wrt_z() for a in l]]
-        d = det_deg2(m, 35)
+        d = det_deg2(m, wt=35)
         d = d * d[(2, -1, 3)]**(-1)
         self.assertEqual(d, x35_with_prec(prec))
 

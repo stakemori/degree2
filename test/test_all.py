@@ -5,3 +5,4 @@ import degree2.test.test_fc_mul_add
 import degree2.test.test_gens
 import degree2.test.test_prec_class
 import degree2.test.test_vecor_valued
+import degree2.test.test_interpolate
