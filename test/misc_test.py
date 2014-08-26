@@ -17,7 +17,7 @@ from degree2.rankin_cohen_diff import rankin_cohen_pair_sym
 
 from sage.all import matrix, mod
 from degree2.hecke_module import HalfIntegralMatrices2
-from degree2.utils import linearly_indep_rows_index_list
+from degree2.utils import linearly_indep_rows_index_list, pmap
 
 
 class TestDeg2fcFunctions(unittest.TestCase):
@@ -2132,6 +2132,11 @@ class TestDeg2fcFunctions(unittest.TestCase):
         f10 = rankin_cohen_pair_sym(2, es4, es6)
         self.assertEqual(f10.hecke_operator_acted(2, 5),
                          -6168 * f10._down_prec(5))
+
+    def test_pmap(self):
+        self.assertEqual([x**2 for x in range(100)],
+                         pmap(lambda x: x**2, range(100), num_of_procs=4))
+
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
