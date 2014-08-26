@@ -6,7 +6,20 @@ from itertools import groupby
 
 import sage
 from sage.misc.cachefunc import cached_function
-from sage.all import ZZ, CC, factorial, Integer, vector
+from sage.all import ZZ, CC, RR, factorial, Integer, vector, ceil
+
+
+def _partition(num_ls, n):
+    '''
+    num_ls is a list of real numbers.
+    Returns a list of indices.
+    '''
+    m = len(num_ls)
+    wts = [sum(num_ls[:i+1]) for i in range(m)]
+    av_wt = RR(wts[-1])/RR(n)
+    def fn(i):
+        return ceil(RR(wts[i])/RR(av_wt))
+    return [list(v) for _, v in groupby(range(m), fn)]
 
 
 def partition_weighted(l, n, weight_fn=None):
@@ -17,18 +30,11 @@ def partition_weighted(l, n, weight_fn=None):
     '''
     if n == 1:
         return [l]
-    if weight_fn is None:
-        res = [[] for i in range(n)]
-        for el, i in zip(l, range(len(l))):
-            res[i%n].append(el)
-        return res
 
-    m = len(l)
-    fn_vals = [weight_fn(x) for x in l]
-    wts = [sum(fn_vals[:i+1]) for i in range(m)]
-    av_wt = max(wts[-1] // n, 1)
-    idx_list = [list(v) for _, v in
-                groupby(range(m), lambda i: min(wts[i] // av_wt, n - 1))]
+    if weight_fn is None:
+        weight_fn = lambda x: 1
+
+    idx_list = _partition([weight_fn(x) for x in l], n)
     return [[l[i] for i in idl] for idl in idx_list]
 
 
