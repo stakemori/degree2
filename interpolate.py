@@ -101,9 +101,10 @@ def calc_forms(func, forms, prec, autom=True, wt=None,
         t_vals = [QQ(a) for a in range(1, 2*bd + 2)]
     else:
         t_vals = [QQ(a) for a in range(2, 2*bd + 2)]
-    t_dct = dict(pmap(lambda r: (r, func([_to_polynomial(f, r)
-                                          for f in forms])),
-                      t_vals, num_of_procs=num_of_procs))
+
+    def _f(r):
+        return (r, func([_to_polynomial(f, r) for f in forms]))
+    t_dct = dict(pmap(_f, t_vals, num_of_procs=num_of_procs))
     fc_dct = interpolate_deg2(t_dct, bd, autom=autom, parity=parity)
     if not autom:
         return Deg2QsrsElement(fc_dct, bd)
