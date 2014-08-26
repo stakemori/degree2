@@ -2138,6 +2138,5 @@ class TestDeg2fcFunctions(unittest.TestCase):
                          pmap(lambda x: x**2, range(100), num_of_procs=4))
 
 
-
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
 unittest.TextTestRunner(verbosity = 2).run(suite)
