@@ -1,5 +1,6 @@
 # -*- coding: utf-8; mode: sage -*-
 from math import sqrt
+import multiprocessing
 
 import sage
 from sage.all import Integer, ZZ, gcd, QQ, mod
@@ -215,7 +216,7 @@ def number_of_procs(n):
 class CurrentNumOfProcs(object):
 
     def __init__(self):
-        self._procs = sage.parallel.ncpus.ncpus()
+        self._procs = multiprocessing.cpu_count()
 
     @property
     def num_of_procs(self):
