@@ -1,4 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
+import traceback
 from multiprocessing import Process, Pipe
 import operator
 from itertools import groupby
@@ -31,8 +32,6 @@ def partition_weighted(l, n, weight_fn=None):
     return [[l[i] for i in idl] for idl in idx_list]
 
 
-# Borrowed from http://stackoverflow.com/questions/3288595/
-# multiprocessing-using-pool-map-on-a-function-defined-in-a-class
 def pmap(fn, l, weight_fn=None, num_of_procs=None):
     '''
     Parallel map. The meaning of weight_fn is same as the meaning
@@ -52,18 +51,29 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
         num = n
     ls = partition_weighted(l, num, weight_fn=wt_fn)
     pipes = [Pipe() for _ in ls]
-    procs = [Process(target=spawn(lambda x: [fn(a) for a in x]), args=(c, x))
+    procs = [Process(target=_spawn(lambda x: [fn(a) for a in x]), args=(c, x))
              for x, (_, c) in zip(ls, pipes)]
     for p in procs:
         p.start()
+    vals = [parent.recv() for parent, _ in pipes]
     for p in procs:
         p.join()
-    return reduce(operator.add, [parent.recv() for (parent, _) in pipes], [])
+    try:
+        return reduce(operator.add, vals, [])
+    except TypeError:
+        for e in vals:
+            if isinstance(e, Exception):
+                print e._traceback
+                raise e
 
 
-def spawn(f):
+def _spawn(f):
     def fun(pipe, x):
-        pipe.send(f(x))
+        try:
+            pipe.send(f(x))
+        except Exception as e:
+            e._traceback = traceback.format_exc()
+            pipe.send(e)
         pipe.close()
     return fun
 
