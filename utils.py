@@ -76,7 +76,7 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
         return reduce(operator.add, vals, [])
     except TypeError:
         for e in vals:
-            if isinstance(e, Exception):
+            if isinstance(e, BaseException):
                 print e._traceback
                 raise e
 
