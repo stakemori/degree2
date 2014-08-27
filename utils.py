@@ -61,9 +61,17 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
              for x, (_, c) in zip(ls, pipes)]
     for p in procs:
         p.start()
-    vals = [parent.recv() for parent, _ in pipes]
-    for p in procs:
-        p.join()
+    try:
+        vals = [parent.recv() for parent, _ in pipes]
+    except KeyboardInterrupt:
+        # Kill processes.
+        for p in procs:
+            p.terminate()
+            p.join()
+        raise
+    finally:
+        for p in procs:
+            p.join()
     try:
         return reduce(operator.add, vals, [])
     except TypeError:
@@ -77,7 +85,7 @@ def _spawn(f):
     def fun(pipe, x):
         try:
             pipe.send(f(x))
-        except Exception as e:
+        except BaseException as e:
             e._traceback = traceback.format_exc()
             pipe.send(e)
         pipe.close()
