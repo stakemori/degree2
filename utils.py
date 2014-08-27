@@ -88,7 +88,8 @@ def _spawn(f):
         except BaseException as e:
             e._traceback = traceback.format_exc()
             pipe.send(e)
-        pipe.close()
+        finally:
+            pipe.close()
     return fun
 
 
