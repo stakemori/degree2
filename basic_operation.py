@@ -2,7 +2,6 @@
 from math import sqrt
 import multiprocessing
 
-import sage
 from sage.all import Integer, ZZ, gcd, QQ, mod
 
 from sage.misc.cachefunc import cached_function
