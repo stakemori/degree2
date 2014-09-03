@@ -51,6 +51,10 @@ class PrecisionDeg2(object):
         return str(self)
 
     @property
+    def prec(self):
+        raise DeprecationWarning("Use 'value' instead.")
+
+    @property
     def value(self):
         return self.__prec
 
