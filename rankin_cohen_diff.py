@@ -40,7 +40,7 @@ def _mul_q_half_monom(f):
     This function returns f * q1^(-1) * t * q2^(-1).
     Decrease prec by 1.
     '''
-    prec = PrecisionDeg2(f.prec.prec-1)
+    prec = PrecisionDeg2(f.prec.value-1)
     res_dc = {}
     fc_dct = f.fc_dct
     for n, r, m in prec:
@@ -48,7 +48,7 @@ def _mul_q_half_monom(f):
             res_dc[(n, r, m)] = 0
         else:
             res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
-    return Deg2QsrsElement(res_dc, prec.prec, base_ring=f.base_ring)
+    return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
 
 
 def rankin_cohen_triple_x5(Q, f, prec):
@@ -60,7 +60,7 @@ def rankin_cohen_triple_x5(Q, f, prec):
     prec_p1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
     if f.prec < prec_p1:
         raise RuntimeError("The precision of f must be bigger than prec.")
-    x5 = x5__with_prec(prec_p1.prec)
+    x5 = x5__with_prec(prec_p1.value)
     g = f._down_prec(prec_p1)
     funcs = [diff_op_monom_x5, diff_op_monom_x5, monom_diff_normal]
     k = _inc_weight(Q)

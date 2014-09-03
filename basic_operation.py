@@ -29,10 +29,10 @@ class PrecisionDeg2(object):
                             "a collection of tuples of integers.")
 
     def _to_format_dct(self):
-        return {"type": self.type, "prec": self.prec}
+        return {"type": self.type, "prec": self.value}
 
     def __hash__(self):
-        return self.prec.__hash__()
+        return self.value.__hash__()
 
     @classmethod
     def _from_dict_to_object(cls, data_dict):
@@ -43,15 +43,15 @@ class PrecisionDeg2(object):
 
     def __str__(self):
         if self.type == "diag_max":
-            return "diag_max " + str(self.prec)
+            return "diag_max " + str(self.value)
         elif self.type == "tuples":
-            return "tuples " + str(list(self.prec))
+            return "tuples " + str(list(self.value))
 
     def __repr__(self):
         return str(self)
 
     @property
-    def prec(self):
+    def value(self):
         return self.__prec
 
     @property
@@ -60,11 +60,11 @@ class PrecisionDeg2(object):
 
     def __iter__(self):
         if self.type == "diag_max":
-            for t in semi_pos_def_matarices(self.prec):
+            for t in semi_pos_def_matarices(self.value):
                 yield t
         elif self.type == "tuples":
             res = set([])
-            for t in self.prec:
+            for t in self.value:
                 res.update(_spos_def_mats_lt(t))
             for t in res:
                 yield t
@@ -139,7 +139,7 @@ class PrecisionDeg2(object):
     def __eq__(self, other):
         if not isinstance(other, PrecisionDeg2):
             return False
-        elif self.type == other.type and self.prec == other.prec:
+        elif self.type == other.type and self.value == other.value:
             return True
         else:
             return set(self) == set(other)
@@ -154,9 +154,9 @@ class PrecisionDeg2(object):
         if not isinstance(other, PrecisionDeg2):
             raise NotImplementedError
         elif self.type == other.type and self.type == "diag_max":
-            return self.prec >= other.prec
+            return self.value >= other.value
         elif other.type == "tuples":
-            return set(self).issuperset(set(other.prec))
+            return set(self).issuperset(set(other.value))
         else:
             return set(self).issuperset(set(other))
 
@@ -167,9 +167,9 @@ class PrecisionDeg2(object):
         if not isinstance(other, PrecisionDeg2):
             return NotImplementedError
         elif self.type == other.type and self.type == "diag_max":
-            return self.prec <= other.prec
+            return self.value <= other.value
         elif self.type == "tuples":
-            return set(self.prec).issubset(set(other))
+            return set(self.value).issubset(set(other))
         else:
             return set(self).issubset(set(other))
 
@@ -184,10 +184,10 @@ class PrecisionDeg2(object):
         Used for calculating phi_operator.
         '''
         if self.type == "diag_max":
-            for t in range(self.prec + 1):
+            for t in range(self.value + 1):
                 yield t
         elif self.type == "tuples":
-            mx = max([t[0] for t in self.prec])
+            mx = max([t[0] for t in self.value])
             for t in range(mx + 1):
                 if (t, 0, 0) in self:
                     yield t

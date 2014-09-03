@@ -9,7 +9,7 @@ from degree2.deg2_fourier import (
 from degree2.utils import mul, pmap, group
 
 def _to_polynomial(f, val1):
-    prec = f.prec.prec
+    prec = f.prec.value
     R = PolynomialRing(QQ if f.base_ring == ZZ else f.base_ring,
                        names="q1, q2")
     q1, q2 = R.gens()
@@ -30,7 +30,7 @@ def det_deg2(mat, autom=True,
     Result is a Siegel modular form.
     '''
     n = len(mat)
-    bd = mat[0][0].prec.prec
+    bd = mat[0][0].prec.value
     forms_flatten = reduce(lambda x, y: x + y, mat)
     func = lambda l: matrix(group(l, n)).det()
     if autom:
@@ -90,7 +90,7 @@ def calc_forms(func, forms, prec, autom=True, wt=None,
     func is a function which takes forms as an argument.
     Calculate func(forms) by interpolation.
     '''
-    bd = prec.prec if isinstance(prec, PrecisionDeg2) else prec
+    bd = prec.value if isinstance(prec, PrecisionDeg2) else prec
     parity = wt%2 if autom else None
 
     if not autom:
