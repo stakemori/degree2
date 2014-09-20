@@ -1069,7 +1069,7 @@ def tuples_even_wt_modular_forms(wt):
     Returns the list of tuples (p, q, r, s) such that
     4p + 6q + 10r +12s = wt.
     '''
-    if wt < 0:
+    if wt < 0 or wt%2 == 1:
         return []
     w = wt/2
     return [(p, q, r, s) for p in range(0, floor(w/2) + 1)
