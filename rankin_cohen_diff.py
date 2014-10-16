@@ -51,10 +51,12 @@ def _mul_q_half_monom(f):
     return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
 
 
-def rankin_cohen_triple_x5(Q, f, prec):
+def rankin_cohen_triple_x5(Q, f, prec, i=2):
     '''
     Let D be the differential operator ass. to Q.
-    Returns D(x5, x5, f).
+    If i = 0, returns D(f, x5, x5),
+    If i = 1, returns D(x5, f, x5),
+    If i = 2, returns D(x5, x5, f).
     '''
     prec = PrecisionDeg2(prec)
     prec_p1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
@@ -62,9 +64,12 @@ def rankin_cohen_triple_x5(Q, f, prec):
         raise RuntimeError("The precision of f must be bigger than prec.")
     x5 = x5__with_prec(prec_p1.value)
     g = f._down_prec(prec_p1)
-    funcs = [diff_op_monom_x5, diff_op_monom_x5, monom_diff_normal]
+    funcs = [diff_op_monom_x5] * 3
+    args = [x5] * 3
     k = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5, g])
+    funcs[i] = monom_diff_normal
+    args[i] = g
+    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)(args)
     forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
     return SWMFE(forms, 10 + f.wt + k, prec)
 
