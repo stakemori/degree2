@@ -1301,20 +1301,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         l = [[fm[(n, r, m)] for n, r, m in tuples] for fm in basis]
         return matrix(l).rank() == len(basis)
 
-    def _to_vector(self, fm):
-        '''
-        Returns a vector corresponding to fm.
-        By this method, self.basis() becomes the standard basis.
-        '''
-        basis = self.basis()
-        lin_indep_tuples = self.linearly_indep_tuples()
-        l1 = []
-        for f in basis:
-            l1.append([f[t] for t in lin_indep_tuples])
-        m1 = matrix(l1)
-        v = vector([fm[t] for t in lin_indep_tuples]).column()
-        return (m1.transpose())**(-1) * v
-
     def _to_form(self, v):
         '''
         The inverse to _to_vector.
