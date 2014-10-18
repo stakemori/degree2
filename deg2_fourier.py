@@ -1310,8 +1310,8 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         return reduce(operator.add, [basis[i] * v[i] for i in range(n)])
 
     def construction(self, f):
-        return sum([a[0] * b._construction for a, b in zip(self._to_vector(f),
-                                                           self.basis())])
+        return sum([a * b._construction for a, b in zip(self._to_vector(f),
+                                                        self.basis())])
 
     def hecke_eigenvalue(self, f, a):
         '''

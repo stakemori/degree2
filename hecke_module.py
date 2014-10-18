@@ -420,8 +420,8 @@ class HeckeModule(object):
         for f in basis:
             l1.append([f[t] for t in lin_indep_tuples])
         m1 = matrix(l1)
-        v = vector([fm[t] for t in lin_indep_tuples]).column()
-        return (m1.transpose())**(-1) * v
+        v = vector([fm[t] for t in lin_indep_tuples])
+        return v * m1**(-1)
 
 
 def reprs_of_double_cosets(p, i):
