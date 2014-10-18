@@ -60,6 +60,30 @@ class VectorValuedSiegelModularForms(HeckeModule):
         return self._prec
 
     def dimension(self):
+        raise NotImplementedError
+
+    def basis(self):
+        raise NotImplementedError
+
+    def linearly_indep_tuples(self):
+        basis = self.basis()
+        dim = self.dimension()
+        tpls = sorted(list(self.prec.group_by_reduced_forms().keys()),
+                      key=lambda x: (x[0] + x[2], max(x[0], x[2])))
+        tpls_w_idx = reduce(operator.add,
+                            [[(t, i) for i in range(self.sym_wt + 1)]
+                             for t in tpls], [])
+        ml = [[f.forms[i][t] for f in basis] for t, i in tpls_w_idx]
+        index_list = linearly_indep_rows_index_list(ml, dim)
+        res = [tpls_w_idx[i] for i in index_list]
+        return res
+
+
+class VvsmfSym2_4(VectorValuedSiegelModularForms):
+    def basis(self):
+        raise NotImplementedError
+
+    def dimension(self):
         '''
         Returns the dimension of self.
         '''
@@ -77,24 +101,8 @@ class VectorValuedSiegelModularForms(HeckeModule):
             nm = (1 + t**7) * (t**8 + t**10 + t**12 + t**14 + t**16)
             return (nm/dnm)[self.wt]
 
-    def basis(self):
-        raise NotImplementedError
 
-    def linearly_indep_tuples(self):
-        basis = self.basis()
-        dim = self.dimension()
-        tpls = sorted(list(self.prec), key=lambda x: (x[0] + x[2],
-                                                      max(x[0], x[2])))
-        tpls_w_idx = reduce(operator.add,
-                            [[(t, i) for i in range(self.sym_wt + 1)]
-                             for t in tpls], [])
-        ml = [[f.forms[i][t] for f in basis] for t, i in tpls_w_idx]
-        index_list = linearly_indep_rows_index_list(ml, dim)
-        res = [tpls_w_idx[i] for i in index_list]
-        return res
-
-
-class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
+class VectorValuedSMFsSym2(VvsmfSym2_4):
     @cached_method
     def basis(self):
         if self.dimension() == 0:
@@ -147,7 +155,7 @@ class VectorValuedSMFsSym2(VectorValuedSiegelModularForms):
             return res
 
 
-class VectorValuedSMFsSym4(VectorValuedSiegelModularForms):
+class VectorValuedSMFsSym4(VvsmfSym2_4):
     @cached_method
     def basis(self):
         if self.dimension() == 0:
