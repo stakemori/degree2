@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import QQ, PolynomialRing, matrix, log
+from sage.all import QQ, PolynomialRing, matrix, log, Integer
 
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
@@ -17,16 +17,15 @@ from degree2.basic_operation import PrecisionDeg2
 
 
 def diff_op_monom_x5(f, t):
-    al = QQ(-1)/QQ(2)
-    be = QQ(1)/QQ(2)
-    gm = QQ(-1)/QQ(2)
     a, b, c = t
-    return sum([al**i * be**j * gm**k * combination(a, i) *
-                combination(b, j) * combination(c, k) *
-                f._differential_operator_monomial(a - i, b - j, c - k)
-                for i in range(a + 1)
-                for j in range(b + 1)
-                for k in range(c + 1)])
+    fcmap = {(n, r, m):
+             ((n - Integer(1)/Integer(2))**a *
+              (r + Integer(1)/Integer(2))**b *
+              (m - Integer(1)/Integer(2))**c * v)
+             for (n, r, m), v in f.fc_dct.iteritems()}
+    res = Deg2QsrsElement(fcmap, f.prec, base_ring=f.base_ring,
+                          is_cuspidal=f._is_cuspidal)
+    return res
 
 
 def monom_diff_normal(f, t):
