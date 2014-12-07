@@ -81,6 +81,12 @@ class Deg2QsrsElement(object):
         self._is_gen = False
         self._sym_wt = 0
 
+        # _x5_mult is True means that self is equal to f * x5.
+        # Here f is a modular form of level 1 and x5 is weight 5 modular form
+        # s.t. x10 = x5^2.
+        self._x5_mult = False
+
+
     def __eq__(self, other):
         if other == 0:
             return all([x == 0 for x in self.fc_dct.itervalues()])
@@ -147,6 +153,9 @@ class Deg2QsrsElement(object):
         return ' with prec = ' + str(self.prec) \
             + ': \n' + '{' + ",\n ".join(l) + '}'
 
+    def _set_x5_mult(self, b):
+        self._x5_mult = b
+
     def fourier_coefficient(self, n, r, m):
         return self.fc_dct[(n, r, m)]
 
@@ -202,8 +211,11 @@ class Deg2QsrsElement(object):
             mo = other.fc_dct
             cuspidal = self._is_cuspidal or other._is_cuspidal
             fcmap = _mul_fourier(ms, mo, prec, cuspidal)
-            return Deg2QsrsElement(fcmap, prec, base_ring=bsring,
-                                   is_cuspidal=cuspidal)
+            res = Deg2QsrsElement(fcmap, prec, base_ring=bsring,
+                                  is_cuspidal=cuspidal)
+            if isinstance(other, Deg2ModularFormQseries) and other._x5_mult:
+                res._set_x5_mult(True)
+            return res
 
         elif isinstance(other, SymmetricWeightGenericElement):
             return other.__mul__(self)
@@ -1029,6 +1041,7 @@ def x5__with_prec(prec):
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
     res = Deg2QsrsElement(fc_dct, prec)
+    res._set_x5_mult(True)
     return res
 
 
