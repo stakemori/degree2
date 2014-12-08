@@ -488,6 +488,16 @@ class MultipleByX5(Deg2QsrsElement):
     def level_1_part(self):
         return self._f
 
+    def _differential_operator_monomial(self, a, b, c):
+        fcmap = {(n, r, m): ((n - QQ(1)/QQ(2))**a *
+                             (r + QQ(1)/QQ(2))**b *
+                             (m - QQ(1)/QQ(2))**c * v)
+                 for (n, r, m), v in self.fc_dct.iteritems()}
+        res = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring,
+                              is_cuspidal=self._is_cuspidal)
+        return res
+
+
 
 def is_hol_mod_form(f):
     return isinstance(f, Deg2ModularFormQseries)
