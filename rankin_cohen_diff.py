@@ -33,20 +33,47 @@ def monom_diff_normal(f, t):
     return f._differential_operator_monomial(*t)
 
 
-def _rankin_cohen_triple_mul_of_x5(Q, flist, prec):
+def _rankin_cohen_pair_mul_of_x5_sym(j, f, g):
+    '''
+    Assumes f and g are instances of MultipleByX5.
+    Returns {f, g}_{Sym(j)}. Decreases prec by 1.
+    '''
+    Q = _rankin_cohen_pair_sym_pol(j, f.wt, g.wt)
+    return _rankin_cohen_pair_mul_of_x5(Q, f, g)
+
+
+def _rankin_cohen_pair_mul_of_x5_det2_sym(j, f, g):
+    '''
+    Assumes f and g are instances of MultipleByX5.
+    Returns {f, g}_{det^2 Sym(j)}. Decreases prec by 1.
+    '''
+    Q = _rankin_cohen_pair_det2_sym_pol(j, f.wt, g.wt)
+    return _rankin_cohen_pair_mul_of_x5(Q, f, g)
+
+
+def _rankin_cohen_pair_mul_of_x5(Q, f, g):
+    """
+    Assumes f and g are instances of MultipleByX5.
+    Decreases prec by 1.
+    """
+    flist = [f, g]
+    forms = _rankin_cohen_bracket_func(Q)(flist)
+    forms = [_mul_q_half_monom(a) for a in forms]
+    prec = f.prec
+    return SWMFE(forms, sum([f.wt for f in flist]), prec)
+
+
+def _rankin_cohen_triple_mul_of_x5(Q, f, g, h):
     '''
     Assumes that
-    2 of flist are instances of MultipleByX5  and the remaining one is a
-    modular form of level 1.
+    2 of f, g and h are instances of MultipleByX5  and the remaining one is a
+    modular form of level 1. Decreases prec by 1.
     '''
-    prec = PrecisionDeg2(prec)
-    prec1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
-    if any(f.prec < prec1 for f in flist):
-        raise RuntimeError("The precision is too small.")
-    flist = [f._down_prec(prec1) for f in  flist]
+    flist = [f, g, h]
+    prec = flist[0].prec
     a = _inc_weight(Q)
     forms = _rankin_cohen_bracket_func(Q)(flist)
-    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    forms = [_mul_q_half_monom(a) for a in forms]
     return SWMFE(forms, sum([f.wt for f in flist]) + a, prec)
 
 
