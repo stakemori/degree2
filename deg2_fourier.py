@@ -491,37 +491,58 @@ class QseriesTimesQminushalf(FormalQexp):
         f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m in the notation above.
         '''
         self.__f = f
-        self.__base_ring = f.base_ring
-        self.__prec = f.prec
-        self.__mp = f.fc_dct
-        self._sym_wt = 0
-        self._is_gen = False
+        FormalQexp.__init__(self, f.fc_dct, f.prec, base_ring=f.base_ring)
 
     @property
-    def base_ring(self):
-        return self.__base_ring
-
-    @property
-    def fc_dct(self):
-        return self.__mp
-
-    @property
-    def prec(self):
-        return self.__prec
-
-    @property
-    def sym_wt(self):
-        return 0
-
-    @property
-    def f(self):
+    def f_part(self):
         return self.__f
 
     def _name(self):
         return 'q1^(-1/2)t^(1/2)q2^(-1/2) times q-expansion'
 
     def __mul__(self, other):
-        return QseriesTimesQminushalf(self.f * other)
+        if isinstance(other, QseriesTimesQminushalf):
+            return _mul_q_half_monom(self.f_part * other.f_part)
+        else:
+            return QseriesTimesQminushalf(self.f_part * other)
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        elif isinstance(other, QseriesTimesQminushalf):
+            return QseriesTimesQminushalf(self.f_part + other.f_part)
+        else:
+            raise NotImplementedError
+
+
+class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
+    '''
+    An instance of QseriesTimesQminushalf and can be regard as modular form.
+    (i.e. multiple of x5 by a modular form of level 1).
+    A typical instance of this class is a return value of x5__with_prec.
+    '''
+    def __init__(self, f, wt):
+        QseriesTimesQminushalf.__init__(self, f)
+        self.__wt = wt
+
+    @property
+    def wt(self):
+        return self.__wt
+
+    def __mul__(self, other):
+        res = QseriesTimesQminushalf.__mul__(self, other)
+        if isinstance(other, Deg2ModularFormQseries):
+            return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
+        else:
+            return res
+
+    def __add__(self, other):
+        res = QseriesTimesQminushalf.__add__(self, other)
+        if (isinstance(other, ModFormQsrTimesQminushalf) and
+            self.wt == other.wt):
+            return ModFormQsrTimesQminushalf(res.f_part, self.wt)
+        else:
+            return res
 
 
 class MultipleByX5(Deg2QsrsElement):
@@ -1141,7 +1162,7 @@ def x5__with_prec(prec):
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
     res = Deg2QsrsElement(fc_dct, prec)
-    return res
+    return ModFormQsrTimesQminushalf(res, 5)
 
 
 def _det3(ls):
