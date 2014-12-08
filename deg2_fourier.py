@@ -1320,7 +1320,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         lin_indep_tuples_cached = \
             KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
         if (wt in lin_indep_tuples_cached.keys() and
-            lin_indep_tuples_cached[wt] != []):
+             lin_indep_tuples_cached[wt] != []):
             return lin_indep_tuples_cached[wt]
         basis = self.basis()
         dim = self.dimension()
