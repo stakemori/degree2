@@ -81,12 +81,6 @@ class Deg2QsrsElement(object):
         self._is_gen = False
         self._sym_wt = 0
 
-        # _x5_mult is True means that self is equal to f * x5.
-        # Here f is a modular form of level 1 and x5 is weight 5 modular form
-        # s.t. x10 = x5^2.
-        self._x5_mult = False
-
-
     def __eq__(self, other):
         if other == 0:
             return all([x == 0 for x in self.fc_dct.itervalues()])
@@ -153,9 +147,6 @@ class Deg2QsrsElement(object):
         return ' with prec = ' + str(self.prec) \
             + ': \n' + '{' + ",\n ".join(l) + '}'
 
-    def _set_x5_mult(self, b):
-        self._x5_mult = b
-
     def fourier_coefficient(self, n, r, m):
         return self.fc_dct[(n, r, m)]
 
@@ -213,8 +204,6 @@ class Deg2QsrsElement(object):
             fcmap = _mul_fourier(ms, mo, prec, cuspidal)
             res = Deg2QsrsElement(fcmap, prec, base_ring=bsring,
                                   is_cuspidal=cuspidal)
-            if isinstance(other, Deg2ModularFormQseries) and other._x5_mult:
-                res._set_x5_mult(True)
             return res
 
         elif isinstance(other, SymmetricWeightGenericElement):
@@ -472,6 +461,29 @@ def _mul_q_half_monom(f):
         else:
             res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
     return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
+
+
+class MultipleByX5(Deg2QsrsElement):
+    '''
+    An instance of this class represents x5 * f, where f is a modular form of
+    level 1.
+    '''
+    def __init__(self, f):
+        self._f = f
+        self._wt = f.wt + 5
+        if f.prec.type != "diag_max":
+            raise NotImplementedError
+        x5 = x5__with_prec(f.prec.value)
+        g = f*x5
+        Deg2QsrsElement.__init__(self, g.fc_dct, f.prec, base_ring=g.base_ring)
+
+    @property
+    def wt(self):
+        return self._wt
+
+    @property
+    def level_1_part(self):
+        return self._f
 
 
 def is_hol_mod_form(f):
@@ -1059,7 +1071,6 @@ def x5__with_prec(prec):
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
     res = Deg2QsrsElement(fc_dct, prec)
-    res._set_x5_mult(True)
     return res
 
 

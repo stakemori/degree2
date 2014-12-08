@@ -4,7 +4,8 @@ from sage.all import QQ, PolynomialRing, matrix, log, Integer
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, Deg2QsrsElement,
-                                  _common_base_ring, _mul_q_half_monom)
+                                  _common_base_ring, _mul_q_half_monom,
+                                  MultipleByX5)
 
 from degree2.deg2_fourier import SymmetricWeightGenericElement\
     as SWGElt
@@ -133,8 +134,8 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
         res = []
 
         if monom_diff_funcs is None:
-            monom_diff_funcs = [diff_op_monom_x5 if f._x5_mult else
-                                monom_diff_normal for f in flist]
+            monom_diff_funcs = [diff_op_monom_x5 if isinstance(f, MultipleByX5)
+                                else monom_diff_normal for f in flist]
 
         for a in range(j, -1, -1):
             p_sum = QQ(0)
