@@ -493,11 +493,20 @@ class QseriesTimesQminushalf(FormalQexp):
         f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m in the notation above.
         '''
         self.__f = f
+        self._mul_dct = {}
         FormalQexp.__init__(self, f.fc_dct, f.prec, base_ring=f.base_ring)
 
     @property
     def f_part(self):
         return self.__f
+
+    def __getitem__(self, t):
+        if self._mul_dct == {}:
+            self._mul_dct = {(n - QQ(1)/QQ(2),
+                              r + QQ(1)/QQ(2),
+                              m - QQ(1)/QQ(2)): v
+                             for (n, r, m), v in self.f_part.fc_dct.items()}
+        return self._mul_dct[t]
 
     def _name(self):
         return 'q1^(-1/2)t^(1/2)q2^(-1/2) times q-expansion'
