@@ -33,6 +33,23 @@ def monom_diff_normal(f, t):
     return f._differential_operator_monomial(*t)
 
 
+def _rankin_cohen_triple_mul_of_x5(Q, flist, prec):
+    '''
+    Assumes that
+    2 of flist are instances of MultipleByX5  and the remaining one is a
+    modular form of level 1.
+    '''
+    prec = PrecisionDeg2(prec)
+    prec1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
+    if any(f.prec < prec1 for f in flist):
+        raise RuntimeError("The precision is too small.")
+    flist = [f._down_prec(prec1) for f in  flist]
+    a = _inc_weight(Q)
+    forms = _rankin_cohen_bracket_func(Q)(flist)
+    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    return SWMFE(forms, sum([f.wt for f in flist]) + a, prec)
+
+
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
     '''
     Let D be the differential operator ass. to Q.
