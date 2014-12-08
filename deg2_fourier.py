@@ -516,6 +516,22 @@ class QseriesTimesQminushalf(FormalQexp):
         else:
             raise NotImplementedError
 
+    def __pow__(self, other):
+        if other == 0:
+            return 1
+        elif other == 1:
+            return self
+        elif is_number(other) and other > 0:
+            f = (self.f_part)**other
+            q, r = divmod(other, 2)
+            g = _mul_q_half_monom(f, a=q)
+            if r == 0:
+                return g
+            else:
+                return QseriesTimesQminushalf(g)
+        else:
+            raise NotImplementedError
+
 
 class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
     '''
@@ -535,6 +551,10 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
         res = QseriesTimesQminushalf.__mul__(self, other)
         if isinstance(other, Deg2ModularFormQseries):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
+        elif isinstance(other, ModFormQsrTimesQminushalf):
+            return Deg2ModularFormQseries(self.wt + other.wt,
+                                          res.fc_dct, res.prec,
+                                          base_ring=res.base_ring)
         else:
             return res
 
@@ -545,6 +565,15 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt)
         else:
             return res
+
+    def __pow__(self, other):
+        res = QseriesTimesQminushalf.__pow__(self, other)
+        wt = self.wt * other
+        if isinstance(res, Deg2QsrsElement):
+            return Deg2ModularFormQseries(wt, res.fc_dct, res.prec,
+                                          base_ring=res.base_ring)
+        else:
+            return ModFormQsrTimesQminushalf(res.f_part, wt)
 
 
 class MultipleByX5(Deg2QsrsElement):
