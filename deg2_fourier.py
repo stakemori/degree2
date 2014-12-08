@@ -60,6 +60,7 @@ def common_prec(forms):
     else:
         raise NotImplementedError
 
+
 class FormalQexp(CommRingLikeElment):
     '''
     A parent class of Deg2QsrsElement and QseriesTimesQminushalf.
@@ -94,6 +95,7 @@ class FormalQexp(CommRingLikeElment):
             return all([x == 0 for x in self.fc_dct.itervalues()])
         else:
             return self - other == 0
+
     @property
     def base_ring(self):
         return self.__base_ring
@@ -183,7 +185,6 @@ class Deg2QsrsElement(FormalQexp):
     def load_from(cls, filename):
         data_dict = load(filename)
         return cls._from_dict_to_object(data_dict)
-
 
     def __add__(self, other):
         if is_number(other):
@@ -520,12 +521,6 @@ class QseriesTimesQminushalf(FormalQexp):
         return QseriesTimesQminushalf(self.f * other)
 
 
-
-
-
-
-
-
 class MultipleByX5(Deg2QsrsElement):
     '''
     An instance of this class represents x5 * f, where f is a modular form of
@@ -556,7 +551,6 @@ class MultipleByX5(Deg2QsrsElement):
         res = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring,
                               is_cuspidal=self._is_cuspidal)
         return res
-
 
 
 def is_hol_mod_form(f):
