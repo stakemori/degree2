@@ -445,21 +445,24 @@ class Deg2QsrsElement(object):
         return Deg2QsrsElement._from_dict_to_object(d)
 
 
-def _mul_q_half_monom(f):
+def _mul_q_half_monom(f, a=1):
     '''
     Let f be a formal Fourier expansion:
     f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
-    This function returns f * q1^(-1) * t * q2^(-1).
-    Decrease prec by 1.
+    Assuming f * q1^(-a) * t^a * q2^(-a)
+    This function returns f * q1^(-a) * t^a * q2^(-a).
+    Decrease prec by a.
     '''
-    prec = PrecisionDeg2(f.prec.value-1)
+    if f.prec.type != "diag_max":
+        raise NotImplementedError
+    prec = PrecisionDeg2(f.prec.value - a)
     res_dc = {}
     fc_dct = f.fc_dct
     for n, r, m in prec:
-        if 4*(n+1)*(m+1)-(r-1)**2 <= 0:
+        if 4*(n + a)*(m + a)-(r - a)**2 <= 0:
             res_dc[(n, r, m)] = 0
         else:
-            res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
+            res_dc[(n, r, m)] = fc_dct[(n + a, r - a, m + a)]
     return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
 
 
