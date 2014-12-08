@@ -54,6 +54,9 @@ def common_base_ring(forms):
 
 
 def common_prec(forms):
+    if all(f.prec.type == "diag_max" for f in forms):
+        return PrecisionDeg2(min([f.prec.value for f in forms]))
+    # else
     a_prec = forms[0].prec
     if all([a_prec == f.prec for f in forms[1:]]):
         return a_prec
