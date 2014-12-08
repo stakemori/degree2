@@ -230,10 +230,12 @@ class Deg2QsrsElement(FormalQexp):
                                   is_cuspidal=cuspidal)
             return res
 
-        elif isinstance(other, SymmetricWeightGenericElement):
+        # elif isinstance(other, SymmetricWeightGenericElement):
+        #     return other.__mul__(self)
+
+        else:
             return other.__mul__(self)
 
-        raise NotImplementedError
 
     # dictionary s.t. ("gen_name", prec) => {0: f, 1: f^2, 2: f^4, 3: f^8, ...}
     gens_powers_cached_dict = {}
