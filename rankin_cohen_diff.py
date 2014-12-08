@@ -4,7 +4,7 @@ from sage.all import QQ, PolynomialRing, matrix, log, Integer
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, Deg2QsrsElement,
-                                  _common_base_ring)
+                                  _common_base_ring, _mul_q_half_monom)
 
 from degree2.deg2_fourier import SymmetricWeightGenericElement\
     as SWGElt
@@ -30,24 +30,6 @@ def diff_op_monom_x5(f, t):
 
 def monom_diff_normal(f, t):
     return f._differential_operator_monomial(*t)
-
-
-def _mul_q_half_monom(f):
-    '''
-    Let f be a formal Fourier expansion:
-    f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
-    This function returns f * q1^(-1) * t * q2^(-1).
-    Decrease prec by 1.
-    '''
-    prec = PrecisionDeg2(f.prec.value-1)
-    res_dc = {}
-    fc_dct = f.fc_dct
-    for n, r, m in prec:
-        if 4*(n+1)*(m+1)-(r-1)**2 <= 0:
-            res_dc[(n, r, m)] = 0
-        else:
-            res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
-    return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
 
 
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
