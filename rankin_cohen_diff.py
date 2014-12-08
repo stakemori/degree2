@@ -141,23 +141,23 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     Q = S(Q)
     j = Q.degree()
 
-    if monom_diff_funcs is None:
-        monom_diff_funcs = [monom_diff_normal for _ in range(len(R.gens())//3)]
-
-
-    def monom_mul(tpl, v, flist):
+    def monom_mul(tpl, v, flist, diff_funcs):
         tpls = group(tpl, 3)
-        l = zip(flist, tpls, monom_diff_funcs)
+        l = zip(flist, tpls, diff_funcs)
         return ((v * mul([QQ(2)**(-t[1]) for _, t, _ in l])) *
                 mul([func(f, t) for f, t, func in l]))
 
-    def rankin_cohen(flist):
+    def rankin_cohen(flist, monom_diff_funcs=tuple(monom_diff_funcs)):
         res = []
+
+        if monom_diff_funcs is None:
+            monom_diff_funcs = [diff_op_monom_x5 if f._x5_mult else
+                                monom_diff_normal for f in flist]
 
         for a in range(j, -1, -1):
             p_sum = QQ(0)
             for tpl, v in Q[(a, j - a)].dict().items():
-                p_sum += monom_mul(tpl, v, flist)
+                p_sum += monom_mul(tpl, v, flist, monom_diff_funcs)
             res.append(p_sum)
 
         return res
