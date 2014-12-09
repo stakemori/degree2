@@ -9,7 +9,7 @@ from sage.all import CuspForms, PolynomialRing, QQ, matrix, identity_matrix
 from degree2.deg2_fourier import (
     eisenstein_series_degree2,
     degree2_modular_forms_ring_level1_gens,
-    SymmetricWeightModularFormElement)
+    SymmetricWeightModularFormElement, x5__with_prec)
 
 from degree2.all import (rankin_cohen_pair_sym, rankin_cohen_pair_det2_sym,
                          rankin_cohen_triple_det_sym2,
@@ -143,6 +143,17 @@ class TestVectorValued(unittest.TestCase):
         t = (1, 0, 1)
         self.assertTrue(f4_15[t].vec != 0)
         self.assertEqual(f4_15 * QQ(-766402560), g4_15 * QQ(8294400))
+
+        es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(5)
+        f = es6
+        x5 = x5__with_prec(5)
+        f_even_sym2 = rankin_cohen_pair_sym(2, f, x5)
+        f_odd_sym2 = vector_valued_rankin_cohen(es4*x5, f_even_sym2)
+        a = f_odd_sym2[(1, 0, 2)].vec[1]
+        g_sym2_21 = vvld_smfs(2, 21, 4).basis()[0]
+        b = g_sym2_21[(1, 0, 2)].vec[1]
+        self.assertEqual(f_odd_sym2 * b, g_sym2_21 * a)
+
 
     def test_vecor_valued_misc(self):
         prec = 5
