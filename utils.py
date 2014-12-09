@@ -3,6 +3,7 @@ import traceback
 from multiprocessing import Process, Pipe
 import operator
 from itertools import groupby
+from abc import ABCMeta, abstractmethod
 
 import sage
 from sage.misc.cachefunc import cached_function
@@ -49,7 +50,7 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
     if weight_fn is None:
         wt_fn = None
     else:
-        wt_fn = lambda x: weight_fn(x[1])
+        wt_fn = weight_fn
     n = len(l)
     if num_of_procs is not None:
         num = min(n, num_of_procs)
@@ -258,3 +259,37 @@ def is_integer(a):
 def _is_triple_of_integers(tpl):
     return isinstance(tpl, tuple) and len(tpl) == 3 and \
         all([is_integer(a) for a in list(tpl)])
+
+
+class CommRingLikeElment(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def __mul__(self, other):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __add__(self, other):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __eq__(self, other):
+        raise NotImplementedError
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        return self.__add__(other.__neg__())
+
+    def __rsub__(self, other):
+        return self.__neg__().__add__(other)
+
+    def __neg__(self):
+        return self.__mul__(-1)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

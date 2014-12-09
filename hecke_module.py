@@ -409,6 +409,20 @@ class HeckeModule(object):
         lm = f.hecke_eigenvalue(2)
         return all([f.hecke_operator(2, t) == lm * f[t] for t in tupls])
 
+    def _to_vector(self, fm):
+        '''
+        Returns a vector corresponding to fm.
+        By this method, self.basis() becomes the standard basis.
+        '''
+        basis = self.basis()
+        lin_indep_tuples = self.linearly_indep_tuples()
+        l1 = []
+        for f in basis:
+            l1.append([f[t] for t in lin_indep_tuples])
+        m1 = matrix(l1)
+        v = vector([fm[t] for t in lin_indep_tuples])
+        return v * m1**(-1)
+
 
 def reprs_of_double_cosets(p, i):
     '''

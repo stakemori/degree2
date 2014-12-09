@@ -23,14 +23,12 @@ Here, we install the package in "~/sage\_packages/".
     , extract the zip file in "~/sage\_packages/" and rename the
     extracted directory name to `degree2`.
 
-3. Put the following lines to "~/.sage/init.sage" and replace the
-   string between double quotes in the second line by the absolute
-   path of "~/sage\_packages".
-   If you are a Mac user, it is "/Users/your\_username/sage_packages".
+3. Put the following lines to "~/.sage/init.sage".
 
     ```python
     import sys
-    sys.path.append("/absolute/path/to/sage_packages")
+    import os
+    sys.path.append(os.path.join(os.environ["HOME"], "sage_packages"))
     from degree2.all import *
     ```
 

@@ -4,7 +4,7 @@ import unittest
 
 # from unittest import skip
 
-from sage.all import CuspForms, PolynomialRing, QQ
+from sage.all import CuspForms, PolynomialRing, QQ, matrix, identity_matrix
 
 from degree2.deg2_fourier import (
     eisenstein_series_degree2,
@@ -15,8 +15,7 @@ from degree2.all import (rankin_cohen_pair_sym, rankin_cohen_pair_det2_sym,
                          rankin_cohen_triple_det_sym2,
                          rankin_cohen_triple_det_sym4)
 
-from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms \
-    as vvvsmf
+
 from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import det
 
@@ -69,7 +68,7 @@ class TestVectorValued(unittest.TestCase):
         t_det_sym6_x5_x5_e6 = load_cache("triple_det_sym6_x5_x5_e6_prec5.sobj")
 
         # x5 triple
-        r, _,  t = PolynomialRing(QQ,  names="r, s, t").gens()
+        r, _, t = PolynomialRing(QQ, names="r, s, t").gens()
         sym6_17_pol = m_operator(5, 5, 6)(
             QQ(1)/QQ(48)*r**2 - QQ(1)/QQ(24)*r*t + QQ(1)/QQ(64)*t**2)
         self.assertEqual(
@@ -108,12 +107,12 @@ class TestVectorValued(unittest.TestCase):
     # def test_module_of_wt_sym_2_4(self):
     #     for k, j in [(27, 2), (29, 2), (18, 2), (20, 2),
     #                  (12, 4), (14, 4), (19, 4), (21, 4)]:
-    #         M = vvvsmf(j, k, k//10 + 3)
+    #         M = vvld_smfs(j, k, k//10 + 3)
     #         self.assertTrue(M.dimension() > 1)
     #         self.assertEqual(len(M.linearly_indep_tuples()),
     #                          M.dimension())
 
-
+    # @skip("OK")
     def test_vecor_valued_klingen(self):
         lst = [(18, 2), (20, 2), (12, 4), (14, 4)]
         R = PolynomialRing(QQ, names="x")
@@ -124,7 +123,7 @@ class TestVectorValued(unittest.TestCase):
             return 1 - f[2] * x + 2**(wt - 1) * x**2
 
         for k, j in lst:
-            M = vvvsmf(j, k, 4)
+            M = vvld_smfs(j, k, 4)
             S = CuspForms(1, j + k)
             f = S.basis()[0]
             f = f * f[1]**(-1)
@@ -133,7 +132,7 @@ class TestVectorValued(unittest.TestCase):
             F = M.eigenform_with_eigenvalue_t2(lam)
             self.assertEqual(R(F.euler_factor_of_spinor_l(2)),
                              pl * pl.subs({x: 2**(k - 2) * x}))
-
+    # @skip("OK")
     def test_vector_valued_rankin_cohen(self):
         prec = 5
         M4_10 = vvld_smfs(4, 10, prec)
@@ -144,6 +143,12 @@ class TestVectorValued(unittest.TestCase):
         t = (1, 0, 1)
         self.assertTrue(f4_15[t].vec != 0)
         self.assertEqual(f4_15 * QQ(-766402560), g4_15 * QQ(8294400))
+
+    def test_vecor_valued_misc(self):
+        prec = 5
+        M = vvld_smfs(2, 20, prec)
+        m = matrix([M._to_vector(f).list() for f in M.basis()])
+        self.assertEqual(m, identity_matrix(QQ, M.dimension()))
 
 
 

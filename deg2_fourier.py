@@ -2,6 +2,7 @@
 import os
 import operator
 from itertools import imap
+from abc import ABCMeta
 
 import sage
 from sage.misc.cachefunc import cached_method, cached_function
@@ -17,7 +18,8 @@ from sage.all import O as bigO
 import sage.matrix.matrix_space
 
 from degree2.utils import (is_number, linearly_indep_rows_index_list,
-                           polynomial_func, list_group_by, pmap)
+                           polynomial_func, list_group_by, pmap,
+                           CommRingLikeElment)
 
 from degree2.utils import det as deg2_det
 
@@ -52,19 +54,23 @@ def common_base_ring(forms):
 
 
 def common_prec(forms):
+    if all(f.prec.type == "diag_max" for f in forms):
+        return PrecisionDeg2(min([f.prec.value for f in forms]))
+    # else
     a_prec = forms[0].prec
     if all([a_prec == f.prec for f in forms[1:]]):
         return a_prec
     else:
         raise NotImplementedError
 
-cache_gens_power = False
 
+class FormalQexp(CommRingLikeElment):
+    '''
+    A parent class of Deg2QsrsElement and QseriesTimesQminushalf.
+    '''
 
-class Deg2QsrsElement(object):
-    '''
-    A class of formal Fourier series of degree 2.
-    '''
+    __metaclass__ = ABCMeta
+
     def __init__(self, fc_dct, prec, base_ring=QQ, is_cuspidal=False):
         '''
         fc_dct is a dictionary whose set of keys is PrecisionDeg2(prec).
@@ -81,41 +87,17 @@ class Deg2QsrsElement(object):
         self._is_gen = False
         self._sym_wt = 0
 
+    def __add__(self, other):
+        raise NotImplementedError
+
+    def __mul__(self, other):
+        raise NotImplementedError
+
     def __eq__(self, other):
         if other == 0:
             return all([x == 0 for x in self.fc_dct.itervalues()])
         else:
             return self - other == 0
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def _to_format_dct(self):
-        data_dict = {"prec": self.prec._to_format_dct(),
-                     "base_ring": self.base_ring,
-                     "fc_dct": self.fc_dct,
-                     "is_cuspidal": self._is_cuspidal}
-        return data_dict
-
-    def save_as_binary(self, filename):
-        data_dict = self._to_format_dct()
-        save(data_dict, filename)
-
-    @classmethod
-    def _from_dict_to_object(cls, data_dict):
-        if "mp" in data_dict.keys():
-            kys = ["mp", "prec", "base_ring", "is_cuspidal"]
-        else:
-            kys = ["fc_dct", "prec", "base_ring", "is_cuspidal"]
-        fc_dct, prec, base_ring, is_cuspidal = [data_dict[ky] for ky in kys]
-        prec = PrecisionDeg2._from_dict_to_object(prec)
-        return cls(fc_dct, prec, base_ring=base_ring,
-                   is_cuspidal=is_cuspidal)
-
-    @classmethod
-    def load_from(cls, filename):
-        data_dict = load(filename)
-        return cls._from_dict_to_object(data_dict)
 
     @property
     def base_ring(self):
@@ -156,6 +138,57 @@ class Deg2QsrsElement(object):
     def iteritems(self):
         return self.fc_dct.iteritems()
 
+    def sorted_list(self):
+        return to_sorted_fc_list(self.fc_dct)
+
+
+cache_gens_power = False
+
+
+class Deg2QsrsElement(FormalQexp):
+    '''
+    A class of formal Fourier series of degree 2.
+    '''
+    def __init__(self, fc_dct, prec, base_ring=QQ, is_cuspidal=False):
+        '''
+        fc_dct is a dictionary whose set of keys is PrecisionDeg2(prec).
+        '''
+        FormalQexp.__init__(self, fc_dct, prec, base_ring=base_ring,
+                            is_cuspidal=is_cuspidal)
+
+    def __eq__(self, other):
+        if other == 0:
+            return all([x == 0 for x in self.fc_dct.itervalues()])
+        else:
+            return self - other == 0
+
+    def _to_format_dct(self):
+        data_dict = {"prec": self.prec._to_format_dct(),
+                     "base_ring": self.base_ring,
+                     "fc_dct": self.fc_dct,
+                     "is_cuspidal": self._is_cuspidal}
+        return data_dict
+
+    def save_as_binary(self, filename):
+        data_dict = self._to_format_dct()
+        save(data_dict, filename)
+
+    @classmethod
+    def _from_dict_to_object(cls, data_dict):
+        if "mp" in data_dict.keys():
+            kys = ["mp", "prec", "base_ring", "is_cuspidal"]
+        else:
+            kys = ["fc_dct", "prec", "base_ring", "is_cuspidal"]
+        fc_dct, prec, base_ring, is_cuspidal = [data_dict[ky] for ky in kys]
+        prec = PrecisionDeg2._from_dict_to_object(prec)
+        return cls(fc_dct, prec, base_ring=base_ring,
+                   is_cuspidal=is_cuspidal)
+
+    @classmethod
+    def load_from(cls, filename):
+        data_dict = load(filename)
+        return cls._from_dict_to_object(data_dict)
+
     def __add__(self, other):
         if is_number(other):
             fcmap = self.fc_dct.copy()
@@ -172,15 +205,6 @@ class Deg2QsrsElement(object):
         fcmap = _add_fourier(ms, mo, prec, cuspidal)
         return Deg2QsrsElement(fcmap, prec, base_ring=bsring,
                                is_cuspidal=cuspidal)
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __sub__(self, other):
-        return self.__add__(other.__neg__())
-
-    def __rsub__(self, other):
-        return self.__neg__().__add__(other)
 
     def __mul__(self, other):
         if is_number(other):
@@ -202,16 +226,16 @@ class Deg2QsrsElement(object):
             mo = other.fc_dct
             cuspidal = self._is_cuspidal or other._is_cuspidal
             fcmap = _mul_fourier(ms, mo, prec, cuspidal)
-            return Deg2QsrsElement(fcmap, prec, base_ring=bsring,
-                                   is_cuspidal=cuspidal)
+            res = Deg2QsrsElement(fcmap, prec, base_ring=bsring,
+                                  is_cuspidal=cuspidal)
+            return res
 
-        elif isinstance(other, SymmetricWeightGenericElement):
+        # elif isinstance(other, SymmetricWeightGenericElement):
+        #     return other.__mul__(self)
+
+        else:
             return other.__mul__(self)
 
-        raise NotImplementedError
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
 
     # dictionary s.t. ("gen_name", prec) => {0: f, 1: f^2, 2: f^4, 3: f^8, ...}
     gens_powers_cached_dict = {}
@@ -274,10 +298,6 @@ class Deg2QsrsElement(object):
             if int(revs[i]) != 0:
                 res *= cached_dict[i]
         return res
-
-    def __neg__(self):
-        fcmap = _mul_fourier_by_num(self.fc_dct, -1, self.prec)
-        return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
 
     def theta_operator4(self):
         dic = dict()
@@ -382,9 +402,6 @@ class Deg2QsrsElement(object):
         '''
         return self._differential_operator_monomial(0, 1, 0)
 
-    def sorted_list(self):
-        return to_sorted_fc_list(self.fc_dct)
-
     def change_ring(self, R, hom=None):
         '''
         Returns a Fourier expansion whose base ring is changed.
@@ -442,6 +459,138 @@ class Deg2QsrsElement(object):
         fc_dct = {t: d["fc_dct"][t] for t in prec}
         d["fc_dct"] = fc_dct
         return Deg2QsrsElement._from_dict_to_object(d)
+
+
+def _mul_q_half_monom(f, a=1):
+    '''
+    Let f be a formal Fourier expansion:
+    f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
+    Assuming f * q1^(-a) * t^a * q2^(-a)
+    This function returns f * q1^(-a) * t^a * q2^(-a).
+    Decrease prec by a.
+    '''
+    if f.prec.type != "diag_max":
+        raise NotImplementedError
+    prec = PrecisionDeg2(f.prec.value - a)
+    res_dc = {}
+    fc_dct = f.fc_dct
+    for n, r, m in prec:
+        if 4*(n + a)*(m + a)-(r - a)**2 <= 0:
+            res_dc[(n, r, m)] = 0
+        else:
+            res_dc[(n, r, m)] = fc_dct[(n + a, r - a, m + a)]
+    return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
+
+
+class QseriesTimesQminushalf(FormalQexp):
+    '''
+    An instance of this class represents a formal qexpansion
+    q1^(-1/2) * t^(1/2) * q2^(-1/2) sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
+    A typical instance of this class is a return value of x5__with_prec.
+    '''
+    def __init__(self, f):
+        '''
+        f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m in the notation above.
+        '''
+        self.__f = f
+        self._mul_dct = {}
+        FormalQexp.__init__(self, f.fc_dct, f.prec, base_ring=f.base_ring)
+
+    @property
+    def f_part(self):
+        return self.__f
+
+    def __getitem__(self, t):
+        if self._mul_dct == {}:
+            self._mul_dct = {(n - QQ(1)/QQ(2),
+                              r + QQ(1)/QQ(2),
+                              m - QQ(1)/QQ(2)): v
+                             for (n, r, m), v in self.f_part.fc_dct.items()}
+        return self._mul_dct[t]
+
+    def _name(self):
+        return 'q1^(-1/2)t^(1/2)q2^(-1/2) times q-expansion'
+
+    def __mul__(self, other):
+        if isinstance(other, QseriesTimesQminushalf):
+            return _mul_q_half_monom(self.f_part * other.f_part)
+        else:
+            return QseriesTimesQminushalf(self.f_part * other)
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        elif isinstance(other, QseriesTimesQminushalf):
+            return QseriesTimesQminushalf(self.f_part + other.f_part)
+        else:
+            raise NotImplementedError
+
+    def __pow__(self, other):
+        if other == 0:
+            return 1
+        elif other == 1:
+            return self
+        elif is_number(other) and other > 0:
+            f = (self.f_part)**other
+            q, r = divmod(other, 2)
+            g = _mul_q_half_monom(f, a=q)
+            if r == 0:
+                return g
+            else:
+                return QseriesTimesQminushalf(g)
+        else:
+            raise NotImplementedError
+
+    def _differential_operator_monomial(self, a, b, c):
+        fcmap = {(n, r, m): ((n - QQ(1)/QQ(2))**a *
+                             (r + QQ(1)/QQ(2))**b *
+                             (m - QQ(1)/QQ(2))**c * v)
+                 for (n, r, m), v in self.f_part.fc_dct.iteritems()}
+        f = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring)
+        return QseriesTimesQminushalf(f)
+
+
+class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
+    '''
+    An instance of QseriesTimesQminushalf and can be regard as modular form.
+    (i.e. multiple of x5 by a modular form of level 1).
+    A typical instance of this class is a return value of x5__with_prec.
+    '''
+    def __init__(self, f, wt):
+        QseriesTimesQminushalf.__init__(self, f)
+        self.__wt = wt
+
+    @property
+    def wt(self):
+        return self.__wt
+
+    def __mul__(self, other):
+        res = QseriesTimesQminushalf.__mul__(self, other)
+        if isinstance(other, Deg2ModularFormQseries):
+            return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
+        elif isinstance(other, ModFormQsrTimesQminushalf):
+            return Deg2ModularFormQseries(self.wt + other.wt,
+                                          res.fc_dct, res.prec,
+                                          base_ring=res.base_ring)
+        else:
+            return res
+
+    def __add__(self, other):
+        res = QseriesTimesQminushalf.__add__(self, other)
+        if (isinstance(other, ModFormQsrTimesQminushalf) and
+            self.wt == other.wt):
+            return ModFormQsrTimesQminushalf(res.f_part, self.wt)
+        else:
+            return res
+
+    def __pow__(self, other):
+        res = QseriesTimesQminushalf.__pow__(self, other)
+        wt = self.wt * other
+        if isinstance(res, Deg2QsrsElement):
+            return Deg2ModularFormQseries(wt, res.fc_dct, res.prec,
+                                          base_ring=res.base_ring)
+        else:
+            return ModFormQsrTimesQminushalf(res.f_part, wt)
 
 
 def is_hol_mod_form(f):
@@ -1005,7 +1154,7 @@ def x5_jacobi_g(n, r, prec=40):
 @cached_function
 def x5__with_prec(prec):
     '''
-    Returns formal q-expansion f s.t. f * q1^(-1/2)*t^(1/2)*q2^(^1/2)
+    Returns formal q-expansion f s.t. f * q1^(-1/2)*t^(1/2)*q2^(-1/2)
     equals to x5 (x10 == x5^2).
     '''
     pwsr_prec = (2*prec - 1)**2
@@ -1029,7 +1178,7 @@ def x5__with_prec(prec):
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
     res = Deg2QsrsElement(fc_dct, prec)
-    return res
+    return ModFormQsrTimesQminushalf(res, 5)
 
 
 def _det3(ls):
@@ -1069,7 +1218,7 @@ def tuples_even_wt_modular_forms(wt):
     Returns the list of tuples (p, q, r, s) such that
     4p + 6q + 10r +12s = wt.
     '''
-    if wt < 0:
+    if wt < 0 or wt%2 == 1:
         return []
     w = wt/2
     return [(p, q, r, s) for p in range(0, floor(w/2) + 1)
@@ -1278,7 +1427,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         lin_indep_tuples_cached = \
             KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
         if (wt in lin_indep_tuples_cached.keys() and
-            lin_indep_tuples_cached[wt] != []):
+             lin_indep_tuples_cached[wt] != []):
             return lin_indep_tuples_cached[wt]
         basis = self.basis()
         dim = self.dimension()
@@ -1301,20 +1450,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         l = [[fm[(n, r, m)] for n, r, m in tuples] for fm in basis]
         return matrix(l).rank() == len(basis)
 
-    def _to_vector(self, fm):
-        '''
-        Returns a vector corresponding to fm.
-        By this method, self.basis() becomes the standard basis.
-        '''
-        basis = self.basis()
-        lin_indep_tuples = self.linearly_indep_tuples()
-        l1 = []
-        for f in basis:
-            l1.append([f[t] for t in lin_indep_tuples])
-        m1 = matrix(l1)
-        v = vector([fm[t] for t in lin_indep_tuples]).column()
-        return (m1.transpose())**(-1) * v
-
     def _to_form(self, v):
         '''
         The inverse to _to_vector.
@@ -1324,8 +1459,8 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         return reduce(operator.add, [basis[i] * v[i] for i in range(n)])
 
     def construction(self, f):
-        return sum([a[0] * b._construction for a, b in zip(self._to_vector(f),
-                                                           self.basis())])
+        return sum([a * b._construction for a, b in zip(self._to_vector(f),
+                                                        self.basis())])
 
     def hecke_eigenvalue(self, f, a):
         '''

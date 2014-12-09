@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import QQ, PolynomialRing, matrix, log
+from sage.all import QQ, PolynomialRing, matrix, log, Integer
 
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
@@ -17,55 +17,38 @@ from degree2.basic_operation import PrecisionDeg2
 
 
 def diff_op_monom_x5(f, t):
-    al = QQ(-1)/QQ(2)
-    be = QQ(1)/QQ(2)
-    gm = QQ(-1)/QQ(2)
     a, b, c = t
-    return sum([al**i * be**j * gm**k * combination(a, i) *
-                combination(b, j) * combination(c, k) *
-                f._differential_operator_monomial(a - i, b - j, c - k)
-                for i in range(a + 1)
-                for j in range(b + 1)
-                for k in range(c + 1)])
+    fcmap = {(n, r, m):
+             ((n - Integer(1)/Integer(2))**a *
+              (r + Integer(1)/Integer(2))**b *
+              (m - Integer(1)/Integer(2))**c * v)
+             for (n, r, m), v in f.fc_dct.iteritems()}
+    res = Deg2QsrsElement(fcmap, f.prec, base_ring=f.base_ring,
+                          is_cuspidal=f._is_cuspidal)
+    return res
 
 
 def monom_diff_normal(f, t):
     return f._differential_operator_monomial(*t)
 
 
-def _mul_q_half_monom(f):
-    '''
-    Let f be a formal Fourier expansion:
-    f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
-    This function returns f * q1^(-1) * t * q2^(-1).
-    Decrease prec by 1.
-    '''
-    prec = PrecisionDeg2(f.prec.prec-1)
-    res_dc = {}
-    fc_dct = f.fc_dct
-    for n, r, m in prec:
-        if 4*(n+1)*(m+1)-(r-1)**2 <= 0:
-            res_dc[(n, r, m)] = 0
-        else:
-            res_dc[(n, r, m)] = fc_dct[(n + 1, r - 1, m + 1)]
-    return Deg2QsrsElement(res_dc, prec.prec, base_ring=f.base_ring)
-
-
-def rankin_cohen_triple_x5(Q, f, prec):
+def rankin_cohen_triple_x5(Q, f, prec, i=2):
     '''
     Let D be the differential operator ass. to Q.
-    Returns D(x5, x5, f).
+    If i = 0, returns D(f, x5, x5),
+    If i = 1, returns D(x5, f, x5),
+    If i = 2, returns D(x5, x5, f).
     '''
     prec = PrecisionDeg2(prec)
     prec_p1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
     if f.prec < prec_p1:
         raise RuntimeError("The precision of f must be bigger than prec.")
-    x5 = x5__with_prec(prec_p1.prec)
+    x5 = x5__with_prec(prec_p1.value)
     g = f._down_prec(prec_p1)
-    funcs = [diff_op_monom_x5, diff_op_monom_x5, monom_diff_normal]
+    args = [x5] * 3
     k = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5, g])
-    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    args[i] = g
+    forms = _rankin_cohen_bracket_func(Q)(args)
     return SWMFE(forms, 10 + f.wt + k, prec)
 
 
@@ -77,10 +60,8 @@ def rankin_cohen_pair_x5(Q, prec):
     prec = PrecisionDeg2(prec)
     prec_p1 = max([n for n, _, _ in prec]) + 1
     x5 = x5__with_prec(prec_p1)
-    funcs = [diff_op_monom_x5, diff_op_monom_x5]
     k = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5])
-    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    forms = _rankin_cohen_bracket_func(Q)([x5, x5])
     return SWMFE(forms, 10 + k, prec)
 
 
@@ -106,8 +87,7 @@ def _inc_weight(Q):
     return int(log(a)/log(2))
 
 
-def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
-                               monom_diff_funcs=None):
+def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
     '''
     Let
     rnames = "r00, r01, r02, ..., r(n-1)0, r(n-1)1, r(n-1)2"
@@ -137,25 +117,19 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     Q = S(Q)
     j = Q.degree()
 
-    if monom_diff_funcs is None:
-        monom_diff_funcs = [monom_diff_normal for _ in range(len(R.gens())//3)]
-
-
     def monom_mul(tpl, v, flist):
         tpls = group(tpl, 3)
-        l = zip(flist, tpls, monom_diff_funcs)
-        return ((v * mul([QQ(2)**(-t[1]) for _, t, _ in l])) *
-                mul([func(f, t) for f, t, func in l]))
+        l = zip(flist, tpls)
+        return ((v * mul([QQ(2)**(-t[1]) for _, t in l])) *
+                mul([f._differential_operator_monomial(*t) for f, t in l]))
 
     def rankin_cohen(flist):
         res = []
-
         for a in range(j, -1, -1):
             p_sum = QQ(0)
             for tpl, v in Q[(a, j - a)].dict().items():
                 p_sum += monom_mul(tpl, v, flist)
             res.append(p_sum)
-
         return res
 
     return rankin_cohen

@@ -56,6 +56,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
             bls.append(bl)
         self.assertTrue(all(bls))
 
+    # @skip("OK")
     def save_load_basis(self, wt):
         KS = KlingenEisensteinAndCuspForms(wt, 10)
         basis = KS.basis()
@@ -2103,6 +2104,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.save_load_basis(34)
         self.save_load_basis(47)
 
+    # @skip("OK")
     def test_eisenstein(self):
         prec = 10
         es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for k in [4, 6, 10, 12]]
@@ -2125,6 +2127,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
         A = [[1, 0], [0, 0], [1, 0], [0, 1]]
         self.assertEqual(linearly_indep_rows_index_list(A, 2), [0, 3])
 
+    # @skip("OK")
     def test_hecke_operator(self):
         es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(10)
         self.assertEqual(es4.hecke_operator_acted(2, 5),
@@ -2133,9 +2136,19 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertEqual(f10.hecke_operator_acted(2, 5),
                          -6168 * f10._down_prec(5))
 
+    # @skip("OK")
     def test_pmap(self):
         self.assertEqual([x**2 for x in range(100)],
                          pmap(lambda x: x**2, range(100), num_of_procs=4))
+
+    def test_x5_mul(self):
+        x5 = x5__with_prec(5)
+        x10 = x10_with_prec(4)
+        es4 = eisenstein_series_degree2(4, 5)
+        self.assertEqual(x10, x5**2)
+        self.assertEqual(x10 * x5, x5**3)
+        self.assertEqual(x5 * es4, es4 * x5)
+        self.assertEqual((x5 + x5*es4)*x5, x10 + x10*es4)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
