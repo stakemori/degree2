@@ -541,6 +541,14 @@ class QseriesTimesQminushalf(FormalQexp):
         else:
             raise NotImplementedError
 
+    def _differential_operator_monomial(self, a, b, c):
+        fcmap = {(n, r, m): ((n - QQ(1)/QQ(2))**a *
+                             (r + QQ(1)/QQ(2))**b *
+                             (m - QQ(1)/QQ(2))**c * v)
+                 for (n, r, m), v in self.f_part.fc_dct.iteritems()}
+        f = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring)
+        return QseriesTimesQminushalf(f)
+
 
 class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
     '''
