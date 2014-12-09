@@ -593,38 +593,6 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
             return ModFormQsrTimesQminushalf(res.f_part, wt)
 
 
-class MultipleByX5(Deg2QsrsElement):
-    '''
-    An instance of this class represents x5 * f, where f is a modular form of
-    level 1.
-    '''
-    def __init__(self, f):
-        self._f = f
-        self._wt = f.wt + 5
-        if f.prec.type != "diag_max":
-            raise NotImplementedError
-        x5 = x5__with_prec(f.prec.value)
-        g = f*x5
-        Deg2QsrsElement.__init__(self, g.fc_dct, f.prec, base_ring=g.base_ring)
-
-    @property
-    def wt(self):
-        return self._wt
-
-    @property
-    def level_1_part(self):
-        return self._f
-
-    def _differential_operator_monomial(self, a, b, c):
-        fcmap = {(n, r, m): ((n - QQ(1)/QQ(2))**a *
-                             (r + QQ(1)/QQ(2))**b *
-                             (m - QQ(1)/QQ(2))**c * v)
-                 for (n, r, m), v in self.fc_dct.iteritems()}
-        res = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring,
-                              is_cuspidal=self._is_cuspidal)
-        return res
-
-
 def is_hol_mod_form(f):
     return isinstance(f, Deg2ModularFormQseries)
 

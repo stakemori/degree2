@@ -4,8 +4,7 @@ from sage.all import QQ, PolynomialRing, matrix, log, Integer
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, Deg2QsrsElement,
-                                  _common_base_ring, _mul_q_half_monom,
-                                  MultipleByX5)
+                                  _common_base_ring)
 
 from degree2.deg2_fourier import SymmetricWeightGenericElement\
     as SWGElt
@@ -33,50 +32,6 @@ def monom_diff_normal(f, t):
     return f._differential_operator_monomial(*t)
 
 
-def _rankin_cohen_pair_mul_of_x5_sym(j, f, g):
-    '''
-    Assumes f and g are instances of MultipleByX5.
-    Returns {f, g}_{Sym(j)}. Decreases prec by 1.
-    '''
-    Q = _rankin_cohen_pair_sym_pol(j, f.wt, g.wt)
-    return _rankin_cohen_pair_mul_of_x5(Q, f, g)
-
-
-def _rankin_cohen_pair_mul_of_x5_det2_sym(j, f, g):
-    '''
-    Assumes f and g are instances of MultipleByX5.
-    Returns {f, g}_{det^2 Sym(j)}. Decreases prec by 1.
-    '''
-    Q = _rankin_cohen_pair_det2_sym_pol(j, f.wt, g.wt)
-    return _rankin_cohen_pair_mul_of_x5(Q, f, g)
-
-
-def _rankin_cohen_pair_mul_of_x5(Q, f, g):
-    """
-    Assumes f and g are instances of MultipleByX5.
-    Decreases prec by 1.
-    """
-    flist = [f, g]
-    forms = _rankin_cohen_bracket_func(Q)(flist)
-    forms = [_mul_q_half_monom(a) for a in forms]
-    prec = f.prec
-    return SWMFE(forms, sum([f.wt for f in flist]), prec)
-
-
-def _rankin_cohen_triple_mul_of_x5(Q, f, g, h):
-    '''
-    Assumes that
-    2 of f, g and h are instances of MultipleByX5  and the remaining one is a
-    modular form of level 1. Decreases prec by 1.
-    '''
-    flist = [f, g, h]
-    prec = flist[0].prec
-    a = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q)(flist)
-    forms = [_mul_q_half_monom(a) for a in forms]
-    return SWMFE(forms, sum([f.wt for f in flist]) + a, prec)
-
-
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
     '''
     Let D be the differential operator ass. to Q.
@@ -90,13 +45,10 @@ def rankin_cohen_triple_x5(Q, f, prec, i=2):
         raise RuntimeError("The precision of f must be bigger than prec.")
     x5 = x5__with_prec(prec_p1.value)
     g = f._down_prec(prec_p1)
-    funcs = [diff_op_monom_x5] * 3
     args = [x5] * 3
     k = _inc_weight(Q)
-    funcs[i] = monom_diff_normal
     args[i] = g
-    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)(args)
-    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    forms = _rankin_cohen_bracket_func(Q)(args)
     return SWMFE(forms, 10 + f.wt + k, prec)
 
 
@@ -108,10 +60,8 @@ def rankin_cohen_pair_x5(Q, prec):
     prec = PrecisionDeg2(prec)
     prec_p1 = max([n for n, _, _ in prec]) + 1
     x5 = x5__with_prec(prec_p1)
-    funcs = [diff_op_monom_x5, diff_op_monom_x5]
     k = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q, monom_diff_funcs=funcs)([x5, x5])
-    forms = [_mul_q_half_monom(a)._down_prec(prec) for a in forms]
+    forms = _rankin_cohen_bracket_func(Q)([x5, x5])
     return SWMFE(forms, 10 + k, prec)
 
 
@@ -137,8 +87,7 @@ def _inc_weight(Q):
     return int(log(a)/log(2))
 
 
-def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
-                               monom_diff_funcs=None):
+def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
     '''
     Let
     rnames = "r00, r01, r02, ..., r(n-1)0, r(n-1)1, r(n-1)2"
@@ -168,25 +117,19 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None,
     Q = S(Q)
     j = Q.degree()
 
-    def monom_mul(tpl, v, flist, diff_funcs):
+    def monom_mul(tpl, v, flist):
         tpls = group(tpl, 3)
-        l = zip(flist, tpls, diff_funcs)
-        return ((v * mul([QQ(2)**(-t[1]) for _, t, _ in l])) *
-                mul([func(f, t) for f, t, func in l]))
+        l = zip(flist, tpls)
+        return ((v * mul([QQ(2)**(-t[1]) for _, t in l])) *
+                mul([f._differential_operator_monomial(*t) for f, t in l]))
 
-    def rankin_cohen(flist, monom_diff_funcs=tuple(monom_diff_funcs)):
+    def rankin_cohen(flist):
         res = []
-
-        if monom_diff_funcs is None:
-            monom_diff_funcs = [diff_op_monom_x5 if isinstance(f, MultipleByX5)
-                                else monom_diff_normal for f in flist]
-
         for a in range(j, -1, -1):
             p_sum = QQ(0)
             for tpl, v in Q[(a, j - a)].dict().items():
-                p_sum += monom_mul(tpl, v, flist, monom_diff_funcs)
+                p_sum += monom_mul(tpl, v, flist)
             res.append(p_sum)
-
         return res
 
     return rankin_cohen
