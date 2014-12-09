@@ -256,12 +256,12 @@ class Deg2QsrsElement(FormalQexp):
                                   is_cuspidal=cuspidal)
             return res
 
-        # elif isinstance(other, SymmetricWeightGenericElement):
-        #     return other.__mul__(self)
-
-        else:
+        elif isinstance(other, (SymmetricWeightGenericElement,
+                                QseriesTimesQminushalf)):
             return other.__mul__(self)
 
+        else:
+            raise NotImplementedError
 
     # dictionary s.t. ("gen_name", prec) => {0: f, 1: f^2, 2: f^4, 3: f^8, ...}
     gens_powers_cached_dict = {}
@@ -519,8 +519,12 @@ class QseriesTimesQminushalf(FormalQexp):
     def __mul__(self, other):
         if isinstance(other, QseriesTimesQminushalf):
             return _mul_q_half_monom(self.f_part * other.f_part)
-        else:
+        elif isinstance(other, Deg2QsrsElement) or is_number(other):
             return QseriesTimesQminushalf(self.f_part * other)
+        elif isinstance(other, SymmetricWeightGenericElement):
+            return other.__mul__(self)
+        else:
+            raise NotImplementedError
 
     def __add__(self, other):
         if other == 0:
@@ -1760,7 +1764,7 @@ class SymmetricWeightGenericElement(object):
                 base_ring = self.base_ring
             return SymmetricWeightGenericElement(forms, prec, base_ring)
 
-        if isinstance(other, Deg2QsrsElement) or is_number(other):
+        if isinstance(other, (Deg2QsrsElement, QseriesTimesQminushalf)):
             prec = common_prec([self, other])
             forms = [f * other for f in self.forms]
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
