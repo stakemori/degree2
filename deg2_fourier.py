@@ -2,7 +2,7 @@
 import os
 import operator
 from itertools import imap
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 import sage
 from sage.misc.cachefunc import cached_method, cached_function
@@ -140,6 +140,32 @@ class FormalQexp(CommRingLikeElment):
 
     def sorted_list(self):
         return to_sorted_fc_list(self.fc_dct)
+
+    @abstractmethod
+    def _differential_operator_monomial(self, n, r, m):
+        pass
+
+    def differentiate_wrt_tau(self):
+        '''
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to tau.
+        '''
+        return self._differential_operator_monomial(1, 0, 0)
+
+    def differentiate_wrt_w(self):
+        '''
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to w.
+        '''
+        return self._differential_operator_monomial(0, 0, 1)
+
+    def differentiate_wrt_z(self):
+        '''
+        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
+        half space of degree 2.  Returns the derivative with respect to z.
+        '''
+        return self._differential_operator_monomial(0, 1, 0)
+
 
 
 cache_gens_power = False
@@ -380,27 +406,6 @@ class Deg2QsrsElement(FormalQexp):
                  sorted([(i, v) for i, v in formsdict.iteritems()],
                         key=lambda x: x[0])]
         return SymmetricWeightGenericElement(forms, self.prec, self.base_ring)
-
-    def differentiate_wrt_tau(self):
-        '''
-        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
-        half space of degree 2.  Returns the derivative with respect to tau.
-        '''
-        return self._differential_operator_monomial(1, 0, 0)
-
-    def differentiate_wrt_w(self):
-        '''
-        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
-        half space of degree 2.  Returns the derivative with respect to w.
-        '''
-        return self._differential_operator_monomial(0, 0, 1)
-
-    def differentiate_wrt_z(self):
-        '''
-        Let [[tau, z],[z, w]] be the parameter of the Siegel upper
-        half space of degree 2.  Returns the derivative with respect to z.
-        '''
-        return self._differential_operator_monomial(0, 1, 0)
 
     def change_ring(self, R, hom=None):
         '''
