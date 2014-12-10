@@ -426,6 +426,7 @@ def vector_valued_rankin_cohen(f, vec_val):
 
     crs_prd1 = _cross_prod(diff_tau, diff_d(vec_val))
     forms1 = _bracket_vec_val(crs_prd1)
+    prec = common_prec(forms1)
     res1 = (vec_val.wt + sym_wt//2 - 1) * SWGElt(forms1, prec,
                                                  base_ring=base_ring)
 

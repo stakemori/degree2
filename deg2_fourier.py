@@ -1765,8 +1765,8 @@ class SymmetricWeightGenericElement(object):
             return SymmetricWeightGenericElement(forms, prec, base_ring)
 
         if isinstance(other, (Deg2QsrsElement, QseriesTimesQminushalf)):
-            prec = common_prec([self, other])
             forms = [f * other for f in self.forms]
+            prec = common_prec(forms)
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
             return SymmetricWeightGenericElement(forms, prec, base_ring)
         else:
