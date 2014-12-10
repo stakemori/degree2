@@ -1858,7 +1858,8 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
                                                      res.prec,
                                                      res.base_ring)
 
-        if isinstance(other, Deg2ModularFormQseries):
+        if isinstance(other, (Deg2ModularFormQseries,
+                              ModFormQsrTimesQminushalf)):
             return SymmetricWeightModularFormElement(res.forms,
                                                      self.wt + other.wt,
                                                      res.prec,
