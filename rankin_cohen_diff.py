@@ -1,10 +1,9 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import QQ, PolynomialRing, matrix, log, Integer
+from sage.all import QQ, PolynomialRing, matrix, log
 
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
-                                  x5__with_prec, Deg2QsrsElement,
-                                  _common_base_ring)
+                                  x5__with_prec, _common_base_ring)
 
 from degree2.deg2_fourier import SymmetricWeightGenericElement\
     as SWGElt
@@ -14,22 +13,6 @@ from degree2.deg2_fourier import SymmetricWeightModularFormElement \
     as SWMFE
 
 from degree2.basic_operation import PrecisionDeg2
-
-
-def diff_op_monom_x5(f, t):
-    a, b, c = t
-    fcmap = {(n, r, m):
-             ((n - Integer(1)/Integer(2))**a *
-              (r + Integer(1)/Integer(2))**b *
-              (m - Integer(1)/Integer(2))**c * v)
-             for (n, r, m), v in f.fc_dct.iteritems()}
-    res = Deg2QsrsElement(fcmap, f.prec, base_ring=f.base_ring,
-                          is_cuspidal=f._is_cuspidal)
-    return res
-
-
-def monom_diff_normal(f, t):
-    return f._differential_operator_monomial(*t)
 
 
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
