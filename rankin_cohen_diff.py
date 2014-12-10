@@ -137,6 +137,14 @@ def _triple_gens():
     return (R.gens(), S.gens())
 
 
+def _rankin_cohen_gen(Q, flist):
+    forms = _rankin_cohen_bracket_func(Q)(flist)
+    prec = common_prec(forms)
+    base_ring = common_base_ring(flist)
+    a = _inc_weight(Q)
+    return SWMFE(forms, sum([f.wt for f in flist]) + a, prec, base_ring)
+
+
 def rankin_cohen_pair_sym(j, f, g):
     '''
     Assuming j: even, returns Rankin-Cohen bracket
@@ -148,10 +156,7 @@ def rankin_cohen_pair_sym(j, f, g):
     '''
     Q = _rankin_cohen_pair_sym_pol(j, f.wt, g.wt)
     args = [f, g]
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    prec = common_prec(args)
-    base_ring = common_base_ring(args)
-    return SWMFE(forms, sum([fm.wt for fm in args]), prec, base_ring)
+    return _rankin_cohen_gen(Q, args)
 
 
 def rankin_cohen_pair_det2_sym(j, f, g):
@@ -162,37 +167,25 @@ def rankin_cohen_pair_det2_sym(j, f, g):
     '''
     Q = _rankin_cohen_pair_det2_sym_pol(j, f.wt, g.wt)
     args = [f, g]
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    prec = common_prec(args)
-    base_ring = common_base_ring(args)
-    return SWMFE(forms, sum([fm.wt for fm in args]) + 2, prec, base_ring)
+    return _rankin_cohen_gen(Q, args)
 
 
 def rankin_cohen_triple_det_sym2(f, g, h):
     Q = _rankin_cohen_triple_det_sym2_pol(f.wt, g.wt, h.wt)
     args = [f, g, h]
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    prec = common_prec(args)
-    base_ring = common_base_ring(args)
-    return SWMFE(forms, f.wt + g.wt + h.wt + 1, prec, base_ring)
+    return _rankin_cohen_gen(Q, args)
 
 
 def rankin_cohen_triple_det_sym4(f, g, h):
     Q = _rankin_cohen_triple_det_sym4_pol(f.wt, g.wt, h.wt)
     args = [f, g, h]
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    prec = common_prec(args)
-    base_ring = common_base_ring(args)
-    return SWMFE(forms, f.wt + g.wt + h.wt + 1, prec, base_ring)
+    return _rankin_cohen_gen(Q, args)
 
 
 def rankin_cohen_triple_det_sym8(f, g, h):
     Q = _rankin_cohen_triple_det_sym8_pol(f.wt, g.wt, h.wt)
     args = [f, g, h]
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    prec = common_prec(args)
-    base_ring = common_base_ring(args)
-    return SWMFE(forms, f.wt + g.wt + h.wt + 1, prec, base_ring)
+    return _rankin_cohen_gen(Q, args)
 
 
 def _rankin_cohen_pair_sym_pol(j, k, l):
