@@ -1,9 +1,11 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import QQ, PolynomialRing, matrix, log
+from sage.all import QQ, PolynomialRing, matrix, log, cached_function
 
 from degree2.utils import mul, combination, group
 from degree2.deg2_fourier import (common_prec, common_base_ring,
                                   x5__with_prec, _common_base_ring)
+
+from degree2.deg2_fourier import Deg2QsrsElement, QseriesTimesQminushalf
 
 from degree2.deg2_fourier import SymmetricWeightGenericElement\
     as SWGElt
@@ -48,6 +50,7 @@ def rankin_cohen_pair_x5(Q, prec):
     return SWMFE(forms, 10 + k, prec)
 
 
+@cached_function
 def _inc_weight(Q):
     '''
     Let D be the differential operator ass. to Q.
