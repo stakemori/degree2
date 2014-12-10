@@ -403,8 +403,11 @@ def vector_valued_rankin_cohen(f, vec_val):
     This function returns a vector valued Siegel modular form
     of weight det^(k + l + 1) Sym(j).
     '''
+    if not (isinstance(f, (Deg2QsrsElement, QseriesTimesQminushalf))
+            and isinstance(vec_val, SWGElt)):
+        raise TypeError("Arguments are invalid.")
+
     sym_wt = vec_val.sym_wt
-    prec = f.prec
     base_ring = _common_base_ring(f.base_ring, vec_val.base_ring)
     diff_tau = (f.differentiate_wrt_tau(),
                 f.differentiate_wrt_z() * QQ(2)**(-1),
