@@ -502,3 +502,25 @@ def m_operator(k1, k2, k3):
         return sum([a * (b + c) for a, b, c in zip(brcks, xs, brxs)])
 
     return m_op_val
+
+
+def rankin_cohen_triple_det_sym(j, f, g, h):
+    '''
+    Let f, g, h be scalar valued Siegel modular forms of weight k, l, m
+    respectively.
+    Then this returns a vector valued Siegel modular form of weight
+    det^{k + l + m + 1}Sym(j). It uses vector_valued_rankin_cohen.
+    '''
+    F = rankin_cohen_pair_sym(j, f, g)
+    return vector_valued_rankin_cohen(h, F)
+
+
+def rankin_cohen_triple_det3_sym(j, f, g, h):
+    '''
+    Let f, g, h be scalar valued Siegel modular forms of weight k, l, m
+    respectively.
+    Then this returns a vector valued Siegel modular form of weight
+    det^{k + l + m + 3}Sym(j). It uses vector_valued_rankin_cohen.
+    '''
+    F = rankin_cohen_pair_det2_sym(j, f, g)
+    return vector_valued_rankin_cohen(h, F)
