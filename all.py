@@ -5,7 +5,7 @@ from degree2.deg2_fourier import (
     KlingenEisensteinAndCuspForms,
     diff_opetator_4, y12_with_prec,
     CuspFormsDegree2, Deg2ModularFormQseries, Deg2QsrsElement,
-    SymmetricWeightGenericElement, SymmetricWeightModularFormElement,
+    SymWtGenElt, SymWtModFmElt,
     degree2_modular_forms_ring_level1_gens)
 
 from degree2.rankin_cohen_diff import (

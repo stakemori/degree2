@@ -7,12 +7,10 @@ from degree2.deg2_fourier import (common_prec, common_base_ring,
 
 from degree2.deg2_fourier import Deg2QsrsElement, QseriesTimesQminushalf
 
-from degree2.deg2_fourier import SymmetricWeightGenericElement\
-    as SWGElt
+from degree2.deg2_fourier import SymWtGenElt as SWGElt
 
 
-from degree2.deg2_fourier import SymmetricWeightModularFormElement \
-    as SWMFE
+from degree2.deg2_fourier import SymWtModFmElt as SWMFE
 
 from degree2.basic_operation import PrecisionDeg2
 

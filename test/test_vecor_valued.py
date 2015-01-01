@@ -9,7 +9,7 @@ from sage.all import CuspForms, PolynomialRing, QQ, matrix, identity_matrix
 from degree2.deg2_fourier import (
     eisenstein_series_degree2,
     degree2_modular_forms_ring_level1_gens,
-    SymmetricWeightModularFormElement, x5__with_prec)
+    SymWtModFmElt, x5__with_prec)
 
 from degree2.all import (rankin_cohen_pair_sym, rankin_cohen_pair_det2_sym,
                          rankin_cohen_triple_det_sym2,
@@ -55,8 +55,7 @@ class TestVectorValued(unittest.TestCase):
                               "vector_valued_differential")
 
         def load_cache(f):
-            return SymmetricWeightModularFormElement.load_from(
-                opath.join(data_dir, f))
+            return SymWtModFmElt.load_from(opath.join(data_dir, f))
 
         p_e4_e4 = load_cache("pair_sym4_e4_e4_prec7.sobj")
         p_e4_x10 = load_cache("pair_sym4_e4_x10_prec7.sobj")

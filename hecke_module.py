@@ -450,7 +450,7 @@ class SymTensorRepElt(object):
     def __init__(self, vec, wt):
         '''
         vec is a returned valued of
-        degree2.SymmetricWeightModularFormElement.__getitem__.
+        degree2.SymWtModFmElt.__getitem__.
         '''
         self.vec = vec
         self.sym_wt = len(vec) - 1

@@ -256,7 +256,7 @@ class Deg2QsrsElement(FormalQexp):
                                   is_cuspidal=cuspidal)
             return res
 
-        elif isinstance(other, (SymmetricWeightGenericElement,
+        elif isinstance(other, (SymWtGenElt,
                                 QseriesTimesQminushalf)):
             return other.__mul__(self)
 
@@ -405,7 +405,7 @@ class Deg2QsrsElement(FormalQexp):
         forms = [x for _, x in
                  sorted([(i, v) for i, v in formsdict.iteritems()],
                         key=lambda x: x[0])]
-        return SymmetricWeightGenericElement(forms, self.prec, self.base_ring)
+        return SymWtGenElt(forms, self.prec, self.base_ring)
 
     def change_ring(self, R, hom=None):
         '''
@@ -521,7 +521,7 @@ class QseriesTimesQminushalf(FormalQexp):
             return _mul_q_half_monom(self.f_part * other.f_part)
         elif isinstance(other, Deg2QsrsElement) or is_number(other):
             return QseriesTimesQminushalf(self.f_part * other)
-        elif isinstance(other, SymmetricWeightGenericElement):
+        elif isinstance(other, SymWtGenElt):
             return other.__mul__(self)
         else:
             raise NotImplementedError
@@ -1659,7 +1659,7 @@ def modulo(x, p, K):
     return sum(list(imap(operator.mul, a_s, xl_p)))
 
 
-class SymmetricWeightGenericElement(object):
+class SymWtGenElt(object):
     '''
     Let Symm(j) be the symmetric tensor representation of degree j of GL2.
     Symm(j) is the space of homogenous polynomials of u1 and u2 of degree j.
@@ -1739,12 +1739,11 @@ class SymmetricWeightGenericElement(object):
     def __add__(self, other):
         if other == 0:
             return self
-        elif isinstance(other, SymmetricWeightGenericElement) and \
-                self.sym_wt == other.sym_wt:
+        elif isinstance(other, SymWtGenElt) and self.sym_wt == other.sym_wt:
             prec = common_prec([self, other])
             forms = [sum(tp) for tp in zip(other.forms, self.forms)]
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
-            return SymmetricWeightGenericElement(forms, prec, base_ring)
+            return SymWtGenElt(forms, prec, base_ring)
         else:
             raise NotImplementedError
 
@@ -1762,13 +1761,13 @@ class SymmetricWeightGenericElement(object):
                 base_ring = _common_base_ring(self.base_ring, other.parent())
             else:
                 base_ring = self.base_ring
-            return SymmetricWeightGenericElement(forms, prec, base_ring)
+            return SymWtGenElt(forms, prec, base_ring)
 
         if isinstance(other, (Deg2QsrsElement, QseriesTimesQminushalf)):
             forms = [f * other for f in self.forms]
             prec = common_prec(forms)
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
-            return SymmetricWeightGenericElement(forms, prec, base_ring)
+            return SymWtGenElt(forms, prec, base_ring)
         else:
             raise NotImplementedError
 
@@ -1779,7 +1778,7 @@ class SymmetricWeightGenericElement(object):
         return gcd([x.gcd_of_coefficients() for x in self.forms])
 
     def __eq__(self, other):
-        if isinstance(other, SymmetricWeightGenericElement) \
+        if isinstance(other, SymWtGenElt) \
                 and self.sym_wt == other.sym_wt:
             return all([x == y for x, y in zip(self.forms, other.forms)])
         elif other == 0:
@@ -1791,14 +1790,13 @@ class SymmetricWeightGenericElement(object):
         return not self.__eq__(other)
 
 
-class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
-                                        HeckeModuleElement):
+class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
     '''
     An instance of this class corresponding to
     vector valued Siegel modular form of degree 2.
     '''
     def __init__(self, forms, wt, prec, base_ring=QQ):
-        SymmetricWeightGenericElement.__init__(self, forms, prec, base_ring)
+        SymWtGenElt.__init__(self, forms, prec, base_ring)
         self.__wt = wt
 
     def __repr__(self):
@@ -1808,7 +1806,7 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
                                                           prec=self.prec)
 
     def _to_format_dct(self):
-        d1 = SymmetricWeightGenericElement._to_format_dct(self)
+        d1 = SymWtGenElt._to_format_dct(self)
         return dict([("wt", self.wt)] + d1.items())
 
     @classmethod
@@ -1834,13 +1832,10 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
     def __add__(self, other):
         if other == 0:
             return self
-        res = SymmetricWeightGenericElement.__add__(self, other)
-        if isinstance(other, SymmetricWeightModularFormElement) \
+        res = SymWtGenElt.__add__(self, other)
+        if isinstance(other, SymWtModFmElt) \
                 and self.wt == other.wt:
-            return SymmetricWeightModularFormElement(res.forms,
-                                                     self.wt,
-                                                     res.prec,
-                                                     res.base_ring)
+            return SymWtModFmElt(res.forms, self.wt, res.prec, res.base_ring)
         else:
             return res
 
@@ -1851,19 +1846,16 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
         return self.__add__(other.__mul__(-1))
 
     def __mul__(self, other):
-        res = SymmetricWeightGenericElement.__mul__(self, other)
+        res = SymWtGenElt.__mul__(self, other)
         if is_number(other):
-            return SymmetricWeightModularFormElement(res.forms,
-                                                     self.wt,
-                                                     res.prec,
-                                                     res.base_ring)
+            return SymWtModFmElt(res.forms, self.wt, res.prec, res.base_ring)
 
         if isinstance(other, (Deg2ModularFormQseries,
                               ModFormQsrTimesQminushalf)):
-            return SymmetricWeightModularFormElement(res.forms,
-                                                     self.wt + other.wt,
-                                                     res.prec,
-                                                     res.base_ring)
+            return SymWtModFmElt(res.forms,
+                                 self.wt + other.wt,
+                                 res.prec,
+                                 res.base_ring)
         else:
             return res
 
@@ -1876,8 +1868,8 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
     def _down_prec(self, prec):
         prec = PrecisionDeg2(prec)
         forms_res = [f._down_prec(prec) for f in self.forms]
-        return SymmetricWeightModularFormElement(forms_res, self.wt, prec,
-                                                 base_ring=self.base_ring)
+        return SymWtModFmElt(forms_res, self.wt, prec,
+                             base_ring=self.base_ring)
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
@@ -1895,5 +1887,4 @@ class SymmetricWeightModularFormElement(SymmetricWeightGenericElement,
                 for i in range(self.sym_wt + 1)]
         forms = [Deg2QsrsElement(d, prec, base_ring=self.base_ring)
                  for d in dcts]
-        return SymmetricWeightModularFormElement(forms, self.wt, prec,
-                                                 base_ring=self.base_ring)
+        return SymWtModFmElt(forms, self.wt, prec, base_ring=self.base_ring)
