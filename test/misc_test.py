@@ -23,7 +23,7 @@ from degree2.utils import linearly_indep_rows_index_list, pmap
 class TestDeg2fcFunctions(unittest.TestCase):
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
-            mat = matrix([[1,0],[0,1]])
+            mat = matrix([[1, 0], [0, 1]])
             sign = 1
             (n, r, m) = tpl
             if n > m:
@@ -46,9 +46,7 @@ class TestDeg2fcFunctions(unittest.TestCase):
 
         bls = []
         for t in PrecisionDeg2(15).pos_defs():
-            (tpl, sign, mat) = reduced_form_with_sign_test(t)
-            (n, r, m) = t
-            (nd, rd, md) = tpl
+            tpl, sign, mat = reduced_form_with_sign_test(t)
             a = HalfIntegralMatrices2(t)
             b = HalfIntegralMatrices2(tpl)
             bl = mat.det() == sign
@@ -65,7 +63,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
         KS.load_basis_from("/tmp/basis_test.sobj")
         lbasis = KS.basis()
         dim = KS.dimension()
-        self.assertTrue(all([lbasis[i].fc_dct == basis[i].fc_dct for i in range(dim)]))
+        self.assertTrue(all([lbasis[i].fc_dct == basis[i].fc_dct
+                             for i in range(dim)]))
 
     def test_x5(self):
         d = {(0, 0, 0): 0,
@@ -2107,7 +2106,8 @@ class TestDeg2fcFunctions(unittest.TestCase):
     # @skip("OK")
     def test_eisenstein(self):
         prec = 10
-        es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for k in [4, 6, 10, 12]]
+        es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for
+                                k in [4, 6, 10, 12]]
         f10 = es4 * es6 - es10
         f12 = 3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12
         f10 = f10 * (f10[(1, 1, 1)])**(-1)
@@ -2152,4 +2152,4 @@ class TestDeg2fcFunctions(unittest.TestCase):
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
-unittest.TextTestRunner(verbosity = 2).run(suite)
+unittest.TextTestRunner(verbosity=2).run(suite)
