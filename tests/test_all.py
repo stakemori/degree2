@@ -12,7 +12,7 @@ def test_module_names():
 
 def import_tests():
     for f in test_module_names():
-        mod_name = "degree2.test." + f.split(".")[0]
+        mod_name = "degree2.tests." + f.split(".")[0]
         pth = join(this_dir, f)
         imp.load_source(mod_name, pth)
 
