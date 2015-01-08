@@ -8,7 +8,8 @@ this_dir = dirname(__file__)
 
 def test_module_names():
     return [f for f in os.listdir(this_dir) if re.match(pat, f)
-            and isfile(join(this_dir, f))]
+            and isfile(join(this_dir, f)) and join(this_dir, f) != __file__]
+
 
 def import_tests():
     for f in test_module_names():
