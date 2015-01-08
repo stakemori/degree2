@@ -1888,3 +1888,34 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         forms = [Deg2QsrsElement(d, prec, base_ring=self.base_ring)
                  for d in dcts]
         return SymWtModFmElt(forms, self.wt, prec, base_ring=self.base_ring)
+
+
+def divide(f, g, prec):
+    '''
+    Assume g is divisible by f. Returns g/f with precision prec.
+    '''
+    key_func = lambda x: (x[0] + x[2], x[0], x[1], x[2])
+    ts = sorted(PrecisionDeg2(prec), key=key_func)
+    f_ts = sorted([k for k, v in f.fc_dct.items() if v != 0], key=key_func)
+
+    res_dct = {}
+    n0, r0, m0 = f_ts[0]
+    a0 = f[(n0, r0, m0)]
+    # Normalize f
+    f = f * a0**(-1)
+
+    for n, r, m in ts:
+        if g[(n + n0, r + r0, m + m0)] == 0:
+            res_dct[(n, r, m)] = 0
+        else:
+            break
+    ts_res = ts[len(res_dct):]
+    for n, r, m in ts_res:
+        n1, r1, m1 = n + n0, r + r0, m + m0
+        s = sum((f.fc_dct[(n1-a, r1-b, m1-c)] * res_dct[(a, b, c)]
+                 for a, b, c in _spos_def_mats_lt((n1, r1, m1))
+                 if not ((a == n and b == r and c == m) or
+                         f.fc_dct[(n1-a, r1-b, m1-c)] == 0)))
+        res_dct[(n, r, m)] = g[(n1, r1, m1)] - s
+    res = Deg2QsrsElement(res_dct, prec)
+    return res * a0
