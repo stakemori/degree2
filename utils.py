@@ -47,15 +47,11 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
     if num_of_procs == 1:
         return [fn(a) for a in l]
 
-    if weight_fn is None:
-        wt_fn = None
-    else:
-        wt_fn = weight_fn
     if num_of_procs is not None:
         num = min(len(l), num_of_procs)
     else:
         num = cpu_count()
-    ls = partition_weighted(l, num, weight_fn=wt_fn)
+    ls = partition_weighted(l, num, weight_fn=weight_fn)
     pipes = [Pipe() for _ in ls]
     procs = [Process(target=_spawn(lambda x: [fn(a) for a in x]), args=(c, x))
              for x, (_, c) in zip(ls, pipes)]
