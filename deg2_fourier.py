@@ -167,7 +167,6 @@ class FormalQexp(CommRingLikeElment):
         return self._differential_operator_monomial(0, 1, 0)
 
 
-
 cache_gens_power = False
 
 
@@ -464,6 +463,15 @@ class Deg2QsrsElement(FormalQexp):
         fc_dct = {t: d["fc_dct"][t] for t in prec}
         d["fc_dct"] = fc_dct
         return Deg2QsrsElement._from_dict_to_object(d)
+
+    def divide(self, f, prec):
+        '''
+        Assuming self is divisible by f, returns self/f.
+        '''
+        if isinstance(f, Deg2QsrsElement):
+            return divide(f, self, prec)
+        else:
+            raise NotImplementedError
 
 
 def _mul_q_half_monom(f, a=1):
@@ -872,6 +880,14 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         return Deg2ModularFormQseries(self.wt, fc_dct, prec,
                                       base_ring=self.base_ring,
                                       is_cuspidal=self._is_cuspidal)
+
+    def divide(self, f, prec):
+        res = Deg2QsrsElement.divide(self, f, prec)
+        if isinstance(f, Deg2ModularFormQseries):
+            return Deg2ModularFormQseries(self.wt - f.wt, res.fc_dct,
+                                          prec, res.base_ring)
+        else:
+            return res
 
 
 class Deg2EisensteinQseries(Deg2ModularFormQseries):
