@@ -1805,6 +1805,14 @@ class SymWtGenElt(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def divide(self, f, prec, parallel=False):
+        if parallel:
+            res_forms = pmap(lambda x: x.divide(f, prec), self.forms)
+        else:
+            res_forms = [a.divide(f, prec) for a in self.forms]
+        res_br = common_base_ring(res_forms)
+        return SymWtGenElt(res_forms, prec, base_ring=res_br)
+
 
 class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
     '''
@@ -1904,6 +1912,15 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         forms = [Deg2QsrsElement(d, prec, base_ring=self.base_ring)
                  for d in dcts]
         return SymWtModFmElt(forms, self.wt, prec, base_ring=self.base_ring)
+
+
+    def divide(self, f, prec, parallel=False):
+        res = SymWtGenElt.divide(self, f, prec, parallel=parallel)
+        if isinstance(f, Deg2ModularFormQseries):
+            return SymWtModFmElt(res.forms, self.wt - f.wt, prec,
+                                 base_ring=res.base_ring)
+        else:
+            return res
 
 
 def divide(f, g, prec):
