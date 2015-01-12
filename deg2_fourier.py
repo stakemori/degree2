@@ -16,7 +16,7 @@ from sage.all import O as bigO
 
 import sage.matrix.matrix_space
 
-from degree2.elements import (Deg2ModularFormQseries, Deg2QsrsElement,
+from degree2.elements import (ModFormQexpLevel1, QexpLevel1,
                               ModFormQsrTimesQminushalf)
 
 from degree2.utils import (linearly_indep_rows_index_list,
@@ -35,10 +35,10 @@ def _number_to_hol_modform(a, prec):
         parent = a.parent()
     else:
         parent = QQ
-    return Deg2ModularFormQseries(0, {(0, 0, 0): a}, prec, parent)
+    return ModFormQexpLevel1(0, {(0, 0, 0): a}, prec, parent)
 
 
-class Deg2EisensteinQseries(Deg2ModularFormQseries):
+class Deg2EisensteinQseries(ModFormQexpLevel1):
     def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=False):
         self.__wt = wt
         if fc_dct is False:
@@ -47,7 +47,7 @@ class Deg2EisensteinQseries(Deg2ModularFormQseries):
                 fc = self.fourier_coefficient(n, r, m)
                 fc_dct[(n, r, m)] = fc
                 fc_dct[(n, -r, m)] = fc
-        Deg2ModularFormQseries.__init__(self, wt, fc_dct, prec, base_ring)
+        ModFormQexpLevel1.__init__(self, wt, fc_dct, prec, base_ring)
 
     @property
     def wt(self):
@@ -147,11 +147,11 @@ def load_cached_gens_from_file(prec):
             gens_dct = {k: {t: gens_dct1[k][t] for t in prec}
                         for k in gens_dct1.keys()}
             max_prec = prec
-        es4 = Deg2ModularFormQseries(4, gens_dct[4], max_prec)
-        es6 = Deg2ModularFormQseries(6, gens_dct[6], max_prec)
-        x10 = Deg2ModularFormQseries(10, gens_dct[10], max_prec)
-        x12 = Deg2ModularFormQseries(12, gens_dct[12], max_prec)
-        x35 = Deg2ModularFormQseries(35, gens_dct[35], max_prec)
+        es4 = ModFormQexpLevel1(4, gens_dct[4], max_prec)
+        es6 = ModFormQexpLevel1(6, gens_dct[6], max_prec)
+        x10 = ModFormQexpLevel1(10, gens_dct[10], max_prec)
+        x12 = ModFormQexpLevel1(12, gens_dct[12], max_prec)
+        x35 = ModFormQexpLevel1(35, gens_dct[35], max_prec)
         Deg2global_gens_dict = {"es4": es4,
                                 "es6": es6,
                                 "x10": x10,
@@ -164,7 +164,7 @@ def load_deg2_cached_gens(key, prec, wt, cuspidal=False):
         f = Deg2global_gens_dict[key]
         if f.prec >= prec:
             fc_dct = {t: f[t] for t in prec}
-            res = Deg2ModularFormQseries(wt, fc_dct, prec,
+            res = ModFormQexpLevel1(wt, fc_dct, prec,
                                          base_ring=ZZ,
                                          is_cuspidal=cuspidal)
             res._is_gen = key
@@ -279,7 +279,7 @@ def diff_opetator_4(f1, f2, f3, f4):
          pmap(lambda a: a.differentiate_wrt_w(), l),
          pmap(lambda a: a.differentiate_wrt_z(), l)]
     res = deg2_det(m)
-    res = Deg2ModularFormQseries(sum(wt_s) + 3, res.fc_dct,
+    res = ModFormQexpLevel1(sum(wt_s) + 3, res.fc_dct,
                                  prec_res,
                                  base_ring=base_ring)
     return res
@@ -350,7 +350,7 @@ def x5__with_prec(prec):
                                                          r1//d)
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
-    res = Deg2QsrsElement(fc_dct, prec)
+    res = QexpLevel1(fc_dct, prec)
     return ModFormQsrTimesQminushalf(res, 5)
 
 
@@ -579,7 +579,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         if self.prec > PrecisionDeg2._from_dict_to_object(prec):
             msg = "self.prec must be less than {prec}".format(prec=prec)
             raise RuntimeError(msg)
-        basis = [Deg2ModularFormQseries._from_dict_to_object(dct)
+        basis = [ModFormQexpLevel1._from_dict_to_object(dct)
                  for dct in dicts]
         self.__basis_cached = True
         self.__cached_basis = basis

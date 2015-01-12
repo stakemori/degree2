@@ -7,7 +7,7 @@ from degree2.deg2_fourier import x5__with_prec
 
 from degree2.elements import SymWtGenElt as SWGElt
 
-from degree2.elements import Deg2QsrsElement, QseriesTimesQminushalf
+from degree2.elements import QexpLevel1, QseriesTimesQminushalf
 
 from degree2.elements import SymWtModFmElt as SWMFE
 
@@ -397,7 +397,7 @@ def vector_valued_rankin_cohen(f, vec_val):
     This function returns a vector valued Siegel modular form
     of weight det^(k + l + 1) Sym(j).
     '''
-    if not (isinstance(f, (Deg2QsrsElement, QseriesTimesQminushalf))
+    if not (isinstance(f, (QexpLevel1, QseriesTimesQminushalf))
             and isinstance(vec_val, SWGElt)):
         raise TypeError("Arguments are invalid.")
 

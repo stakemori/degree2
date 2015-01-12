@@ -28,7 +28,7 @@ def to_sorted_fc_list(fc_dct):
 
 class FormalQexp(CommRingLikeElment):
     '''
-    A parent class of Deg2QsrsElement and QseriesTimesQminushalf.
+    A parent class of QexpLevel1 and QseriesTimesQminushalf.
     '''
 
     __metaclass__ = ABCMeta
@@ -132,7 +132,7 @@ class FormalQexp(CommRingLikeElment):
 cache_gens_power = False
 
 
-class Deg2QsrsElement(FormalQexp):
+class QexpLevel1(FormalQexp):
     '''
     A class of formal Fourier series of degree 2.
     '''
@@ -181,7 +181,7 @@ class Deg2QsrsElement(FormalQexp):
             fcmap = self.fc_dct.copy()
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             cuspidal = other == 0 and self._is_cuspidal
-            return Deg2QsrsElement(fcmap, self.prec, self.base_ring,
+            return QexpLevel1(fcmap, self.prec, self.base_ring,
                                    is_cuspidal=cuspidal)
 
         prec = common_prec([self, other])
@@ -190,7 +190,7 @@ class Deg2QsrsElement(FormalQexp):
         ms = self.fc_dct
         mo = other.fc_dct
         fcmap = _add_fourier(ms, mo, prec, cuspidal)
-        return Deg2QsrsElement(fcmap, prec, base_ring=bsring,
+        return QexpLevel1(fcmap, prec, base_ring=bsring,
                                is_cuspidal=cuspidal)
 
     def __mul__(self, other):
@@ -203,17 +203,17 @@ class Deg2QsrsElement(FormalQexp):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
                 bs = self.base_ring
-            return Deg2QsrsElement(fcmap, self.prec, base_ring=bs,
+            return QexpLevel1(fcmap, self.prec, base_ring=bs,
                                    is_cuspidal=self._is_cuspidal)
 
-        elif isinstance(other, Deg2QsrsElement):
+        elif isinstance(other, QexpLevel1):
             prec = common_prec([self, other])
             bsring = _common_base_ring(self.base_ring, other.base_ring)
             ms = self.fc_dct
             mo = other.fc_dct
             cuspidal = self._is_cuspidal or other._is_cuspidal
             fcmap = _mul_fourier(ms, mo, prec, cuspidal)
-            res = Deg2QsrsElement(fcmap, prec, base_ring=bsring,
+            res = QexpLevel1(fcmap, prec, base_ring=bsring,
                                   is_cuspidal=cuspidal)
             return res
 
@@ -267,7 +267,7 @@ class Deg2QsrsElement(FormalQexp):
         n = len(s)
 
         if cache_gens_power and self._is_gen:
-            gens_pws_dcts = Deg2QsrsElement.gens_powers_cached_dict
+            gens_pws_dcts = QexpLevel1.gens_powers_cached_dict
             prec = self.prec
             key = (self._is_gen, prec)
             if key in gens_pws_dcts:
@@ -276,7 +276,7 @@ class Deg2QsrsElement(FormalQexp):
                 cached_dict = {0: self}
             if not n - 1 in cached_dict.keys():
                 cached_dict = self._calc_pows_lt_nth_pow_of_2(n, cached_dict)
-                Deg2QsrsElement.gens_powers_cached_dict[key] = cached_dict
+                QexpLevel1.gens_powers_cached_dict[key] = cached_dict
         else:
             cached_dict = self._calc_pows_lt_nth_pow_of_2(n)
 
@@ -291,7 +291,7 @@ class Deg2QsrsElement(FormalQexp):
         for k, v in self.fc_dct.iteritems():
             (n, r, m) = k
             dic[k] = (4*n*m - r**2) * v
-        return Deg2QsrsElement(dic, self.prec, self.base_ring)
+        return QexpLevel1(dic, self.prec, self.base_ring)
 
     def phi_operator(self):
         d = {n: self[(n, 0, 0)] for n in self.prec._phi_operator_prec()}
@@ -335,7 +335,7 @@ class Deg2QsrsElement(FormalQexp):
         '''
         fcmap = {(n, r, m): n**a * r**b * m**c * v for (n, r, m), v
                  in self.fc_dct.iteritems()}
-        res = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring,
+        res = QexpLevel1(fcmap, self.prec, base_ring=self.base_ring,
                               is_cuspidal=self._is_cuspidal)
         return res
 
@@ -377,7 +377,7 @@ class Deg2QsrsElement(FormalQexp):
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
-        return Deg2QsrsElement(fc_map, self.prec, base_ring=R,
+        return QexpLevel1(fc_map, self.prec, base_ring=R,
                                is_cuspidal=self._is_cuspidal)
 
     def mod_p_map(self, p):
@@ -416,7 +416,7 @@ class Deg2QsrsElement(FormalQexp):
                                      self[(t[0] - u[0],
                                            t[1] - u[1],
                                            t[2] - u[2])] for u in l])
-        return Deg2QsrsElement(res_dict, prec, base_ring=self.base_ring)
+        return QexpLevel1(res_dict, prec, base_ring=self.base_ring)
 
     def _down_prec(self, prec):
         prec = PrecisionDeg2(prec)
@@ -424,13 +424,13 @@ class Deg2QsrsElement(FormalQexp):
         d["prec"] = prec._to_format_dct()
         fc_dct = {t: d["fc_dct"][t] for t in prec}
         d["fc_dct"] = fc_dct
-        return Deg2QsrsElement._from_dict_to_object(d)
+        return QexpLevel1._from_dict_to_object(d)
 
     def divide(self, f, prec):
         '''
         Assuming self is divisible by f, returns self/f.
         '''
-        if isinstance(f, Deg2QsrsElement):
+        if isinstance(f, QexpLevel1):
             return divide(f, self, prec)
         else:
             raise NotImplementedError
@@ -454,7 +454,7 @@ def _mul_q_half_monom(f, a=1):
             res_dc[(n, r, m)] = 0
         else:
             res_dc[(n, r, m)] = fc_dct[(n + a, r - a, m + a)]
-    return Deg2QsrsElement(res_dc, prec.value, base_ring=f.base_ring)
+    return QexpLevel1(res_dc, prec.value, base_ring=f.base_ring)
 
 
 class QseriesTimesQminushalf(FormalQexp):
@@ -489,7 +489,7 @@ class QseriesTimesQminushalf(FormalQexp):
     def __mul__(self, other):
         if isinstance(other, QseriesTimesQminushalf):
             return _mul_q_half_monom(self.f_part * other.f_part)
-        elif isinstance(other, Deg2QsrsElement) or is_number(other):
+        elif isinstance(other, QexpLevel1) or is_number(other):
             return QseriesTimesQminushalf(self.f_part * other)
         elif isinstance(other, SymWtGenElt):
             return other.__mul__(self)
@@ -525,7 +525,7 @@ class QseriesTimesQminushalf(FormalQexp):
                              (r + QQ(1)/QQ(2))**b *
                              (m - QQ(1)/QQ(2))**c * v)
                  for (n, r, m), v in self.f_part.fc_dct.iteritems()}
-        f = Deg2QsrsElement(fcmap, self.prec, base_ring=self.base_ring)
+        f = QexpLevel1(fcmap, self.prec, base_ring=self.base_ring)
         return QseriesTimesQminushalf(f)
 
 
@@ -545,10 +545,10 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
 
     def __mul__(self, other):
         res = QseriesTimesQminushalf.__mul__(self, other)
-        if isinstance(other, Deg2ModularFormQseries):
+        if isinstance(other, ModFormQexpLevel1):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
         elif isinstance(other, ModFormQsrTimesQminushalf):
-            return Deg2ModularFormQseries(self.wt + other.wt,
+            return ModFormQexpLevel1(self.wt + other.wt,
                                           res.fc_dct, res.prec,
                                           base_ring=res.base_ring)
         else:
@@ -565,18 +565,18 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
     def __pow__(self, other):
         res = QseriesTimesQminushalf.__pow__(self, other)
         wt = self.wt * other
-        if isinstance(res, Deg2QsrsElement):
-            return Deg2ModularFormQseries(wt, res.fc_dct, res.prec,
+        if isinstance(res, QexpLevel1):
+            return ModFormQexpLevel1(wt, res.fc_dct, res.prec,
                                           base_ring=res.base_ring)
         else:
             return ModFormQsrTimesQminushalf(res.f_part, wt)
 
 
 def is_hol_mod_form(f):
-    return isinstance(f, Deg2ModularFormQseries)
+    return isinstance(f, ModFormQexpLevel1)
 
 
-class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
+class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
     def __init__(self, wt, fc_dct, prec, base_ring=QQ,
                  is_cuspidal=False,
                  given_reduced_tuples_only=False):
@@ -597,7 +597,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
                 for rdf, col in prec.group_by_reduced_forms().iteritems():
                     for t in col:
                         fc_dct[t] = fc_dct[rdf]
-        Deg2QsrsElement.__init__(self, fc_dct, prec, base_ring=base_ring,
+        QexpLevel1.__init__(self, fc_dct, prec, base_ring=base_ring,
                                  is_cuspidal=is_cuspidal)
 
     @property
@@ -618,11 +618,11 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             fcmap = self.fc_dct.copy()
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             if other == 0:
-                return Deg2ModularFormQseries(self.wt, fcmap, self.prec,
+                return ModFormQexpLevel1(self.wt, fcmap, self.prec,
                                               self.base_ring,
                                               is_cuspidal=self._is_cuspidal)
             else:
-                return Deg2QsrsElement(fcmap, self.prec, self.base_ring)
+                return QexpLevel1(fcmap, self.prec, self.base_ring)
 
         if is_hol_mod_form(other) and self.wt == other.wt:
             prec = common_prec([self, other])
@@ -632,11 +632,11 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             cuspidal = self._is_cuspidal and other._is_cuspidal
             fcmap = _add_fourier(ms, mo, prec, cuspidal=cuspidal,
                                  hol=True)
-            return Deg2ModularFormQseries(self.wt, fcmap, prec, bsring,
+            return ModFormQexpLevel1(self.wt, fcmap, prec, bsring,
                                           is_cuspidal=cuspidal,
                                           given_reduced_tuples_only=True)
         else:
-            return Deg2QsrsElement.__add__(self, other)
+            return QexpLevel1.__add__(self, other)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -659,11 +659,11 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
                 bs = _common_base_ring(self.base_ring, other.parent())
             else:
                 bs = self.base_ring
-            return Deg2ModularFormQseries(self.wt, fcmap, self.prec,
+            return ModFormQexpLevel1(self.wt, fcmap, self.prec,
                                           base_ring=bs,
                                           is_cuspidal=self._is_cuspidal,
                                           given_reduced_tuples_only=True)
-        if isinstance(other, Deg2ModularFormQseries) and other.wt == 0:
+        if isinstance(other, ModFormQexpLevel1) and other.wt == 0:
             return self.__mul__(other[(0, 0, 0)])
 
         if is_hol_mod_form(other):
@@ -674,14 +674,14 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
             cuspidal = self._is_cuspidal or other._is_cuspidal
             fcmap = _mul_fourier(ms, mo, prec, cuspidal=cuspidal,
                                  hol=True)
-            return Deg2ModularFormQseries(self.wt + other.wt,
+            return ModFormQexpLevel1(self.wt + other.wt,
                                           fcmap,
                                           prec,
                                           base_ring=bsring,
                                           is_cuspidal=cuspidal,
                                           given_reduced_tuples_only=True)
         else:
-            return Deg2QsrsElement.__mul__(self, other)
+            return QexpLevel1.__mul__(self, other)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -689,8 +689,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
     def __pow__(self, other):
         if other == 0:
             return 1
-        res = Deg2QsrsElement.__pow__(self, other)
-        return Deg2ModularFormQseries(self.wt * other,
+        res = QexpLevel1.__pow__(self, other)
+        return ModFormQexpLevel1(self.wt * other,
                                       res.fc_dct,
                                       res.prec,
                                       res.base_ring)
@@ -702,8 +702,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         return self.__neg__().__add__(other)
 
     def __neg__(self):
-        res = Deg2QsrsElement.__neg__(self)
-        return Deg2ModularFormQseries(self.wt, res.fc_dct,
+        res = QexpLevel1.__neg__(self)
+        return ModFormQexpLevel1(self.wt, res.fc_dct,
                                       res.prec, res.base_ring)
 
     def _name(self):
@@ -781,7 +781,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         d = {"wt": self.wt,
              "construction": self._construction
              if hasattr(self, "_construction") else None}
-        return dict(d.items() + Deg2QsrsElement._to_format_dct(self).items())
+        return dict(d.items() + QexpLevel1._to_format_dct(self).items())
 
     @classmethod
     def _from_dict_to_object(cls, data_dict):
@@ -794,7 +794,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         wt, fc_dct, prec, base_ring, const, is_cuspidal \
             = [data_dict[ky] for ky in kys]
         prec = PrecisionDeg2._from_dict_to_object(prec)
-        f = Deg2ModularFormQseries(wt, fc_dct, prec, base_ring=base_ring,
+        f = ModFormQexpLevel1(wt, fc_dct, prec, base_ring=base_ring,
                                    is_cuspidal=is_cuspidal)
         f._construction = const
         return f
@@ -813,7 +813,7 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
-        res = Deg2ModularFormQseries(self.wt, fc_map, self.prec,
+        res = ModFormQexpLevel1(self.wt, fc_map, self.prec,
                                      base_ring=R,
                                      is_cuspidal=self._is_cuspidal)
         return res
@@ -822,8 +822,8 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         self._construction = c
 
     def _inverse(self):
-        res = Deg2QsrsElement._inverse(self)
-        return Deg2ModularFormQseries(-self.wt, res.fc_dct, res.prec,
+        res = QexpLevel1._inverse(self)
+        return ModFormQexpLevel1(-self.wt, res.fc_dct, res.prec,
                                        base_ring=res.base_ring)
 
     def hecke_operator_acted(self, m, prec=None):
@@ -832,14 +832,14 @@ class Deg2ModularFormQseries(Deg2QsrsElement, HeckeModuleElement):
         '''
         prec = PrecisionDeg2(prec)
         fc_dct = {t: self.hecke_operator(m, t) for t in prec}
-        return Deg2ModularFormQseries(self.wt, fc_dct, prec,
+        return ModFormQexpLevel1(self.wt, fc_dct, prec,
                                       base_ring=self.base_ring,
                                       is_cuspidal=self._is_cuspidal)
 
     def divide(self, f, prec):
-        res = Deg2QsrsElement.divide(self, f, prec)
-        if isinstance(f, Deg2ModularFormQseries):
-            return Deg2ModularFormQseries(self.wt - f.wt, res.fc_dct,
+        res = QexpLevel1.divide(self, f, prec)
+        if isinstance(f, ModFormQexpLevel1):
+            return ModFormQexpLevel1(self.wt - f.wt, res.fc_dct,
                                           prec, res.base_ring)
         else:
             return res
@@ -876,7 +876,7 @@ class SymWtGenElt(object):
         base_ring, prec, forms_dct = \
             [data_dict[ky] for ky in ["base_ring", "prec", "forms"]]
         prec = PrecisionDeg2._from_dict_to_object(prec)
-        forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
+        forms = [QexpLevel1._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, prec, base_ring)
 
     @classmethod
@@ -948,7 +948,7 @@ class SymWtGenElt(object):
                 base_ring = self.base_ring
             return SymWtGenElt(forms, prec, base_ring)
 
-        if isinstance(other, (Deg2QsrsElement, QseriesTimesQminushalf)):
+        if isinstance(other, (QexpLevel1, QseriesTimesQminushalf)):
             forms = [f * other for f in self.forms]
             prec = common_prec(forms)
             base_ring = _common_base_ring(self.base_ring, other.base_ring)
@@ -1010,7 +1010,7 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
                                       "prec",
                                       "base_ring"]]
         prec = PrecisionDeg2._from_dict_to_object(prec)
-        forms = [Deg2QsrsElement._from_dict_to_object(d) for d in forms_dct]
+        forms = [QexpLevel1._from_dict_to_object(d) for d in forms_dct]
         return cls(forms, wt, prec, base_ring)
 
     @classmethod
@@ -1043,7 +1043,7 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         if is_number(other):
             return SymWtModFmElt(res.forms, self.wt, res.prec, res.base_ring)
 
-        if isinstance(other, (Deg2ModularFormQseries,
+        if isinstance(other, (ModFormQexpLevel1,
                               ModFormQsrTimesQminushalf)):
             return SymWtModFmElt(res.forms,
                                  self.wt + other.wt,
@@ -1078,14 +1078,14 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         fc_dct = {t: self.hecke_operator(m, t) for t in prec}
         dcts = [{t: v.vec[i] for t, v in fc_dct.items()}
                 for i in range(self.sym_wt + 1)]
-        forms = [Deg2QsrsElement(d, prec, base_ring=self.base_ring)
+        forms = [QexpLevel1(d, prec, base_ring=self.base_ring)
                  for d in dcts]
         return SymWtModFmElt(forms, self.wt, prec, base_ring=self.base_ring)
 
 
     def divide(self, f, prec, parallel=False):
         res = SymWtGenElt.divide(self, f, prec, parallel=parallel)
-        if isinstance(f, Deg2ModularFormQseries):
+        if isinstance(f, ModFormQexpLevel1):
             return SymWtModFmElt(res.forms, self.wt - f.wt, prec,
                                  base_ring=res.base_ring)
         else:
@@ -1119,7 +1119,7 @@ def divide(f, g, prec):
                  if not ((a == n and b == r and c == m) or
                          f.fc_dct[(n1-a, r1-b, m1-c)] == 0)))
         res_dct[(n, r, m)] = g[(n1, r1, m1)] - s
-    res = Deg2QsrsElement(res_dct, prec)
+    res = QexpLevel1(res_dct, prec)
     return res * a0
 
 def modulo(x, p, K):

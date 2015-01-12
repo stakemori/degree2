@@ -1,13 +1,13 @@
 # -*- coding: utf-8; mode: sage -*-
 import unittest
 from degree2.deg2_fourier import eisenstein_series_degree2, x12_with_prec, x35_with_prec,\
-    Deg2ModularFormQseries, Deg2QsrsElement
+    ModFormQexpLevel1, QexpLevel1
 import tempfile
 from sage.all import FiniteField, ZZ
 global_prec = 8
 
 es4 = eisenstein_series_degree2(4, global_prec)
-qsres4 = Deg2QsrsElement(es4.fc_dct, global_prec, base_ring = ZZ)
+qsres4 = QexpLevel1(es4.fc_dct, global_prec, base_ring = ZZ)
 
 x12 = x12_with_prec(global_prec)
 
@@ -30,10 +30,10 @@ class TestLoadSave(unittest.TestCase):
 
     def loaded_form(self, form, fname):
         form.save_as_binary(fname)
-        if isinstance(form, Deg2ModularFormQseries):
-            return Deg2ModularFormQseries.load_from(fname)
+        if isinstance(form, ModFormQexpLevel1):
+            return ModFormQexpLevel1.load_from(fname)
         else:
-            return Deg2QsrsElement.load_from(fname)
+            return QexpLevel1.load_from(fname)
 
     def test_save_load(self):
         with tempfile.NamedTemporaryFile() as temp:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8; mode: sage -*-
-from degree2.deg2_fourier import eisenstein_series_degree2, Deg2QsrsElement,\
-    x10_with_prec, x12_with_prec, x35_with_prec, Deg2ModularFormQseries
+from degree2.deg2_fourier import eisenstein_series_degree2, QexpLevel1,\
+    x10_with_prec, x12_with_prec, x35_with_prec, ModFormQexpLevel1
 from degree2.basic_operation import PrecisionDeg2
 import unittest
 from sage.all import FiniteField, ZZ, QQ, PolynomialRing
@@ -10,7 +10,7 @@ global_prec = 8
 # global_prec = [(10, 5, 10), (9, 0, 8)]
 
 es4 = eisenstein_series_degree2(4, global_prec)
-qsres4 = Deg2QsrsElement(es4.fc_dct, global_prec, base_ring=ZZ)
+qsres4 = QexpLevel1(es4.fc_dct, global_prec, base_ring=ZZ)
 
 ffld = FiniteField(5)
 
@@ -18,13 +18,13 @@ ff_es4 = es4.change_ring(ffld)
 ff_qsres4 = qsres4.change_ring(ffld)
 
 es6 = eisenstein_series_degree2(6, global_prec)
-qsres6 = Deg2QsrsElement(es6.fc_dct, global_prec, base_ring=ZZ)
+qsres6 = QexpLevel1(es6.fc_dct, global_prec, base_ring=ZZ)
 
 ff_es6 = es6.change_ring(ffld)
 ff_qsres6 = qsres6.change_ring(ffld)
 
 x10 = x10_with_prec(global_prec)
-qsrx10 = Deg2QsrsElement(x10.fc_dct, global_prec, base_ring=ZZ,
+qsrx10 = QexpLevel1(x10.fc_dct, global_prec, base_ring=ZZ,
                          is_cuspidal=True)
 
 ff_x10 = x10.change_ring(ffld)
@@ -35,7 +35,7 @@ dzx10 = x10.differentiate_wrt_z()
 ff_dzx10 = dzx10.change_ring(ffld)
 
 x12 = x12_with_prec(global_prec)
-qsrx12 = Deg2QsrsElement(x12.fc_dct, global_prec, is_cuspidal=True,
+qsrx12 = QexpLevel1(x12.fc_dct, global_prec, is_cuspidal=True,
                          base_ring=ZZ)
 dzx12 = x12.differentiate_wrt_z()
 
@@ -111,23 +111,23 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
     def test_hol_add(self):
         f1 = self.add_is_correct("es4", "0")
         self.assertFalse(f1._is_cuspidal)
-        self.assertTrue(isinstance(f1, Deg2ModularFormQseries))
+        self.assertTrue(isinstance(f1, ModFormQexpLevel1))
 
         f2 = self.add_is_correct("es4", "2")
         self.assertFalse(f2._is_cuspidal)
-        self.assertFalse(isinstance(f2, Deg2ModularFormQseries))
+        self.assertFalse(isinstance(f2, ModFormQexpLevel1))
 
         f3 = self.add_is_correct("x10", "0")
         self.assertTrue(f3._is_cuspidal)
-        self.assertTrue(isinstance(f3, Deg2ModularFormQseries))
+        self.assertTrue(isinstance(f3, ModFormQexpLevel1))
 
         f4 = self.add_is_correct("x10", "x10")
         self.assertTrue(f4._is_cuspidal)
-        self.assertTrue(isinstance(f4, Deg2ModularFormQseries))
+        self.assertTrue(isinstance(f4, ModFormQexpLevel1))
 
         f5 = self.add_is_correct("x12", "x10")
         self.assertTrue(f5._is_cuspidal)
-        self.assertFalse(isinstance(f5, Deg2ModularFormQseries))
+        self.assertFalse(isinstance(f5, ModFormQexpLevel1))
 
     # @skip("OK")
     def test_hol_mul(self):
@@ -145,7 +145,7 @@ class TestDeg2fcMulAddFunctions(unittest.TestCase):
 
         f5 = self.mul_is_correct("x10", "dzx10")
         self.assertTrue(f5._is_cuspidal)
-        self.assertFalse(isinstance(f5, Deg2ModularFormQseries))
+        self.assertFalse(isinstance(f5, ModFormQexpLevel1))
 
         f6 = self.mul_is_correct("es4", "F5_3", base_ring=FiniteField(5))
         self.assertFalse(f6._is_cuspidal)

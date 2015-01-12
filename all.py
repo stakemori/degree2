@@ -7,8 +7,8 @@ from degree2.deg2_fourier import (
     CuspFormsDegree2,
     degree2_modular_forms_ring_level1_gens)
 
-from degree2.elements import (Deg2ModularFormQseries,
-                              Deg2QsrsElement,
+from degree2.elements import (ModFormQexpLevel1,
+                              QexpLevel1,
                               SymWtGenElt, SymWtModFmElt)
 
 from degree2.rankin_cohen_diff import (

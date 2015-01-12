@@ -5,7 +5,7 @@ import multiprocessing
 
 from degree2.basic_operation import PrecisionDeg2
 from degree2.deg2_fourier import (
-    Deg2QsrsElement, Deg2ModularFormQseries)
+    QexpLevel1, ModFormQexpLevel1)
 from degree2.utils import mul, pmap, group
 
 def _to_polynomial(f, val1):
@@ -105,6 +105,6 @@ def calc_forms(func, forms, prec, autom=True, wt=None,
     t_dct = dict(pmap(_f, t_vals, num_of_procs=num_of_procs))
     fc_dct = interpolate_deg2(t_dct, bd, autom=autom, parity=parity)
     if not autom:
-        return Deg2QsrsElement(fc_dct, bd)
+        return QexpLevel1(fc_dct, bd)
     else:
-        return Deg2ModularFormQseries(wt, fc_dct, bd)
+        return ModFormQexpLevel1(wt, fc_dct, bd)
