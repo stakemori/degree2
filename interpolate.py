@@ -4,8 +4,7 @@ from math import sqrt
 import multiprocessing
 
 from degree2.basic_operation import PrecisionDeg2
-from degree2.scalar_valued_smfs import (
-    QexpLevel1, ModFormQexpLevel1)
+from degree2.elements import QexpLevel1, ModFormQexpLevel1
 from degree2.utils import mul, pmap, group
 
 
