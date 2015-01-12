@@ -123,7 +123,6 @@ def load_cached_gens_from_file(prec):
     cached_dir = os.path.join(current_dir, "cached_data")
     prec39 = PrecisionDeg2(39)
     prec34_m17_51 = PrecisionDeg2([(34, -17, 51)])
-    global Deg2global_gens_dict
 
     if Deg2global_gens_dict != {}:
         a_ky = Deg2global_gens_dict.keys()[0]
@@ -151,11 +150,9 @@ def load_cached_gens_from_file(prec):
         x10 = ModFormQexpLevel1(10, gens_dct[10], max_prec)
         x12 = ModFormQexpLevel1(12, gens_dct[12], max_prec)
         x35 = ModFormQexpLevel1(35, gens_dct[35], max_prec)
-        Deg2global_gens_dict = {"es4": es4,
-                                "es6": es6,
-                                "x10": x10,
-                                "x12": x12,
-                                "x35": x35}
+        d = {"es4": es4, "es6": es6, "x10": x10, "x12": x12, "x35": x35}
+        for k, v in d.items():
+            Deg2global_gens_dict[k] = v
 
 
 def load_deg2_cached_gens(key, prec, wt, cuspidal=False):
