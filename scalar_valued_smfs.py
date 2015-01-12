@@ -391,7 +391,7 @@ def dimension_degree2(wt):
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 
 
-class Deg2SpaceOfModularForms(object):
+class SpaceOfModForms(object):
     '''
     The space of Siegel modular forms of degree 2.
     '''
@@ -431,7 +431,7 @@ class Deg2SpaceOfModularForms(object):
             return [x35]
         elif self.wt%2 == 1:
             x35 = x35_with_prec(prec)
-            bs = Deg2SpaceOfModularForms(self.wt - 35, prec).basis()
+            bs = SpaceOfModForms(self.wt - 35, prec).basis()
             l = []
             for a in bs:
                 b = x35 * a
@@ -517,13 +517,13 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
     def basis(self):
         '''
         Returns the list of the basis.
-        It is similar to Deg2SpaceOfModularForms.basis.
+        It is similar to SpaceOfModForms.basis.
         '''
         if self.__basis_cached:
             return self.__cached_basis
         prec = self.prec
         if self.wt%2 == 1:
-            M = Deg2SpaceOfModularForms(self.wt, self.prec)
+            M = SpaceOfModForms(self.wt, self.prec)
             return M.basis()
         # If wt is even,
         es4 = eisenstein_series_degree2(4, prec)
