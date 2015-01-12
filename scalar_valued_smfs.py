@@ -37,7 +37,7 @@ def _number_to_hol_modform(a, prec):
     return ModFormQexpLevel1(0, {(0, 0, 0): a}, prec, parent)
 
 
-class Deg2EisensteinQseries(ModFormQexpLevel1):
+class SiegelEisensteinSeries(ModFormQexpLevel1):
     def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=False):
         self.__wt = wt
         if fc_dct is False:
@@ -181,7 +181,7 @@ def eisenstein_series_degree2_innner(k, prec):
     f = load_deg2_cached_gens(key, prec, k)
     if f:
         return f
-    f = Deg2EisensteinQseries(k, prec)
+    f = SiegelEisensteinSeries(k, prec)
     f._is_gen = key
 
     # Eisenstein series of wt 4 and 6 have integral Fourier coefficients.
@@ -416,6 +416,7 @@ class Deg2SpaceOfModularForms(object):
         how one can construct the modular form as a polynomial
         of es4, es6, x10, x12 and x35.
         '''
+        ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
         prec = self.prec
         if self.dimension() == 0:
             return []
@@ -443,7 +444,6 @@ class Deg2SpaceOfModularForms(object):
         x12 = x12_with_prec(prec)
         tuples = tuples_even_wt_modular_forms(self.wt)
         res = []
-        ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
         for (p, q, r, s) in tuples:
             a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
             a._construction = ple4 ** p * ple6 ** q * plx10 ** r * plx12 ** s
@@ -534,7 +534,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
                           if r == 0 and s == 0]
         kl_or_cusp = [t for t in tuples if t not in not_kl_or_cusp]
         res1 = []
-        ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
+        ple4, ple6, plx10, plx12, _ = RDeg2.gens()
         for (p, q, r, s) in kl_or_cusp:
             a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
             a._construction = ple4 ** p * ple6 ** q * plx10 ** r * plx12 ** s
