@@ -1,4 +1,6 @@
 # -*- coding: utf-8; mode: sage -*-
+from __future__ import print_function
+
 import traceback
 from multiprocessing import Process, Pipe, cpu_count
 import operator
@@ -74,7 +76,7 @@ def pmap(fn, l, weight_fn=None, num_of_procs=None):
     except TypeError:
         for e in vals:
             if isinstance(e, BaseException):
-                print e._traceback
+                print(e._traceback)
                 raise e
 
 
