@@ -161,7 +161,7 @@ class PrecisionDeg2(object):
         res = {}
         for _, ls in grpd_by_rdf:
             a_tupl, _, a_sgn = ls[0]
-            res[a_tupl] = [(t, sgn * a_sgn) for t, _, sgn in ls]
+            res[a_tupl] = [(t, _sgn * a_sgn) for t, _, _sgn in ls]
         return res
 
     def __eq__(self, other):

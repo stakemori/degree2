@@ -18,6 +18,7 @@ from degree2.basic_operation import (_mul_fourier, _add_fourier,
 
 from degree2.hecke_module import (HeckeModuleElement, SymTensorRepElt)
 
+
 def to_sorted_fc_list(fc_dct):
     dct = {k: v for k, v in fc_dct.iteritems() if v != 0}
     keys = dct.keys()
@@ -182,7 +183,7 @@ class QexpLevel1(FormalQexp):
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             cuspidal = other == 0 and self._is_cuspidal
             return QexpLevel1(fcmap, self.prec, self.base_ring,
-                                   is_cuspidal=cuspidal)
+                              is_cuspidal=cuspidal)
 
         prec = common_prec([self, other])
         bsring = _common_base_ring(self.base_ring, other.base_ring)
@@ -191,7 +192,7 @@ class QexpLevel1(FormalQexp):
         mo = other.fc_dct
         fcmap = _add_fourier(ms, mo, prec, cuspidal)
         return QexpLevel1(fcmap, prec, base_ring=bsring,
-                               is_cuspidal=cuspidal)
+                          is_cuspidal=cuspidal)
 
     def __mul__(self, other):
         if is_number(other):
@@ -204,7 +205,7 @@ class QexpLevel1(FormalQexp):
             else:
                 bs = self.base_ring
             return QexpLevel1(fcmap, self.prec, base_ring=bs,
-                                   is_cuspidal=self._is_cuspidal)
+                              is_cuspidal=self._is_cuspidal)
 
         elif isinstance(other, QexpLevel1):
             prec = common_prec([self, other])
@@ -214,7 +215,7 @@ class QexpLevel1(FormalQexp):
             cuspidal = self._is_cuspidal or other._is_cuspidal
             fcmap = _mul_fourier(ms, mo, prec, cuspidal)
             res = QexpLevel1(fcmap, prec, base_ring=bsring,
-                                  is_cuspidal=cuspidal)
+                             is_cuspidal=cuspidal)
             return res
 
         elif isinstance(other, (SymWtGenElt,
@@ -336,7 +337,7 @@ class QexpLevel1(FormalQexp):
         fcmap = {(n, r, m): n**a * r**b * m**c * v for (n, r, m), v
                  in self.fc_dct.iteritems()}
         res = QexpLevel1(fcmap, self.prec, base_ring=self.base_ring,
-                              is_cuspidal=self._is_cuspidal)
+                         is_cuspidal=self._is_cuspidal)
         return res
 
     def theta_sym(self, j=2):
@@ -378,7 +379,7 @@ class QexpLevel1(FormalQexp):
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
         return QexpLevel1(fc_map, self.prec, base_ring=R,
-                               is_cuspidal=self._is_cuspidal)
+                          is_cuspidal=self._is_cuspidal)
 
     def mod_p_map(self, p):
         fcmap = {}
@@ -549,8 +550,8 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
         elif isinstance(other, ModFormQsrTimesQminushalf):
             return ModFormQexpLevel1(self.wt + other.wt,
-                                          res.fc_dct, res.prec,
-                                          base_ring=res.base_ring)
+                                     res.fc_dct, res.prec,
+                                     base_ring=res.base_ring)
         else:
             return res
 
@@ -567,7 +568,7 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
         wt = self.wt * other
         if isinstance(res, QexpLevel1):
             return ModFormQexpLevel1(wt, res.fc_dct, res.prec,
-                                          base_ring=res.base_ring)
+                                     base_ring=res.base_ring)
         else:
             return ModFormQsrTimesQminushalf(res.f_part, wt)
 
@@ -598,7 +599,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
                     for t in col:
                         fc_dct[t] = fc_dct[rdf]
         QexpLevel1.__init__(self, fc_dct, prec, base_ring=base_ring,
-                                 is_cuspidal=is_cuspidal)
+                            is_cuspidal=is_cuspidal)
 
     @property
     def wt(self):
@@ -619,8 +620,8 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             fcmap[(0, 0, 0)] = self.fc_dct[(0, 0, 0)] + other
             if other == 0:
                 return ModFormQexpLevel1(self.wt, fcmap, self.prec,
-                                              self.base_ring,
-                                              is_cuspidal=self._is_cuspidal)
+                                         self.base_ring,
+                                         is_cuspidal=self._is_cuspidal)
             else:
                 return QexpLevel1(fcmap, self.prec, self.base_ring)
 
@@ -633,8 +634,8 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             fcmap = _add_fourier(ms, mo, prec, cuspidal=cuspidal,
                                  hol=True)
             return ModFormQexpLevel1(self.wt, fcmap, prec, bsring,
-                                          is_cuspidal=cuspidal,
-                                          given_reduced_tuples_only=True)
+                                     is_cuspidal=cuspidal,
+                                     given_reduced_tuples_only=True)
         else:
             return QexpLevel1.__add__(self, other)
 
@@ -660,9 +661,9 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             else:
                 bs = self.base_ring
             return ModFormQexpLevel1(self.wt, fcmap, self.prec,
-                                          base_ring=bs,
-                                          is_cuspidal=self._is_cuspidal,
-                                          given_reduced_tuples_only=True)
+                                     base_ring=bs,
+                                     is_cuspidal=self._is_cuspidal,
+                                     given_reduced_tuples_only=True)
         if isinstance(other, ModFormQexpLevel1) and other.wt == 0:
             return self.__mul__(other[(0, 0, 0)])
 
@@ -675,11 +676,11 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             fcmap = _mul_fourier(ms, mo, prec, cuspidal=cuspidal,
                                  hol=True)
             return ModFormQexpLevel1(self.wt + other.wt,
-                                          fcmap,
-                                          prec,
-                                          base_ring=bsring,
-                                          is_cuspidal=cuspidal,
-                                          given_reduced_tuples_only=True)
+                                     fcmap,
+                                     prec,
+                                     base_ring=bsring,
+                                     is_cuspidal=cuspidal,
+                                     given_reduced_tuples_only=True)
         else:
             return QexpLevel1.__mul__(self, other)
 
@@ -691,9 +692,9 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             return 1
         res = QexpLevel1.__pow__(self, other)
         return ModFormQexpLevel1(self.wt * other,
-                                      res.fc_dct,
-                                      res.prec,
-                                      res.base_ring)
+                                 res.fc_dct,
+                                 res.prec,
+                                 res.base_ring)
 
     def __sub__(self, other):
         return self.__add__(other.__neg__())
@@ -704,7 +705,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
     def __neg__(self):
         res = QexpLevel1.__neg__(self)
         return ModFormQexpLevel1(self.wt, res.fc_dct,
-                                      res.prec, res.base_ring)
+                                 res.prec, res.base_ring)
 
     def _name(self):
         return 'Siegel Modular form of weight ' + str(self.wt)
@@ -735,7 +736,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             res = self
             pl = 1
             if (hasattr(self, "_construction") and
-                 self._construction is not None):
+                self._construction is not None):
                 pl = a**(-1) * self._construction
             res = a**(-1) * self
             res._construction = pl
@@ -795,7 +796,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             = [data_dict[ky] for ky in kys]
         prec = PrecisionDeg2._from_dict_to_object(prec)
         f = ModFormQexpLevel1(wt, fc_dct, prec, base_ring=base_ring,
-                                   is_cuspidal=is_cuspidal)
+                              is_cuspidal=is_cuspidal)
         f._construction = const
         return f
 
@@ -814,8 +815,8 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
         res = ModFormQexpLevel1(self.wt, fc_map, self.prec,
-                                     base_ring=R,
-                                     is_cuspidal=self._is_cuspidal)
+                                base_ring=R,
+                                is_cuspidal=self._is_cuspidal)
         return res
 
     def _set_construction(self, c):
@@ -824,7 +825,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
     def _inverse(self):
         res = QexpLevel1._inverse(self)
         return ModFormQexpLevel1(-self.wt, res.fc_dct, res.prec,
-                                       base_ring=res.base_ring)
+                                 base_ring=res.base_ring)
 
     def hecke_operator_acted(self, m, prec=None):
         '''
@@ -833,16 +834,17 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
         prec = PrecisionDeg2(prec)
         fc_dct = {t: self.hecke_operator(m, t) for t in prec}
         return ModFormQexpLevel1(self.wt, fc_dct, prec,
-                                      base_ring=self.base_ring,
-                                      is_cuspidal=self._is_cuspidal)
+                                 base_ring=self.base_ring,
+                                 is_cuspidal=self._is_cuspidal)
 
     def divide(self, f, prec):
         res = QexpLevel1.divide(self, f, prec)
         if isinstance(f, ModFormQexpLevel1):
             return ModFormQexpLevel1(self.wt - f.wt, res.fc_dct,
-                                          prec, res.base_ring)
+                                     prec, res.base_ring)
         else:
             return res
+
 
 class SymWtGenElt(object):
     '''
@@ -906,7 +908,7 @@ class SymWtGenElt(object):
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
-             is_number(t[1])):
+            is_number(t[1])):
             tpl, i = t
             return self.forms[i][tpl]
         else:
@@ -1066,7 +1068,7 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
-             is_number(t[1])):
+            is_number(t[1])):
             tpl, i = t
             return self.forms[i][tpl]
         else:
@@ -1081,7 +1083,6 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         forms = [QexpLevel1(d, prec, base_ring=self.base_ring)
                  for d in dcts]
         return SymWtModFmElt(forms, self.wt, prec, base_ring=self.base_ring)
-
 
     def divide(self, f, prec, parallel=False):
         res = SymWtGenElt.divide(self, f, prec, parallel=parallel)
@@ -1121,6 +1122,7 @@ def divide(f, g, prec):
         res_dct[(n, r, m)] = g[(n1, r1, m1)] - s
     res = QexpLevel1(res_dct, prec)
     return res * a0
+
 
 def modulo(x, p, K):
     d = K.degree()

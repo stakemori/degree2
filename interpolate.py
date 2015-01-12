@@ -8,6 +8,7 @@ from degree2.deg2_fourier import (
     QexpLevel1, ModFormQexpLevel1)
 from degree2.utils import mul, pmap, group
 
+
 def _to_polynomial(f, val1):
     prec = f.prec.value
     R = PolynomialRing(QQ if f.base_ring == ZZ else f.base_ring,

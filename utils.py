@@ -18,6 +18,7 @@ def _partition(num_ls, n):
     m = len(num_ls)
     wts = [sum(num_ls[:i+1]) for i in range(m)]
     av_wt = RR(wts[-1])/RR(n)
+
     def fn(i):
         return ceil(RR(wts[i])/RR(av_wt))
     return [list(v) for _, v in groupby(range(m), fn)]

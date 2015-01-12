@@ -210,7 +210,7 @@ def _rankin_cohen_pair_det2_sym_pol(j, k, l):
     detS = s11 * s22 - s12**2
     # det(R+S)
     detRpS = (-r12**2 + r11*r22 + r22*s11 - QQ(2) * r12 * s12
-               - s12**2 + r11*s22 + s11*s22)
+              - s12**2 + r11*s22 + s11*s22)
     Q2 = ((2*k - 1) * (2*l - 1) * detRpS - (2*k - 1) * (2*k + 2*l - 1) * detS -
           (2*l - 1)*(2*k + 2*l - 1)*detR)
     Q = (QQ(4)**(-1) * Q2 * Q +
