@@ -6,7 +6,7 @@ import unittest
 
 from sage.all import CuspForms, PolynomialRing, QQ, matrix, identity_matrix
 
-from degree2.deg2_fourier import (
+from degree2.scalar_valued_smfs import (
     eisenstein_series_degree2,
     degree2_modular_forms_ring_level1_gens, x5__with_prec)
 

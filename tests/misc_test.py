@@ -6,7 +6,7 @@ from degree2.basic_operation import (
     PrecisionDeg2,
     semi_pos_def_matarices, _spos_def_mats_lt)
 
-from degree2.deg2_fourier import (KlingenEisensteinAndCuspForms,
+from degree2.scalar_valued_smfs import (KlingenEisensteinAndCuspForms,
                                   eisenstein_series_degree2,
                                   x10_with_prec,
                                   x12_with_prec,

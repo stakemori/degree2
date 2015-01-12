@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 import unittest
 
-from degree2.deg2_fourier import (eisenstein_series_degree2, x10_with_prec,
+from degree2.scalar_valued_smfs import (eisenstein_series_degree2, x10_with_prec,
                                   x12_with_prec, x35_with_prec,
                                   KlingenEisensteinAndCuspForms,
                                   CuspFormsDegree2)

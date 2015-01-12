@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from degree2.deg2_fourier import (
+from degree2.scalar_valued_smfs import (
     x10_with_prec, x12_with_prec,
     x35_with_prec, eisenstein_series_degree2,
     KlingenEisensteinAndCuspForms,

@@ -3,7 +3,7 @@ from sage.all import QQ, PolynomialRing, matrix, log, cached_function
 
 from degree2.utils import mul, combination, group
 
-from degree2.deg2_fourier import x5__with_prec
+from degree2.scalar_valued_smfs import x5__with_prec
 
 from degree2.elements import SymWtGenElt as SWGElt
 
