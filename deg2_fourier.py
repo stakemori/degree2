@@ -6,8 +6,7 @@ import sage
 from sage.misc.cachefunc import cached_method, cached_function
 from sage.all import (QQ, save, load, gcd, PolynomialRing,
                       ZZ, CuspForms,
-                      floor, matrix, MatrixSpace, factor,
-                      diagonal_matrix, sqrt, ceil,
+                      floor, matrix, factor, sqrt, ceil,
                       LaurentPolynomialRing, PowerSeriesRing,
                       zeta, divisors, fundamental_discriminant,
                       quadratic_L_function__exact, kronecker_character,
@@ -757,59 +756,3 @@ class CuspFormsDegree2(HeckeModule):
             return a**m * F.subs({x: (x - b)/a})
         f1 = morph(u**2 + u + 1, -p * u**3 - u**2 - p*u, f, m)
         return R(g/f1)
-
-
-def diagonalize_matrix(mat, K):
-    '''
-    Assuming all the eigenvalues of a matrix mat exist in the field K
-    and the characteristic polynomial has no double roots,
-    returns a matrix P such that P^(-1) mat P is a diagonal matrix.
-    '''
-    n = mat.parent().ncols()
-    M = MatrixSpace(K, n)
-    mat = M(mat)
-    f = PolynomialRing(K, "x")(mat.charpoly())
-    evs = [-x[0].constant_coefficient() for x in f.factor()]
-    mat = mat.transpose()
-    pml = []
-    for lam in evs:
-        lam_e = diagonal_matrix(K, [lam]*n)
-        pml.append((mat - lam_e).kernel().basis()[0])
-    return matrix(pml).transpose()
-
-
-def block_diagonalize_matrix(mat, pol_list, K=QQ):
-    '''
-    This function is similar to diagonalize_matrix.
-    '''
-    R = PolynomialRing(K, "x")
-    pol_list = [R(f) for f in pol_list]
-    mat = mat.transpose()
-    res = []
-    for f in pol_list:
-        B = polynomial_func(f)(mat)
-        res += B.kernel().basis()
-    return matrix(res).transpose()
-
-
-def _subspace_bases_list(A, K, basis, pol_list):
-    '''
-    Assume a matrix A acts on the space spanned by basis and
-    pol_list is a list of a K-coefficients polynomials prime to each other
-    whose product is equal to the characteristic polynomial
-    of A.
-    This function returns corresponding decomposition of the space
-    as a list of vectors.
-    '''
-    P = block_diagonalize_matrix(A, pol_list, K)
-    deg_list = [f.degree() for f in pol_list]
-    res1 = []
-    n = len(pol_list)
-    dim = len(basis)
-    for a in P.columns():
-        f = reduce(operator.add, [a[i] * basis[i] for i in range(dim)])
-        l = [a[i] * (basis[i]._construction) for i in range(dim)]
-        f._construction = sum(l)
-        res1.append(f)
-    index_list = [0] + [sum(deg_list[:i+1]) for i in range(n)]
-    return [res1[index_list[i]:index_list[i+1]] for i in range(n)]
