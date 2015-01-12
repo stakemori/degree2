@@ -10,8 +10,8 @@ from degree2.elements import (QexpLevel1, QseriesTimesQminushalf,
 
 from degree2.elements import SymWtModFmElt as SWMFE
 
-from degree2.basic_operation import (PrecisionDeg2, common_prec,
-                                     common_base_ring, _common_base_ring)
+from degree2.basic_operation import (common_prec, common_base_ring,
+                                     _common_base_ring)
 
 
 from degree2.interpolate import det_deg2
@@ -35,37 +35,18 @@ def diff_opetator_4(f1, f2, f3, f4):
 
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
     '''
-    Let D be the differential operator ass. to Q.
-    If i = 0, returns D(f, x5, x5),
-    If i = 1, returns D(x5, f, x5),
-    If i = 2, returns D(x5, x5, f).
+    Deprecated.
     '''
-    from degree2.scalar_valued_smfs import x5__with_prec
-    prec = PrecisionDeg2(prec)
-    prec_p1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
-    if f.prec < prec_p1:
-        raise RuntimeError("The precision of f must be bigger than prec.")
-    x5 = x5__with_prec(prec_p1.value)
-    g = f._down_prec(prec_p1)
-    args = [x5] * 3
-    k = _inc_weight(Q)
-    args[i] = g
-    forms = _rankin_cohen_bracket_func(Q)(args)
-    return SWMFE(forms, 10 + f.wt + k, prec)
+    raise DeprecationWarning("Use '_rankin_cohen_bracket_func'"
+                             " with x5__with_prec instead.")
 
 
 def rankin_cohen_pair_x5(Q, prec):
     '''
-    Let D be the differential operator ass. to Q.
-    Returns D(x5, x5).
+    Deprecated.
     '''
-    from degree2.scalar_valued_smfs import x5__with_prec
-    prec = PrecisionDeg2(prec)
-    prec_p1 = max([n for n, _, _ in prec]) + 1
-    x5 = x5__with_prec(prec_p1)
-    k = _inc_weight(Q)
-    forms = _rankin_cohen_bracket_func(Q)([x5, x5])
-    return SWMFE(forms, 10 + k, prec)
+    raise DeprecationWarning("Use '_rankin_cohen_bracket_func'"
+                             " with x5__with_prec instead.")
 
 
 @cached_function
