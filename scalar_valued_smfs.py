@@ -388,7 +388,6 @@ def dimension_degree2(wt):
         return len(tuples_even_wt_modular_forms(wt - 35))
 
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
-(ple4, ple6, plx10, plx12, plx35) = RDeg2.gens()
 
 
 class Deg2SpaceOfModularForms(object):
@@ -444,6 +443,7 @@ class Deg2SpaceOfModularForms(object):
         x12 = x12_with_prec(prec)
         tuples = tuples_even_wt_modular_forms(self.wt)
         res = []
+        ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
         for (p, q, r, s) in tuples:
             a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
             a._construction = ple4 ** p * ple6 ** q * plx10 ** r * plx12 ** s
@@ -534,6 +534,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
                           if r == 0 and s == 0]
         kl_or_cusp = [t for t in tuples if t not in not_kl_or_cusp]
         res1 = []
+        ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
         for (p, q, r, s) in kl_or_cusp:
             a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
             a._construction = ple4 ** p * ple6 ** q * plx10 ** r * plx12 ** s
