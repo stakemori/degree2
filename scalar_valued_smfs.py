@@ -46,6 +46,8 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
                 fc = self.fourier_coefficient(n, r, m)
                 fc_dct[(n, r, m)] = fc
                 fc_dct[(n, -r, m)] = fc
+        if wt in [4, 6]:
+            base_ring = ZZ
         ModFormQexpLevel1.__init__(self, wt, fc_dct, prec, base_ring)
 
     @property
@@ -187,11 +189,6 @@ def eisenstein_series_degree2_innner(k, prec):
         return f
     f = SiegelEisensteinSeries(k, prec)
     f._is_gen = key
-
-    # Eisenstein series of wt 4 and 6 have integral Fourier coefficients.
-    if k == 4 or k == 6:
-        f = f.change_ring(ZZ)
-
     Deg2global_gens_dict["es" + str(k)] = f
     return f
 
