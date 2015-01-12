@@ -22,12 +22,11 @@ from degree2.elements import (ModFormQexpLevel1, QexpLevel1,
 from degree2.utils import (linearly_indep_rows_index_list,
                            polynomial_func, pmap)
 
-from degree2.utils import det as deg2_det
-
-from degree2.basic_operation import (PrecisionDeg2, common_prec,
-                                     common_base_ring)
+from degree2.basic_operation import PrecisionDeg2
 
 from degree2.hecke_module import HeckeModule
+
+from degree2.rankin_cohen_diff import diff_opetator_4
 
 
 def _number_to_hol_modform(a, prec):
@@ -267,22 +266,6 @@ def x35_with_prec_inner(prec):
     res._is_gen = key
     Deg2global_gens_dict[key] = res
     return res.change_ring(ZZ)
-
-
-def diff_opetator_4(f1, f2, f3, f4):
-    l = [f1, f2, f3, f4]
-    wt_s = [f.wt for f in l]
-    prec_res = common_prec(l)
-    base_ring = common_base_ring(l)
-    m = [[a.wt * a for a in l],
-         pmap(lambda a: a.differentiate_wrt_tau(), l),
-         pmap(lambda a: a.differentiate_wrt_w(), l),
-         pmap(lambda a: a.differentiate_wrt_z(), l)]
-    res = deg2_det(m)
-    res = ModFormQexpLevel1(sum(wt_s) + 3, res.fc_dct,
-                            prec_res,
-                            base_ring=base_ring)
-    return res
 
 
 @cached_function

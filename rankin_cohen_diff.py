@@ -1,18 +1,36 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import QQ, PolynomialRing, matrix, log, cached_function
 
-from degree2.utils import mul, combination, group
-
-from degree2.scalar_valued_smfs import x5__with_prec
+from degree2.utils import mul, combination, group, pmap
 
 from degree2.elements import SymWtGenElt as SWGElt
 
-from degree2.elements import QexpLevel1, QseriesTimesQminushalf
+from degree2.elements import (QexpLevel1, QseriesTimesQminushalf,
+                              ModFormQexpLevel1)
 
 from degree2.elements import SymWtModFmElt as SWMFE
 
 from degree2.basic_operation import (PrecisionDeg2, common_prec,
                                      common_base_ring, _common_base_ring)
+
+
+from degree2.interpolate import det_deg2
+
+
+def diff_opetator_4(f1, f2, f3, f4):
+    l = [f1, f2, f3, f4]
+    wt_s = [f.wt for f in l]
+    prec_res = common_prec(l)
+    base_ring = common_base_ring(l)
+    m = [[a.wt * a for a in l],
+         pmap(lambda a: a.differentiate_wrt_tau(), l),
+         pmap(lambda a: a.differentiate_wrt_w(), l),
+         pmap(lambda a: a.differentiate_wrt_z(), l)]
+    res = det_deg2(m)
+    res = ModFormQexpLevel1(sum(wt_s) + 3, res.fc_dct,
+                            prec_res,
+                            base_ring=base_ring)
+    return res
 
 
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
@@ -22,6 +40,7 @@ def rankin_cohen_triple_x5(Q, f, prec, i=2):
     If i = 1, returns D(x5, f, x5),
     If i = 2, returns D(x5, x5, f).
     '''
+    from degree2.scalar_valued_smfs import x5__with_prec
     prec = PrecisionDeg2(prec)
     prec_p1 = PrecisionDeg2(max([n for n, _, _ in prec]) + 1)
     if f.prec < prec_p1:
@@ -40,6 +59,7 @@ def rankin_cohen_pair_x5(Q, prec):
     Let D be the differential operator ass. to Q.
     Returns D(x5, x5).
     '''
+    from degree2.scalar_valued_smfs import x5__with_prec
     prec = PrecisionDeg2(prec)
     prec_p1 = max([n for n, _, _ in prec]) + 1
     x5 = x5__with_prec(prec_p1)
