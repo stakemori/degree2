@@ -38,9 +38,9 @@ def _number_to_hol_modform(a, prec):
 
 
 class SiegelEisensteinSeries(ModFormQexpLevel1):
-    def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=False):
+    def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=None):
         self.__wt = wt
-        if fc_dct is False:
+        if fc_dct is None:
             fc_dct = {}
             for (n, r, m) in PrecisionDeg2(prec):
                 fc = self.fourier_coefficient(n, r, m)
