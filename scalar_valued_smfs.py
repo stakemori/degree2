@@ -165,8 +165,8 @@ def load_deg2_cached_gens(key, prec, wt, cuspidal=False):
         if f.prec >= prec:
             fc_dct = {t: f[t] for t in prec}
             res = ModFormQexpLevel1(wt, fc_dct, prec,
-                                         base_ring=ZZ,
-                                         is_cuspidal=cuspidal)
+                                    base_ring=ZZ,
+                                    is_cuspidal=cuspidal)
             res._is_gen = key
             return res
     else:
@@ -280,8 +280,8 @@ def diff_opetator_4(f1, f2, f3, f4):
          pmap(lambda a: a.differentiate_wrt_z(), l)]
     res = deg2_det(m)
     res = ModFormQexpLevel1(sum(wt_s) + 3, res.fc_dct,
-                                 prec_res,
-                                 base_ring=base_ring)
+                            prec_res,
+                            base_ring=base_ring)
     return res
 
 
@@ -600,7 +600,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         lin_indep_tuples_cached = \
             KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
         if (wt in lin_indep_tuples_cached.keys() and
-             lin_indep_tuples_cached[wt] != []):
+            lin_indep_tuples_cached[wt] != []):
             return lin_indep_tuples_cached[wt]
         basis = self.basis()
         dim = self.dimension()
