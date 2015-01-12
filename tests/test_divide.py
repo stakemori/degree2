@@ -1,8 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 import unittest
 # from unittest import skip
-from degree2.deg2_fourier import (divide, eisenstein_series_degree2,
-                                  x10_with_prec)
+from degree2.deg2_fourier import eisenstein_series_degree2, x10_with_prec
 
 from degree2.rankin_cohen_diff import rankin_cohen_pair_sym
 
@@ -11,8 +10,8 @@ class TestDivide(unittest.TestCase):
         prec = 10
         x10 = x10_with_prec(prec + 1)
         es4 = eisenstein_series_degree2(4, prec + 1)
-        self.assertEqual(divide(x10, es4*x10, prec), es4)
-        self.assertEqual(divide(x10, x10*x10, prec), x10)
+        self.assertEqual((es4*x10).divide(x10, prec), es4)
+        self.assertEqual((x10*x10).divide(x10, prec), x10)
 
     def test_divide_vector_valued(self):
         prec = 6

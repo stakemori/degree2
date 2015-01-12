@@ -4,9 +4,12 @@ from degree2.deg2_fourier import (
     x35_with_prec, eisenstein_series_degree2,
     KlingenEisensteinAndCuspForms,
     diff_opetator_4, y12_with_prec,
-    CuspFormsDegree2, Deg2ModularFormQseries, Deg2QsrsElement,
-    SymWtGenElt, SymWtModFmElt,
+    CuspFormsDegree2,
     degree2_modular_forms_ring_level1_gens)
+
+from degree2.elements import (Deg2ModularFormQseries,
+                              Deg2QsrsElement,
+                              SymWtGenElt, SymWtModFmElt)
 
 from degree2.rankin_cohen_diff import (
     rankin_cohen_pair_sym,

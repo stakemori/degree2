@@ -8,8 +8,9 @@ from sage.all import CuspForms, PolynomialRing, QQ, matrix, identity_matrix
 
 from degree2.deg2_fourier import (
     eisenstein_series_degree2,
-    degree2_modular_forms_ring_level1_gens,
-    SymWtModFmElt, x5__with_prec)
+    degree2_modular_forms_ring_level1_gens, x5__with_prec)
+
+from degree2.elements import SymWtModFmElt
 
 from degree2.all import (rankin_cohen_pair_sym, rankin_cohen_pair_det2_sym,
                          rankin_cohen_triple_det_sym2,

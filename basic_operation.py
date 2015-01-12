@@ -9,6 +9,30 @@ from degree2.utils import (list_group_by, partition_weighted,
                            _is_triple_of_integers, pmap)
 
 
+def _common_base_ring(r1, r2):
+    if r1.has_coerce_map_from(r2):
+        return r1
+    elif r2.has_coerce_map_from(r1):
+        return r2
+    else:
+        raise NotImplementedError
+
+
+def common_base_ring(forms):
+    return reduce(_common_base_ring, [x.base_ring for x in forms])
+
+
+def common_prec(forms):
+    if all(f.prec.type == "diag_max" for f in forms):
+        return PrecisionDeg2(min([f.prec.value for f in forms]))
+    # else
+    a_prec = forms[0].prec
+    if all([a_prec == f.prec for f in forms[1:]]):
+        return a_prec
+    else:
+        raise NotImplementedError
+
+
 class PrecisionDeg2(object):
     '''
     An instance of this class is immutable and used for a dictionary's key.

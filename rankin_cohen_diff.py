@@ -2,17 +2,17 @@
 from sage.all import QQ, PolynomialRing, matrix, log, cached_function
 
 from degree2.utils import mul, combination, group
-from degree2.deg2_fourier import (common_prec, common_base_ring,
-                                  x5__with_prec, _common_base_ring)
 
-from degree2.deg2_fourier import Deg2QsrsElement, QseriesTimesQminushalf
+from degree2.deg2_fourier import x5__with_prec
 
-from degree2.deg2_fourier import SymWtGenElt as SWGElt
+from degree2.elements import SymWtGenElt as SWGElt
 
+from degree2.elements import Deg2QsrsElement, QseriesTimesQminushalf
 
-from degree2.deg2_fourier import SymWtModFmElt as SWMFE
+from degree2.elements import SymWtModFmElt as SWMFE
 
-from degree2.basic_operation import PrecisionDeg2
+from degree2.basic_operation import (PrecisionDeg2, common_prec,
+                                     common_base_ring, _common_base_ring)
 
 
 def rankin_cohen_triple_x5(Q, f, prec, i=2):
