@@ -160,9 +160,13 @@ def load_deg2_cached_gens(key, prec, wt, cuspidal=False):
         f = Deg2global_gens_dict[key]
         if f.prec >= prec:
             fc_dct = {t: f[t] for t in prec}
-            res = ModFormQexpLevel1(wt, fc_dct, prec,
-                                    base_ring=ZZ,
-                                    is_cuspidal=cuspidal)
+            if key in ["es4", "es6"]:
+                res = SiegelEisensteinSeries(wt, prec=prec, base_ring=ZZ,
+                                             fc_dct=fc_dct)
+            else:
+                res = ModFormQexpLevel1(wt, fc_dct, prec,
+                                        base_ring=ZZ,
+                                        is_cuspidal=cuspidal)
             res._is_gen = key
             return res
     else:
