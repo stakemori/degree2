@@ -335,26 +335,6 @@ def x5__with_prec(prec):
     return ModFormQsrTimesQminushalf(res, 5)
 
 
-def _det3(ls):
-    (l1, l2, l3) = ls
-    (x11, x12, x13) = l1
-    (x21, x22, x23) = l2
-    (x31, x32, x33) = l3
-    return (x22*x33 - x23*x32)*x11 - (x12*x33 - x13*x32)*x21 \
-        + (x12*x23 - x13*x22)*x31
-
-# def diff_opetator_3_list(f1, f2, f3):
-#     f_s = [f1, f2, f3]
-#     l1 = [f.wt * f for f in f_s]
-#     l2 = [f.differentiate_wrt_tau() for f in f_s]
-#     l3 = [f.differentiate_wrt_w() for f in f_s]
-#     l4 = [f.differentiate_wrt_z() for f in f_s]
-#     return [_det3([l2, l3, l4]),
-#             -_det3([l1, l3, l4]),
-#             _det3([l1, l2, l4]),
-#             -_det3([l1, l2, l3])]
-
-
 def y12_with_prec(prec):
     '''
     One of Igusa's generators of the ring of Siegel modular forms of degree 2
