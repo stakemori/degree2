@@ -8,7 +8,8 @@ from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
 
 from sage.misc.cachefunc import cached_method
 
-from degree2.utils import _is_triple_of_integers, is_number, uniq
+from degree2.utils import (_is_triple_of_integers, is_number, uniq,
+                           polynomial_func)
 
 from degree2.basic_operation import reduced_form_with_sign
 
@@ -424,6 +425,25 @@ class HeckeModule(object):
         m1 = matrix(l1)
         v = vector([fm[t] for t in lin_indep_tuples])
         return v * m1**(-1)
+
+    def _to_form(self, v):
+        '''
+        The inverse to _to_vector.
+        '''
+        basis = self.basis()
+        return sum((f*a for a, f in zip(v, basis)))
+
+
+    def subspace_basis_annihilated_by(self, pol, a=2):
+        '''
+        Returns the basis of the subspace annihilated by pol(T(a)).
+        '''
+        S = PolynomialRing(QQ, names="x")
+        pol = S(pol)
+        A = self.hecke_matrix(a)
+        B = polynomial_func(pol)(A.transpose())
+        res = [self._to_form(v) for v in B.kernel().basis()]
+        return res
 
 
 def reprs_of_double_cosets(p, i):

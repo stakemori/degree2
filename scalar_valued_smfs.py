@@ -19,8 +19,7 @@ import sage.matrix.matrix_space
 from degree2.elements import (ModFormQexpLevel1, QexpLevel1,
                               ModFormQsrTimesQminushalf)
 
-from degree2.utils import (linearly_indep_rows_index_list,
-                           polynomial_func, pmap)
+from degree2.utils import linearly_indep_rows_index_list, pmap
 
 from degree2.basic_operation import PrecisionDeg2
 
@@ -585,14 +584,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         l = [[fm[(n, r, m)] for n, r, m in tuples] for fm in basis]
         return matrix(l).rank() == len(basis)
 
-    def _to_form(self, v):
-        '''
-        The inverse to _to_vector.
-        '''
-        n = self.dimension()
-        basis = self.basis()
-        return reduce(operator.add, [basis[i] * v[i] for i in range(n)])
-
     def construction(self, f):
         return sum([a * b._construction for a, b in zip(self._to_vector(f),
                                                         self.basis())])
@@ -605,19 +596,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         for t in ts:
             if f[t] != 0:
                 return f.hecke_operator(a, t)/f[t]
-
-    def subspace_basis_annihilated_by(self, pol, a=2):
-        '''
-        Returns the basis of the subspace annihilated by pol(T(a)).
-        '''
-        S = PolynomialRing(QQ, names="x")
-        pol = S(pol)
-        A = self.hecke_matrix(a)
-        B = polynomial_func(pol)(A.transpose())
-        res = [self._to_form(v) for v in B.kernel().basis()]
-        for f in res:
-            f._construction = self.construction(f)
-        return res
 
 
 class CuspFormsDegree2(HeckeModule):
