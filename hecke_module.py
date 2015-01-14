@@ -376,6 +376,8 @@ class HeckeModule(object):
         dim = len(basis)
         if hasattr(lm, "parent"):
             K = lm.parent()
+            if hasattr(K, "fraction_field"):
+                K = K.fraction_field()
         else:
             K = QQ
         A = self.hecke_matrix(2)
