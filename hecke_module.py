@@ -434,7 +434,7 @@ class HeckeModule(object):
         return sum((f*a for a, f in zip(v, basis)))
 
 
-    def subspace_basis_annihilated_by(self, pol, a=2):
+    def basis_of_subsp_annihilated_by(self, pol, a=2):
         '''
         Returns the basis of the subspace annihilated by pol(T(a)).
         '''

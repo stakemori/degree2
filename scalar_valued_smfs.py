@@ -656,7 +656,7 @@ class CuspFormsDegree2(HeckeModule):
         N = self.klingeneisensteinAndCuspForms()
         if self.wt%2 == 1:
             return N.basis()
-        return N.subspace_basis_annihilated_by(self.hecke_charpoly(2))
+        return N.basis_of_subsp_annihilated_by(self.hecke_charpoly(2))
 
     def hecke_charpoly(self, m, var="x", algorithm='linbox'):
         p, i = factor(m)[0]
