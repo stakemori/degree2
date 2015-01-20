@@ -9,9 +9,9 @@ from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
 from sage.misc.cachefunc import cached_method
 
 from degree2.utils import (_is_triple_of_integers, is_number, uniq,
-                           polynomial_func)
+                           polynomial_func, pmap)
 
-from degree2.basic_operation import reduced_form_with_sign
+from degree2.basic_operation import reduced_form_with_sign, number_of_procs
 
 
 class HalfIntegralMatrices2(object):
@@ -434,7 +434,7 @@ class HeckeModule(object):
         return sum((f*a for a, f in zip(v, basis)))
 
 
-    def basis_of_subsp_annihilated_by(self, pol, a=2):
+    def basis_of_subsp_annihilated_by(self, pol, a=2, parallel=False):
         '''
         Returns the basis of the subspace annihilated by pol(T(a)).
         '''
@@ -442,7 +442,11 @@ class HeckeModule(object):
         pol = S(pol)
         A = self.hecke_matrix(a)
         B = polynomial_func(pol)(A.transpose())
-        res = [self._to_form(v) for v in B.kernel().basis()]
+        if parallel:
+            with number_of_procs(1):
+                res = pmap(self._to_form, B.kernel().basis())
+        else:
+            res = [self._to_form(v) for v in B.kernel().basis()]
         return res
 
 
