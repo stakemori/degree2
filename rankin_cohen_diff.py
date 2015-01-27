@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import QQ, PolynomialRing, matrix, log, cached_function
+from sage.all import QQ, PolynomialRing, matrix, log, cached_function, fork
 
 from degree2.utils import mul, combination, group, pmap
 
@@ -139,6 +139,7 @@ def _triple_gens():
     return (R.gens(), S.gens())
 
 
+@fork
 def _rankin_cohen_gen(Q, flist):
     forms = _rankin_cohen_bracket_func(Q)(flist)
     prec = common_prec(forms)
