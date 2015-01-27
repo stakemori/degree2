@@ -14,7 +14,7 @@ from sage.all import ZZ, CC, RR, factorial, Integer, vector, ceil
 
 def _partition(num_ls, n):
     '''
-    num_ls is a list of real numbers.
+    num_ls is a list of non-negative real numbers.
     Returns a list of indices.
     '''
     m = len(num_ls)
@@ -22,7 +22,7 @@ def _partition(num_ls, n):
     av_wt = RR(wts[-1])/RR(n)
 
     def fn(i):
-        return ceil(RR(wts[i])/RR(av_wt))
+        return max(ceil(RR(wts[i])/RR(av_wt)), 1)
     return [list(v) for _, v in groupby(range(m), fn)]
 
 
