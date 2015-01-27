@@ -346,7 +346,8 @@ def _partition_mul_fourier(prec, cuspidal=False, hol=False,
 
     def weight_fn(x):
         n, r, m = x
-        return 16.0/9.0 * (ZZ(n) * ZZ(m))**(1.5) - ZZ(n) * ZZ(m) * abs(r)
+        return max(16.0/9.0 * (ZZ(n) * ZZ(m))**(1.5) - ZZ(n) * ZZ(m) * abs(r),
+                   0)
 
     return partition_weighted(tpls, num_of_procs, weight_fn)
 
