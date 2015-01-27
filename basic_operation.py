@@ -372,9 +372,9 @@ def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
         num_of_procs=current_num_of_procs.num_of_procs)
 
     def _mul_fourier1(tupls):
-        return {(n, r, m): sum([mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
+        return {(n, r, m): sum((mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
                                 for n0, r0, m0
-                                in _spos_def_mats_lt((n, r, m))])
+                                in _spos_def_mats_lt((n, r, m))))
                 for (n, r, m) in tupls}
     return _dict_parallel(_mul_fourier1, tupls_s)
 
