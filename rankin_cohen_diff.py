@@ -102,11 +102,12 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
     Q = S(Q)
     j = Q.degree()
 
+    @fork
     def monom_mul(tpl, v, flist):
         tpls = group(tpl, 3)
         l = zip(flist, tpls)
         return ((v * mul([QQ(2)**(-t[1]) for _, t in l])) *
-                mul([f._differential_operator_monomial(*t) for f, t in l]))
+                mul((f._differential_operator_monomial(*t) for f, t in l)))
 
     def rankin_cohen(flist):
         res = []
