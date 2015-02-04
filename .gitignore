@@ -34,3 +34,4 @@ nosetests.xml
 .project
 .pydevproject
 /TAGS
+flycheck_*.py
