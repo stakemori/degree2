@@ -15,7 +15,7 @@ from sage.misc.cachefunc import cached_method
 from degree2.hecke_module import HeckeModule
 from degree2.basic_operation import PrecisionDeg2
 from degree2.utils import (linearly_indep_rows_index_list,
-                           mul)
+                           mul, is_number)
 from degree2.scalar_valued_smfs import tuples_even_wt_modular_forms
 
 from degree2.all import (rankin_cohen_pair_sym,
@@ -65,11 +65,13 @@ class VectorValuedSiegelModularForms(HeckeModule):
     def basis(self):
         raise NotImplementedError
 
-    def linearly_indep_tuples(self):
+    @cached_method
+    def _linearly_indep_tuples_of_given_bd(self, bd):
         basis = self.basis()
         dim = self.dimension()
-        tpls = sorted(list(self.prec),
-                      key=lambda x: (x[0] + x[2], max(x[0], x[2])))
+        if is_number(bd):
+            bd = list(PrecisionDeg2(bd))
+        tpls = sorted(list(bd), key=lambda x: (x[0] + x[2], max(x[0], x[2])))
         tpls_w_idx = reduce(operator.add,
                             [[(t, i) for i in range(self.sym_wt + 1)]
                              for t in tpls], [])
@@ -77,6 +79,15 @@ class VectorValuedSiegelModularForms(HeckeModule):
         index_list = linearly_indep_rows_index_list(ml, dim)
         res = [tpls_w_idx[i] for i in index_list]
         return res
+
+    def strum_bd_list(self):
+        return None
+
+    def linearly_indep_tuples(self):
+        bd = self.strum_bd_list()
+        if bd is None:
+            bd = frozenset(self.prec)
+        return self._linearly_indep_tuples_of_given_bd(bd)
 
 
 class VvsmfSym2_4(VectorValuedSiegelModularForms):
