@@ -417,12 +417,8 @@ class HeckeModule(object):
         Returns a vector corresponding to fm.
         By this method, self.basis() becomes the standard basis.
         '''
-        basis = self.basis()
         lin_indep_tuples = self.linearly_indep_tuples()
-        l1 = []
-        for f in basis:
-            l1.append([f[t] for t in lin_indep_tuples])
-        m1 = matrix(l1)
+        m1 = matrix([[f[t] for t in lin_indep_tuples] for f in self.basis])
         v = vector([fm[t] for t in lin_indep_tuples])
         return v * m1**(-1)
 
