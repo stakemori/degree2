@@ -8,7 +8,7 @@ from sage.all import (QQ, save, load, gcd, PolynomialRing,
                       ZZ, CuspForms,
                       floor, matrix, factor, sqrt, ceil,
                       LaurentPolynomialRing, PowerSeriesRing,
-                      zeta, divisors, fundamental_discriminant,
+                      bernoulli, divisors, fundamental_discriminant,
                       quadratic_L_function__exact, kronecker_character,
                       prime_factors, valuation)
 
@@ -65,6 +65,11 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
 
     @cached_method
     def _fourier_coefficient(self, content, det_4):
+
+        def zeta(s):
+            k = ZZ(1 - s)
+            return -bernoulli(k)/k
+
         k = self.wt
         if det_4 < 0:
             return 0
