@@ -395,7 +395,7 @@ class HeckeModule(object):
 
         for i in range(dim):
             clm_i = [a.columns()[i] for a in A_pws]
-            w = sum([a*v for a, v in zip(cffs_g, clm_i)])
+            w = sum((a*v for a, v in zip(cffs_g, clm_i)))
             if w != 0:
                 egvec = w
                 break
