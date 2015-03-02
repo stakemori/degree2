@@ -2,11 +2,8 @@
 
 A Sage package for computation of degree 2 Siegel modular forms
 
-# License
-Licensed under the [GPL Version 3][GPL]
-[GPL]: http://www.gnu.org/licenses/gpl.html
 
-# Installation
+## Installation
 Here, we install the package in "~/sage\_packages/".
 
 1. First install [Sage](http://www.sagemath.org/).
@@ -32,7 +29,7 @@ Here, we install the package in "~/sage\_packages/".
     from degree2.all import *
     ```
 
-# Basic Usage
+## Basic Usage
 
 * Siegel-Eisenstein of degree two can be obtained by the function
   `eisenstein_series_degree2`. Siegel-Eisenstein series is normalized
@@ -141,3 +138,7 @@ Here, we install the package in "~/sage\_packages/".
     The attribute `_construction` shows how `x47` is constructed as a
     polynomial of Siegel-Eisenstein series of weight 4, 6 and cusp
     forms of weight 10, 12 and 35.
+
+## License
+Licensed under the [GPL Version 3][GPL]
+[GPL]: http://www.gnu.org/licenses/gpl.html
