@@ -197,15 +197,24 @@ def linearly_indep_rows_index_list(A, r):
     This function returns the list of indices lst such that
     [A.rows()[i] for i in lst] has length r and linearly independent.
     '''
+    return find_linearly_indep_indices(A, r)
+
+def find_linearly_indep_indices(vectors, r):
+    '''
+    Let vectors be a list of vectors or a list of list.
+    Assume r be the rank of vectors.
+    This function returns a list of indices I of length r
+    such that the rank of [vectors[i] for i in I] is equal to r.
+    '''
     acc = []
-    ncls = r
-    if isinstance(A[0], list):
-        A = [vector(a) for a in A]
+    ncls = len(vectors[0])
+    if isinstance(vectors[0], list):
+        vectors = [vector(a) for a in vectors]
     while True:
         if r == 0:
             return acc
-        nrws = len(A)
-        for a, i in zip(A, range(nrws)):
+        nrws = len(vectors)
+        for a, i in zip(vectors, range(nrws)):
             if a != 0:
                 first = a
                 first_r_idx = i
@@ -218,16 +227,17 @@ def linearly_indep_rows_index_list(A, r):
                 nonzero_col_index = j
                 break
 
-        B = []
+        vectors1 = []
         for j in range(first_r_idx + 1, nrws):
-            w = A[j]
-            B.append(w - w[nonzero_col_index] * v)
-        A = B
+            w = vectors[j]
+            vectors1.append(w - w[nonzero_col_index] * v)
+        vectors = vectors1
         r -= 1
         if acc == []:
             acc.append(first_r_idx)
         else:
             acc.append(first_r_idx + acc[-1] + 1)
+
 
 
 def polynomial_func(pl):
