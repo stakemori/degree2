@@ -241,10 +241,13 @@ class ConstVectValued(ConstVectBase):
         if nm_of_x5 > 0:
             prec += nm_of_x5//2
 
-        if len(self.consts) == 3:
-            return self._calc_form3(prec)
-        elif len(self.consts) == 4:
-            return self._calc_form4(prec)
+        funcs = {2: self._calc_form2,
+                 3: self._calc_form3,
+                 4: self._calc_form4}
+        l = len(self.consts)
+
+        if l in [2, 3, 4]:
+            return funcs[l](prec)
         else:
             raise NotImplementedError
 
@@ -257,6 +260,13 @@ class ConstVectValued(ConstVectBase):
 
     def forms(self, prec):
         return [c.calc_form(prec) for c in self.consts]
+
+    def _calc_form2(self, prec):
+        funcs = {0: rankin_cohen_pair_sym,
+                 2: rankin_cohen_pair_det2_sym}
+        func = funcs[self.inc]
+        forms = self.forms(prec)
+        return func(self.j, *forms)
 
     def _calc_form3(self, prec):
         funcs = {1: rankin_cohen_triple_det_sym,
@@ -282,14 +292,14 @@ class ConstVectValued(ConstVectBase):
             raise NotImplementedError
 
     def _latex_(self):
-        if len(self.consts) == 3:
-            return self._latex3()
+        if len(self.consts) in [2, 3]:
+            return self._latex()
         elif len(self.consts) == 4:
             return self._latex4()
         else:
             raise NotImplementedError
 
-    def _latex3(self):
+    def _latex(self):
         lcs = [c._latex_() for c in self.consts]
         return latex_rankin_cohen(self.inc, self.j, lcs)
 
