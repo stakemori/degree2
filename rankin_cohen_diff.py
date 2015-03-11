@@ -26,7 +26,7 @@ def diff_opetator_4(f1, f2, f3, f4):
          pmap(lambda a: a.differentiate_wrt_tau(), l),
          pmap(lambda a: a.differentiate_wrt_w(), l),
          pmap(lambda a: a.differentiate_wrt_z(), l)]
-    res = det_deg2(m)
+    res = det_deg2(m, wt=sum((f.wt for f in l)) + 1)
     res = ModFormQexpLevel1(sum(wt_s) + 3, res.fc_dct,
                             prec_res,
                             base_ring=base_ring)
