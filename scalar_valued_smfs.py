@@ -347,7 +347,8 @@ def y12_with_prec(prec):
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     x12 = x12_with_prec(prec)
-    return 1/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**4 * 3**2 * x12
+    y12 = 1/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**4 * 3**2 * x12
+    return y12.change_ring(ZZ)
 
 
 @cached_function
