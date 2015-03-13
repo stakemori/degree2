@@ -6,6 +6,8 @@ from degree2.scalar_valued_smfs import (
     y12_with_prec, CuspFormsDegree2,
     degree2_modular_forms_ring_level1_gens)
 
+from degree2.scalar_valued_smfs import SpaceOfModForms as ModularFormsDegree2
+
 from degree2.elements import (ModFormQexpLevel1,
                               QexpLevel1,
                               SymWtGenElt, SymWtModFmElt)
