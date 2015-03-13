@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 import os
 import operator
-
+from abc import ABCMeta, abstractproperty
 import sage
 from sage.misc.cachefunc import cached_method, cached_function
 from sage.all import (QQ, save, load, gcd, PolynomialRing,
@@ -376,7 +376,34 @@ def dimension_degree2(wt):
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 
 
-class SpaceOfModForms(object):
+class AbstSpaceOfLevel1(HeckeModule):
+    __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def wt(self):
+        raise NotImplementedError
+
+    def strum_bound(self):
+        return self.wt // 10
+
+    def basis(self):
+        raise NotImplementedError
+
+    def dimension(self):
+        raise NotImplementedError
+
+    @cached_method
+    def linearly_indep_tuples(self):
+        bd = PrecisionDeg2(self.strum_bound())
+        dim = self.dimension()
+        tpls = sorted(bd.group_by_reduced_forms().keys(),
+                      key=lambda x: (x[0] + x[2], max(x[0], x[2])))
+        ml = [[f[t] for f in self.basis()] for t in tpls]
+        idcs = linearly_indep_rows_index_list(ml, dim)
+        return [tpls[i] for i in idcs]
+
+
+class SpaceOfModForms(AbstSpaceOfLevel1):
     '''
     The space of Siegel modular forms of degree 2.
     '''
@@ -437,7 +464,7 @@ class SpaceOfModForms(object):
         return res
 
 
-class KlingenEisensteinAndCuspForms(HeckeModule):
+class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
     '''
     The space of Klingen-Eisenstein series and cupsforms.
     '''
@@ -551,40 +578,6 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
         self.__basis_cached = True
         self.__cached_basis = basis
 
-    def _cache_lin_indep_tuples(self, l):
-        k = self.wt
-        KlingenEisensteinAndCuspForms.lin_indep_tuples_cached[k] = l
-
-    lin_indep_tuples_cached = {}
-
-    def linearly_indep_tuples(self):
-        '''
-        Returns the list of tuples [t1, .., tn] such that
-        (f1(t1),.., f1(tn)), ... , (fn(t1),.., fn(tn))
-        are linearly independent, where f1,..., fn=self.basis().
-        '''
-        wt = self.wt
-        lin_indep_tuples_cached = \
-            KlingenEisensteinAndCuspForms.lin_indep_tuples_cached
-        if (wt in lin_indep_tuples_cached.keys() and
-            lin_indep_tuples_cached[wt] != []):
-            return lin_indep_tuples_cached[wt]
-        basis = self.basis()
-        dim = self.dimension()
-        stbd = self.strum_bound()
-        if self.prec < PrecisionDeg2(stbd):
-            raise RuntimeError("prec must be greater than " + str(stbd) + "!")
-        tpls = [(n, r, m) for (n, r, m) in self.prec.group_by_reduced_forms()
-                if n <= stbd and m <= stbd]
-        ml = [[f[t] for f in basis] for t in tpls]
-        index_list = linearly_indep_rows_index_list(ml, dim)
-        res = [tpls[i] for i in index_list]
-        lin_indep_tuples_cached[wt] = res
-        return res
-
-    def strum_bound(self):
-        return self.wt // 10
-
     def _is_linearly_indep_tuples(self, tuples):
         basis = self.basis()
         l = [[fm[(n, r, m)] for n, r, m in tuples] for fm in basis]
@@ -604,7 +597,7 @@ class KlingenEisensteinAndCuspForms(HeckeModule):
                 return f.hecke_operator(a, t)/f[t]
 
 
-class CuspFormsDegree2(HeckeModule):
+class CuspFormsDegree2(AbstSpaceOfLevel1):
     '''
     The space of cusp forms of degree 2.  This class assumes that the
     characteristic polynomial of T(2) acting on
@@ -640,17 +633,6 @@ class CuspFormsDegree2(HeckeModule):
 
     def dimension(self):
         return self.klingeneisensteinAndCuspForms().dimension_of_cuspforms()
-
-    @cached_method
-    def linearly_indep_tuples(self):
-        basis = self.basis()
-        dim = self.dimension()
-        stbd = self.klingeneisensteinAndCuspForms().strum_bound()
-        tpls = [(n, r, m) for (n, r, m) in self.prec.group_by_reduced_forms()
-                if n <= stbd and m <= stbd]
-        ml = [[f[t] for f in basis] for t in tpls]
-        index_list = linearly_indep_rows_index_list(ml, dim)
-        return [tpls[i] for i in index_list]
 
     @cached_method
     def basis(self):
