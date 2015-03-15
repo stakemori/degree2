@@ -422,6 +422,7 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
     def dimension(self):
         return dimension_degree2(self.wt)
 
+    @cached_method
     def basis(self):
         '''
         Returns the list of the basis.
