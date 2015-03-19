@@ -167,6 +167,9 @@ class ConstVectBase(object):
     def _key(self):
         pass
 
+    @abstractproperty
+    def sym_wt(self):
+        pass
 
     @property
     def _unique_name(self):
@@ -185,16 +188,16 @@ class ConstVectBase(object):
 
 
 class ConstVectValued(ConstVectBase):
-    def __init__(self, j, consts, inc, tp, normalize_num=ZZ(1)):
-        self._j = j
+    def __init__(self, sym_wt, consts, inc, tp, normalize_num=ZZ(1)):
+        self._sym_wt = sym_wt
         self._consts = consts
         self._inc = inc
         self._type = tp
         self._normalize_num = normalize_num
 
     @property
-    def j(self):
-        return self._j
+    def sym_wt(self):
+        return self._sym_wt
 
     def weight(self):
         return sum([c.weight() for c in self.consts]) + self.inc
@@ -216,8 +219,8 @@ class ConstVectValued(ConstVectBase):
             yield a
 
     def __repr__(self):
-        return "ConstVectValued({j}, {a}, {b}, {c}, {n})".format(
-            j=str(self.j),
+        return "ConstVectValued({sym_wt}, {a}, {b}, {c}, {n})".format(
+            sym_wt=str(self.sym_wt),
             a=str(self.consts),
             b=str(self.inc),
             c="None" if self.type is None else "'%s'"%self.type,
@@ -226,7 +229,7 @@ class ConstVectValued(ConstVectBase):
     @property
     def _key(self):
         res = ("ConstVectValued",
-               self.j,
+               self.sym_wt,
                tuple([tuple(a.wts) for a in self.consts]),
                self.inc, self.type)
         # For backward compatibility.
@@ -266,14 +269,14 @@ class ConstVectValued(ConstVectBase):
                  2: rankin_cohen_pair_det2_sym}
         func = funcs[self.inc]
         forms = self.forms(prec)
-        return func(self.j, *forms)
+        return func(self.sym_wt, *forms)
 
     def _calc_form3(self, prec):
         funcs = {1: rankin_cohen_triple_det_sym,
                  3: rankin_cohen_triple_det3_sym}
         func = funcs[self.inc]
         forms = self.forms(prec)
-        return func(self.j, *forms)
+        return func(self.sym_wt, *forms)
 
     def _calc_form4(self, prec):
         if self.inc == 1:
@@ -281,13 +284,13 @@ class ConstVectValued(ConstVectBase):
                      'b': rankin_cohen_quadruple_det_sym_1}
             func = funcs[self.type]
             forms = self.forms(prec)
-            return func(self.j, *forms)
+            return func(self.sym_wt, *forms)
         elif self.inc == 3:
             funcs = {'a': rankin_cohen_quadruple_det3_sym,
                      'b': rankin_cohen_quadruple_det3_sym_1}
             func = funcs[self.type]
             forms = self.forms(prec)
-            return func(self.j, *forms)
+            return func(self.sym_wt, *forms)
         else:
             raise NotImplementedError
 
@@ -301,36 +304,36 @@ class ConstVectValued(ConstVectBase):
 
     def _latex(self):
         lcs = [c._latex_() for c in self.consts]
-        return latex_rankin_cohen(self.inc, self.j, lcs)
+        return latex_rankin_cohen(self.inc, self.sym_wt, lcs)
 
     def _latex4(self):
         f1, f2, f3, f4 = self.consts
         if self.type == "a":
             lcs = [c._latex_() for c in [f1, f2, f4]]
-            lrc = latex_rankin_cohen(self.inc, self.j, lcs)
+            lrc = latex_rankin_cohen(self.inc, self.sym_wt, lcs)
             return "%s %s"%(f3._latex_(), lrc)
         elif self.type == "b":
             lrcp = latex_rankin_cohen(self.inc - 1,
-                                      self.j,
+                                      self.sym_wt,
                                       [c._latex_() for c in [f1, f2]])
 
             lvec = "%s %s"%(f3._latex_(), lrcp)
             lcs = [f4._latex_(), lvec]
-            return latex_rankin_cohen(1, self.j, lcs)
+            return latex_rankin_cohen(1, self.sym_wt, lcs)
 
 
 class ConstVectValuedHeckeOp(ConstVectBase):
     def __init__(self, const_vec, m=2):
         self._const_vec = const_vec
         self._m = m
-        self._j = const_vec.j
+        self._sym_wt = const_vec.sym_wt
 
     def weight(self):
         return self._const_vec.weight()
 
     @property
-    def j(self):
-        return self._j
+    def sym_wt(self):
+        return self._sym_wt
 
     def __repr__(self):
         return "ConstVectValuedHeckeOp({a}, m={m})".format(
@@ -358,6 +361,10 @@ class ConstDivision(ConstVectBase):
         self._coeffs = coeffs
         self._gen_func = gen_func
         self._inc = inc
+
+    @property
+    def sym_wt(self):
+        return self._consts[0].sym_wt
 
     @cached_method
     def weight(self):
@@ -414,6 +421,10 @@ class ConstMul(ConstVectBase):
     def __init__(self, const, gen_func):
         self._const_vec = const
         self._gen_func = gen_func
+
+    @property
+    def sym_wt(self):
+        return self._const_vec[0].sym_wt
 
     @cached_method
     def weight(self):
