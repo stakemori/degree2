@@ -418,7 +418,7 @@ class ConstMul(ConstVectBase):
     @cached_method
     def weight(self):
         f = self._gen_func(2)
-        return self._const_vec.weight() - f.wt
+        return self._const_vec.weight() + f.wt
 
     def __repr__(self):
         return "ConstMul({const}, {f})".format(
