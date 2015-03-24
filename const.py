@@ -10,11 +10,11 @@ import os
 import hashlib
 import time
 
-from sage.all import (cached_method, mul, flatten, ZZ, fork)
+from sage.all import (cached_method, mul, flatten, ZZ, fork, matrix)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
-from degree2.utils import list_group_by
+from degree2.utils import list_group_by, find_linearly_indep_indices
 
 from degree2.scalar_valued_smfs import x5__with_prec
 
@@ -25,7 +25,7 @@ from degree2.rankin_cohen_diff import (vector_valued_rankin_cohen,
                                        rankin_cohen_triple_det3_sym)
 
 from degree2.elements import SymWtModFmElt as SWMFE
-
+from degree2.basic_operation import PrecisionDeg2
 
 scalar_wts = [4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
@@ -454,6 +454,24 @@ class CalculatorVectValued(object):
     def __init__(self, const_vecs, data_dir):
         self._const_vecs = const_vecs
         self._data_dir = data_dir
+
+    def file_name(self, c):
+        return c._fname(self._data_dir)
+
+    def _mat_ls(self, consts, prec):
+        prec = PrecisionDeg2(prec)
+        sym_wt = consts[0].sym_wt
+        d = self.forms_dict(prec)
+        ts = [(t, i) for t in prec for i in range(sym_wt + 1)]
+        return [[d[c][t] for t in ts] for c in consts]
+
+    def rank(self, consts, prec=5):
+        return matrix(self._mat_ls(consts, prec)).rank()
+
+    def linearly_indep_consts(self, consts, prec=5):
+        ms = self._mat_ls(consts, prec)
+        idcs = find_linearly_indep_indices(ms, matrix(ms).rank())
+        return [consts[i] for i in idcs]
 
     def calc_forms_and_save(self, prec, force=False, verbose=False,
                             do_fork=False):
