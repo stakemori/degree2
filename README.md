@@ -1,32 +1,41 @@
 # degree2
 
-A Sage package for computation of degree 2 Siegel modular forms
+A SageMath package for computation of degree 2 Siegel modular forms
 
 
 ## Installation
-Here, we install the package in "~/sage\_packages/".
+`degree2` is a package written in pure Python.
+Place it an appropriate directory so that `SageMath` can find the package.
 
-1. First install [Sage](http://www.sagemath.org/).
+In the following, we illustrate how we install this package in
+"~/sage\_packages/". Of course the directory name may not be
+"~/sage\_packages/".
 
-2. Create the directory and clone the repository.
+
+1. First install [SageMath](http://www.sagemath.org/).
+
+1. Open a terminal.
+
+   In SageMathCloud, you can open a terminal by creating a new file
+   whose file type is "Terminal".
+
+1. Create the directory and clone the repository.
 
     ```sh
     mkdir ~/sage_packages
     cd ~/sage_packages
     git clone https://github.com/stakemori/degree2.git
     ```
-   Or
-    [download this repository as a zip file](https://github.com/stakemori/degree2/archive/master.zip)
-    , extract the zip file in "~/sage\_packages/" and rename the
-    extracted directory name to `degree2`.
+   <!-- Or -->
+   <!--  [download this repository as a zip file](https://github.com/stakemori/degree2/archive/master.zip) -->
+   <!--  , extract the zip file in "~/sage\_packages/" and rename the -->
+   <!--  extracted directory name to `degree2`. -->
 
-3. Put the following lines to "~/.sage/init.sage".
+1. Edit the init script file of SageMath to load the package.
 
-    ```python
-    import sys
-    import os
-    sys.path.append(os.path.join(os.environ["HOME"], "sage_packages"))
-    from degree2.all import *
+    ```sh
+    touch ~/.sage/init.sage
+    cat ~/sage_packages/degree2/config/example_config.sage >> ~/.sage/init.sage
     ```
 
 ## Basic Usage
