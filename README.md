@@ -5,7 +5,7 @@ A SageMath package for computation of degree 2 Siegel modular forms
 
 ## Installation
 `degree2` is a package written in pure Python.
-Place it so that `SageMath` can find the package.
+Place it an appropriate directory so that `SageMath` can find the package.
 
 In the following, we illustrate how we install this package in
 "~/sage\_packages/". Of course the directory name may not be
