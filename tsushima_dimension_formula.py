@@ -96,7 +96,7 @@ def rem_line_1_2():
 
 def rem_line_3_4():
     t, s = global_ring.gens()
-    k, j = t, s
+    _, j = t, s
     r = root_of_unities()["rho"]
     pl1 = thr**(-3) * (r + 1)
     pl2 = two**(-2) * thr**(-4) * (2*r + 1) * (2*j + 1)
@@ -136,7 +136,6 @@ def rem_line_5_9():
 
 def rem_line_10_11():
     t, s = global_ring.gens()
-    k, j = t, s
     om = root_of_unities()["omega"]
     sgm = root_of_unities()["sigma"]
     pl1 = fiv**(-2)
