@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 
 import sage
 from sage.misc.cachefunc import cached_function
-from sage.all import ZZ, CC, RR, factorial, Integer, vector, ceil
+from sage.all import CC, RR, factorial, Integer, vector, ceil
 
 
 def _partition(num_ls, n):
@@ -247,7 +247,8 @@ def polynomial_func(pl):
 
 
 def is_number(a):
-    if isinstance(a, (int, float, long, complex, ZZ)):
+    if isinstance(a, (int, float, long, complex,
+                      sage.rings.all.CommutativeRingElement)):
         return True
     elif hasattr(a, 'parent'):
         numgen = sage.rings.number_field.number_field.NumberField_generic
