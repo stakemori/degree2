@@ -10,7 +10,7 @@ import os
 import hashlib
 import time
 
-from sage.all import (cached_method, mul, ZZ, fork, matrix, QQ, gcd, latex,
+from sage.all import (cached_method, mul, fork, matrix, QQ, gcd, latex,
                       PolynomialRing)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
@@ -236,12 +236,11 @@ class ConstVectBase(object):
 
 
 class ConstVectValued(ConstVectBase):
-    def __init__(self, sym_wt, consts, inc, tp, normalize_num=ZZ(1)):
+    def __init__(self, sym_wt, consts, inc, tp):
         self._sym_wt = sym_wt
         self._consts = consts
         self._inc = inc
         self._type = tp
-        self._normalize_num = normalize_num
         self._latex_alias_name = None
 
     def _set_latex_alias_name(self, name):
@@ -271,12 +270,11 @@ class ConstVectValued(ConstVectBase):
             yield a
 
     def __repr__(self):
-        return "ConstVectValued({sym_wt}, {a}, {b}, {c}, {n})".format(
+        return "ConstVectValued({sym_wt}, {a}, {b}, {c})".format(
             sym_wt=str(self.sym_wt),
             a=str(self.consts),
             b=str(self.inc),
-            c="None" if self.type is None else "'%s'"%self.type,
-            n=str(self._normalize_num))
+            c="None" if self.type is None else "'%s'"%self.type)
 
     @property
     def _key(self):
@@ -284,13 +282,9 @@ class ConstVectValued(ConstVectBase):
                self.sym_wt,
                tuple([a._frozen_wts() for a in self.consts]),
                self.inc, self.type)
-        # For backward compatibility.
-        if self._normalize_num == 1:
-            return res
-        else:
-            return tuple(list(res) + [self._normalize_num])
+        return res
 
-    def _calc_form_non_norm(self, prec):
+    def calc_form(self, prec):
         nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
         if nm_of_x5 > 0:
             prec += nm_of_x5//2
@@ -304,13 +298,6 @@ class ConstVectValued(ConstVectBase):
             return funcs[l](prec)
         else:
             raise NotImplementedError
-
-    def calc_form(self, prec):
-        res = self._calc_form_non_norm(prec)
-        if self._normalize_num == 1:
-            return res
-        else:
-            return res * (self._normalize_num ** (-1))
 
     def forms(self, prec):
         return [c.calc_form(prec) for c in self.consts]
