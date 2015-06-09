@@ -76,6 +76,12 @@ class ScalarModFormConst(object):
     def __repr__(self):
         return "ScalarModFormConst({a})".format(a=str(self.wts))
 
+    def _frozen_wts(self):
+        if isinstance(self.wts, list):
+            return tuple(self.wts)
+        else:
+            return frozenset((k, v) for k, v in self.wts.iteritems())
+
     def calc_form(self, prec):
         es4, es6, x10, x12, x35 = degree2_modular_forms_ring_level1_gens(prec)
         x5 = x5__with_prec(prec)
@@ -269,7 +275,7 @@ class ConstVectValued(ConstVectBase):
     def _key(self):
         res = ("ConstVectValued",
                self.sym_wt,
-               tuple([tuple(a.wts) for a in self.consts]),
+               tuple([a._frozen_wts() for a in self.consts]),
                self.inc, self.type)
         # For backward compatibility.
         if self._normalize_num == 1:
