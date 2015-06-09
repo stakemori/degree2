@@ -10,7 +10,8 @@ import os
 import hashlib
 import time
 
-from sage.all import (cached_method, mul, flatten, ZZ, fork, matrix)
+from sage.all import (cached_method, mul, flatten, ZZ, fork, matrix,
+                      QQ, gcd, latex)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
@@ -194,6 +195,10 @@ class ConstVectValued(ConstVectBase):
         self._inc = inc
         self._type = tp
         self._normalize_num = normalize_num
+        self._latex_alias_name = None
+
+    def _set_latex_alias_name(self, name):
+        self._latex_alias_name = name
 
     @property
     def sym_wt(self):
@@ -394,6 +399,22 @@ class ConstDivision(ConstVectBase):
         f = self._gen_func(prec + self._inc)
         g = sum((a*f for a, f in zip(self._coeffs, forms)))
         return g.divide(f, prec)
+
+    def _latex_(self):
+        if (any(c._latex_alias_name is None for c in self._consts) or
+            any(v not in QQ for v in self._coeffs)):
+            raise NotImplementedError
+        else:
+            names = [c._latex_alias_name is None for c in self._consts]
+            _gcd = QQ(gcd(self._coeffs))
+            coeffs = [c / _gcd for c in self._coeffs]
+            coeffs_names = [(c, n) for c, n in zip(coeffs, names)
+                            if c != 0]
+            tail_terms = ["%s %s %s"%("+" if c > 0 else "-", c, n)
+                          for c, n in coeffs_names[-1]]
+            head_term = str(coeffs_names[0]) + " " + coeffs_names[0]
+            return r"%s \left(%s\right)"%(latex(_gcd),
+                                          " ".join([head_term] + tail_terms))
 
 
 class ConstDivision0(ConstDivision):
