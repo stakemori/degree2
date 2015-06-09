@@ -10,8 +10,8 @@ import os
 import hashlib
 import time
 
-from sage.all import (cached_method, mul, flatten, ZZ, fork, matrix,
-                      QQ, gcd, latex, PolynomialRing)
+from sage.all import (cached_method, mul, ZZ, fork, matrix, QQ, gcd, latex,
+                      PolynomialRing)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
@@ -82,6 +82,16 @@ class ScalarModFormConst(object):
         else:
             return frozenset((k, v) for k, v in self.wts.iteritems())
 
+    def _to_wts_dict(self):
+        if isinstance(self.wts, dict):
+            return self.wts
+        else:
+            return {tuple(self.wts): QQ(1)}
+
+    def _chi5_degree(self):
+        coeffs_dct = self._to_wts_dict()
+        return max([ks.count(5) for ks in coeffs_dct])
+
     def calc_form(self, prec):
         es4, es6, x10, x12, x35 = degree2_modular_forms_ring_level1_gens(prec)
         x5 = x5__with_prec(prec)
@@ -89,10 +99,7 @@ class ScalarModFormConst(object):
         return self._calc_from_gens_dict(d)
 
     def _calc_from_gens_dict(self, dct):
-        if isinstance(self.wts, list):
-            coeffs_dct = {(k, ): 1 for k in self.wts}
-        else:
-            coeffs_dct = self.wts
+        coeffs_dct = self._to_wts_dict()
 
         def _monm(ws):
             return mul(dct[k] for k in ws)
@@ -284,8 +291,7 @@ class ConstVectValued(ConstVectBase):
             return tuple(list(res) + [self._normalize_num])
 
     def _calc_form_non_norm(self, prec):
-        nm_of_x5 = len([a for a in flatten([c.wts for c in self.consts])
-                        if a == 5])
+        nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
         if nm_of_x5 > 0:
             prec += nm_of_x5//2
 
