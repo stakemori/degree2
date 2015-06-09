@@ -82,6 +82,10 @@ class ScalarModFormConst(object):
         else:
             return frozenset((k, v) for k, v in self.wts.iteritems())
 
+    @property
+    def _key(self):
+        return self._frozen_wts()
+
     def _to_wts_dict(self):
         if isinstance(self.wts, dict):
             return self.wts
@@ -394,11 +398,11 @@ class ConstVectValuedHeckeOp(ConstVectBase):
 
 
 class ConstDivision(ConstVectBase):
-    def __init__(self, consts, coeffs, gen_func, inc):
+    def __init__(self, consts, coeffs, scalar_const, inc):
         self._consts = consts
         self._coeffs = coeffs
-        self._gen_func = gen_func
         self._inc = inc
+        self._scalar_const = scalar_const
 
     @property
     def sym_wt(self):
@@ -406,15 +410,13 @@ class ConstDivision(ConstVectBase):
 
     @cached_method
     def weight(self):
-        # small prec
-        f = self._gen_func(2)
-        return self._consts[0].weight() - f.wt
+        return self._consts[0].weight() - self._scalar_const.weight()
 
     def __repr__(self):
-        return "ConstDivision({consts}, {coeffs}, {f}, {inc})".format(
+        return "ConstDivision({consts}, {coeffs}, {scc}, {inc})".format(
             consts=str(self._consts),
             coeffs=str(self._coeffs),
-            f=self._gen_func.__name__,
+            scc=self._scalar_const,
             inc=str(self._inc))
 
     def calc_form(self, prec):
@@ -426,10 +428,10 @@ class ConstDivision(ConstVectBase):
         return ("ConstDivision",
                 tuple([c._key for c in self._consts]),
                 tuple([a for a in self._coeffs]),
-                self._gen_func.__name__, self._inc)
+                self._scalar_const._key, self._inc)
 
     def calc_from_forms(self, forms, prec):
-        f = self._gen_func(prec + self._inc)
+        f = self._scalar_const.calc_form(prec + self._inc)
         g = sum((a*f for a, f in zip(self._coeffs, forms)))
         return g.divide(f, prec)
 
@@ -454,52 +456,50 @@ class ConstDivision0(ConstDivision):
     '''
     This will be computed lastly.
     '''
-    def __init__(self, consts, coeffs, gen_func):
-        ConstDivision.__init__(self, consts, coeffs, gen_func, 0)
+    def __init__(self, consts, coeffs, scalar_const):
+        ConstDivision.__init__(self, consts, coeffs, scalar_const, 0)
 
     def __repr__(self):
-        return "ConstDivision0({consts}, {coeffs}, {f})".format(
+        return "ConstDivision0({consts}, {coeffs}, {scc})".format(
             consts=str(self._consts),
             coeffs=str(self._coeffs),
-            f=self._gen_func.__name__)
+            scc=str(self._scalar_const))
 
     @property
     def _key(self):
         return ("ConstDivision0",
                 tuple([c._key for c in self._consts]),
                 tuple([a for a in self._coeffs]),
-                self._gen_func.__name__)
+                self._scalar_const._key)
 
 
 class ConstMul(ConstVectBase):
-    def __init__(self, const, gen_func):
+    def __init__(self, const, scalar_const):
         self._const_vec = const
-        self._gen_func = gen_func
+        self._scalar_const = scalar_const
 
     @property
     def sym_wt(self):
         return self._const_vec[0].sym_wt
 
-    @cached_method
     def weight(self):
-        f = self._gen_func(2)
-        return self._const_vec.weight() + f.wt
+        return self._const_vec.weight() + self._scalar_const.weight()
 
     def __repr__(self):
-        return "ConstMul({const}, {f})".format(
+        return "ConstMul({const}, {scc})".format(
             const=str(self._const_vec),
-            f=self._gen_func.__name__)
+            scc=self._scalar_const)
 
     @property
     def _key(self):
-        return ("ConstMul", self._const_vec._key, self._gen_func.__name__)
+        return ("ConstMul", self._const_vec._key, self._scalar_const._key)
 
     def calc_form(self, prec):
         f = self._const_vec.calc_form(prec)
         return self.calc_form_from_f(prec, f)
 
     def calc_form_from_f(self, f, prec):
-        g = self._gen_func(prec)
+        g = self._scalar_const.calc_form(prec)
         return f*g
 
 
