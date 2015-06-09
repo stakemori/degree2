@@ -11,11 +11,11 @@ import hashlib
 import time
 
 from sage.all import (cached_method, mul, flatten, ZZ, fork, matrix,
-                      QQ, gcd, latex)
+                      QQ, gcd, latex, PolynomialRing)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
-from degree2.utils import list_group_by, find_linearly_indep_indices
+from degree2.utils import find_linearly_indep_indices
 
 from degree2.scalar_valued_smfs import x5__with_prec
 
@@ -39,7 +39,27 @@ gens_latex_name = {4: "\\varphi_{4}",
 
 class ScalarModFormConst(object):
     def __init__(self, wts):
-        self.wts = wts
+        """
+        Used for construction of scalar valued Siegel modular forms of
+        even weights.
+        wts is a list or a dict.
+
+        If wts is a list, elements should be in [4, 5, 6, 10, 12, 35].
+        Each integer corresponds to the weight of a generator.
+        Then self.calc_form returns a monomial of generators corresponding to
+        wts.
+
+        If wts is a dict, its keys should be a tuple each element in
+        [4, 5, 6, 12, 35].
+        self.calc_form returns a polynomial of generators corresponding to wts.
+        """
+        if not isinstance(wts, (list, dict)):
+            raise TypeError
+        self._wts = wts
+
+    @property
+    def wts(self):
+        return self._wts
 
     def name(self):
         return "f_{wts}".format(wts="_".join(str(a) for a in self.wts))
@@ -56,18 +76,32 @@ class ScalarModFormConst(object):
     def __repr__(self):
         return "ScalarModFormConst({a})".format(a=str(self.wts))
 
-    @cached_method
     def calc_form(self, prec):
-        es4, es6, x10, x12, _ = degree2_modular_forms_ring_level1_gens(prec)
+        es4, es6, x10, x12, x35 = degree2_modular_forms_ring_level1_gens(prec)
         x5 = x5__with_prec(prec)
-        d = {4: es4, 6: es6, 10: x10, 12: x12, 5: x5}
-        return mul(d[k] for k in self.wts)
+        d = {4: es4, 6: es6, 10: x10, 12: x12, 5: x5, 35: x35}
+        return self._calc_from_gens_dict(d)
+
+    def _calc_from_gens_dict(self, dct):
+        if isinstance(self.wts, list):
+            coeffs_dct = {(k, ): 1 for k in self.wts}
+        else:
+            coeffs_dct = self.wts
+
+        def _monm(ws):
+            return mul(dct[k] for k in ws)
+
+        return sum(_monm(k) * v for k, v in coeffs_dct.iteritems())
+
+    def _polynomial_expr(self):
+        R = PolynomialRing(QQ,
+                           names="varphi4, varphi6, chi10, chi12, chi35, chi5")
+        es4, es6, chi10, chi12, chi35, chi5 = R.gens()
+        d = {4: es4, 6: es6, 10: chi10, 12: chi12, 35: chi35, 5: chi5}
+        return self._calc_from_gens_dict(d)
 
     def _latex_(self):
-        l = ["{g}{w}".format(g=gens_latex_name[k],
-                             w=latex_expt(len(ws)))
-             for k, ws in list_group_by(self.wts, lambda x: x)]
-        return " ".join(l)
+        return latex(self._polynomial_expr())
 
 def latex_expt(n):
     if n == 1:
