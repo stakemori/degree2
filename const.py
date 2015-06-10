@@ -496,7 +496,7 @@ class ConstMul(ConstVectBase):
 
     def calc_form(self, prec):
         f = self._const_vec.calc_form(prec)
-        return self.calc_form_from_f(prec, f)
+        return self.calc_form_from_f(f, prec)
 
     def calc_form_from_f(self, f, prec):
         g = self._scalar_const.calc_form(prec)
