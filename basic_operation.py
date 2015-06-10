@@ -82,6 +82,17 @@ class PrecisionDeg2(object):
     def value(self):
         return self.__prec
 
+    def _max_value(self):
+        '''
+        Returns max([max(n, m) for n, r, m in self]).
+        '''
+        if self.type == "tuples":
+            return max([max(n, m) for n, _, m in self.value])
+        elif self.type == "diag_max":
+            return self.value
+        else:
+            raise NotImplementedError
+
     @property
     def type(self):
         return self.__type
