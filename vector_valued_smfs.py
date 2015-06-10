@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: Sage -*-
+# -*- coding: utf-8 -*-
 '''
 The space of vector valued Siegel modular forms of degree two.
 cf

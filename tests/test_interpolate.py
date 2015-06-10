@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 import unittest
 
 from degree2.all import eisenstein_series_degree2, x35_with_prec

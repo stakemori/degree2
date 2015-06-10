@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 from sage.all import QQ, PolynomialRing, matrix, log, cached_function, fork
 
 from degree2.utils import mul, combination, group, pmap

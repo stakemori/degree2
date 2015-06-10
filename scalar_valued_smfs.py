@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 import os
 import operator
 from abc import ABCMeta, abstractproperty

@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 from sage.all import PolynomialRing, QQ, matrix, ZZ
 from math import sqrt
 import multiprocessing

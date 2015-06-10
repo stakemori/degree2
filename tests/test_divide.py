@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 import unittest
 # from unittest import skip
 from degree2.scalar_valued_smfs import eisenstein_series_degree2, x10_with_prec

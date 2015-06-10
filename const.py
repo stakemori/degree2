@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 '''
 A module for construction of vector valued Siegel modular forms.
 '''

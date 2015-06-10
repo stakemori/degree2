@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 import unittest
 from degree2.basic_operation import PrecisionDeg2, reduced_form_with_sign
 

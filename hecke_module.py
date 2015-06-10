@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod, abstractproperty
 import operator
 

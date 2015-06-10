@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 from sage.all import (NumberField, var, QQ, PolynomialRing, cached_function,
                       dimension_cusp_forms, O, PowerSeriesRing)
 
