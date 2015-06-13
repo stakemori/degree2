@@ -445,6 +445,16 @@ class HeckeModule(object):
             res = [self._to_form(v) for v in B.kernel().basis()]
         return res
 
+    def contains(self, f):
+        '''If self._to_form(self._to_vector(f)) is equal to f with this
+        precision, then return True otherwise False.
+        f may not be contained in self even if this method returns True.
+        '''
+        if self._to_form(self._to_vector(f)) == f:
+            return True
+        else:
+            return False
+
 
 def reprs_of_double_cosets(p, i):
     '''
