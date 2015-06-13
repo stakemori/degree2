@@ -315,6 +315,8 @@ def x5__with_prec(prec):
     Returns formal q-expansion f s.t. f * q1^(-1/2)*t^(1/2)*q2^(-1/2)
     equals to x5 (x10 == x5^2).
     '''
+    if prec not in ZZ:
+        prec = prec._max_value()
     pwsr_prec = (2*prec - 1)**2
 
     def jacobi_g(n, r):
