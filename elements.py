@@ -546,7 +546,9 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
 
     def __mul__(self, other):
         res = QseriesTimesQminushalf.__mul__(self, other)
-        if isinstance(other, ModFormQexpLevel1):
+        if is_number(other):
+            return ModFormQsrTimesQminushalf(res.f_part, self.wt)
+        elif isinstance(other, ModFormQexpLevel1):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt + other.wt)
         elif isinstance(other, ModFormQsrTimesQminushalf):
             return ModFormQexpLevel1(self.wt + other.wt,
