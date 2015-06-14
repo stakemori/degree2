@@ -74,7 +74,7 @@ class ScalarModFormConst(object):
 
     def __eq__(self, other):
         if isinstance(other, ScalarModFormConst):
-            return self.wts == other.wts
+            return self._frozen_wts() == other._frozen_wts()
         else:
             raise NotImplementedError
 
@@ -247,7 +247,7 @@ class ConstVectBase(object):
         return hash(self._key)
 
     def __eq__(self, other):
-        return isinstance(other, ConstVectBase) and hash(self) == hash(other)
+        return isinstance(other, ConstVectBase) and self._key == other._key
 
     @abstractmethod
     def needed_prec(self, prec):
