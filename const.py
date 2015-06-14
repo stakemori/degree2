@@ -211,7 +211,10 @@ class ConstVectBase(object):
         form.save_as_binary(self._fname(data_dir))
 
     def load_form(self, data_dir):
-        return SWMFE.load_from(self._fname(data_dir))
+        try:
+            return SWMFE.load_from(self._fname(data_dir))
+        except IOError:
+            raise IOError("cache file for %s is not found"%(repr(self), ))
 
     def calc_form_and_save(self, prec, data_dir, force=False):
         def calc():
