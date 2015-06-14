@@ -2,25 +2,24 @@
 '''
 
 import unittest
-from degree2.const import (ScalarModFormConst, ConstMul, ConstDivision,
-                           ConstVectValued)
+from degree2.const import ConstMul, ConstDivision, ConstVectValued
 from degree2.all import degree2_modular_forms_ring_level1_gens
 from degree2.scalar_valued_smfs import x10_with_prec
-
+from degree2.const import ScalarModFormConst as SMFC
 
 class ConstsTest(unittest.TestCase):
     def test_scalar_calc_form(self):
-        '''Test ScalarModFormConst.calc_form.
+        '''Test SMFC.calc_form.
         '''
         prec = 5
         es4, es6, x10, x12, _ = degree2_modular_forms_ring_level1_gens(prec)
-        c = ScalarModFormConst([4, 6])
+        c = SMFC([4, 6])
         self.assertTrue(c.calc_form(prec), es4 * es6)
-        c = ScalarModFormConst({(4, 6): 1})
+        c = SMFC({(4, 6): 1})
         self.assertTrue(c.calc_form(prec), es4 * es6)
-        c = ScalarModFormConst([4, 4, 10, 12])
+        c = SMFC([4, 4, 10, 12])
         self.assertTrue(c.calc_form(prec), es4**2 * x10 * x12)
-        c = ScalarModFormConst({(4, 4, 6): 1, (4, 10): -1})
+        c = SMFC({(4, 4, 6): 1, (4, 10): -1})
         self.assertTrue(c.calc_form(prec), es4**2 * es6 - es4 * x10)
 
 
@@ -28,10 +27,10 @@ class ConstsTest(unittest.TestCase):
         '''Test the method calc_form of ConstDivision and ConstMul.'''
         prec = 5
         es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(prec)
-        sccs = [ScalarModFormConst([4, 6]), ScalarModFormConst([10, 12])]
+        sccs = [SMFC([4, 6]), SMFC([10, 12])]
         cvc = ConstVectValued(2, sccs, 0, None)
-        cd = ConstDivision([cvc], [1], ScalarModFormConst([4, 6]), 0)
-        cm = ConstMul(cvc, ScalarModFormConst([4, 6]))
+        cd = ConstDivision([cvc], [1], SMFC([4, 6]), 0)
+        cm = ConstMul(cvc, SMFC([4, 6]))
         F = cvc.calc_form(prec)
         G = cd.calc_form(prec)
         H = cm.calc_form(prec)
@@ -47,9 +46,9 @@ class ConstsTest(unittest.TestCase):
         '''
         prec = 5
         x10 = x10_with_prec(prec)
-        sccs = [ScalarModFormConst([4, 10]), ScalarModFormConst([6, 10])]
+        sccs = [SMFC([4, 10]), SMFC([6, 10])]
         cvc = ConstVectValued(2, sccs, 0, None)
-        cd = ConstDivision([cvc], [1], ScalarModFormConst([10]), 1)
+        cd = ConstDivision([cvc], [1], SMFC([10]), 1)
         F = cvc.calc_form(prec)
         G = cd.calc_form(prec)
         self.assertNotEqual(F, 0)
