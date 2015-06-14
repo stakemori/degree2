@@ -566,6 +566,34 @@ class ConstMul(ConstVectBase):
         return f*g
 
 
+def dependencies(vec_const):
+    '''Returns a set of instances of ConstVectBase needed for the computation
+    of vec_const.
+    '''
+    dep_dpth1 = vec_const.dependencies_depth1()
+    if not dep_dpth1:
+        # No dependencies.
+        return set([])
+    else:
+        return reduce(lambda x, y: x.union(y),
+                      (dependencies(c) for c in dep_dpth1),
+                      set(dep_dpth1))
+
+
+def needed_precs(vec_const, prec):
+    '''Returns a dict whose set of keys is equal to the union of
+    dependencies(vec_const) and set([vec_const])
+    and whose values are equal to needed_prec_depth1.
+    '''
+    dep_dpth1 = vec_const.dependencies_depth1()
+    res = {}
+    nprec = vec_const.needed_prec_depth1(prec)
+    res[vec_const] = nprec
+    dcts = [needed_precs(c, nprec) for c in dep_dpth1]
+    for c in dependencies(vec_const):
+        res[c] = max(d.get(c, prec) for d in dcts)
+    return res
+
 
 class CalculatorVectValued(object):
     def __init__(self, const_vecs, data_dir):
