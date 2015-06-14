@@ -1,3 +1,6 @@
+'''A module for testing degree2.const.
+'''
+
 import unittest
 from degree2.const import (ScalarModFormConst, ConstMul, ConstDivision,
                            ConstVectValued)
@@ -7,6 +10,8 @@ from degree2.scalar_valued_smfs import x10_with_prec
 
 class ConstsTest(unittest.TestCase):
     def test_scalar_calc_form(self):
+        '''Test ScalarModFormConst.calc_form.
+        '''
         prec = 5
         es4, es6, x10, x12, _ = degree2_modular_forms_ring_level1_gens(prec)
         c = ScalarModFormConst([4, 6])
@@ -20,6 +25,7 @@ class ConstsTest(unittest.TestCase):
 
 
     def test_division_multiplication(self):
+        '''Test the method calc_form of ConstDivision and ConstMul.'''
         prec = 5
         es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(prec)
         sccs = [ScalarModFormConst([4, 6]), ScalarModFormConst([10, 12])]
@@ -36,6 +42,9 @@ class ConstsTest(unittest.TestCase):
         self.assertEqual(H, F * es4 * es6)
 
     def test_division_cusp(self):
+        '''Test the method calc_form of ConstDivision in the case when
+        division by a cusp form.
+        '''
         prec = 5
         x10 = x10_with_prec(prec)
         sccs = [ScalarModFormConst([4, 10]), ScalarModFormConst([6, 10])]
