@@ -250,7 +250,7 @@ class ConstVectBase(object):
         return isinstance(other, ConstVectBase) and self._key == other._key
 
     @abstractmethod
-    def needed_prec(self, prec):
+    def needed_prec_depth1(self, prec):
         '''prec: an integer or an instance of PrecisionDeg2.
         This method should return a non-negative integer.
         To compute self with precision prec, dependencies_depth1 and instances
@@ -320,13 +320,13 @@ class ConstVectValued(ConstVectBase):
                self.inc, self.type)
         return res
 
-    def needed_prec(self, prec):
+    def needed_prec_depth1(self, prec):
         prec = _prec_value(prec)
         nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
         return prec + nm_of_x5//2
 
     def calc_form(self, prec):
-        prec = self.needed_prec(prec)
+        prec = self.needed_prec_depth1(prec)
 
         funcs = {2: self._calc_form2,
                  3: self._calc_form3,
@@ -424,7 +424,7 @@ class ConstVectValuedHeckeOp(ConstVectBase):
     def dependencies_depth1(self):
         return [self._const_vec]
 
-    def needed_prec(self, prec):
+    def needed_prec_depth1(self, prec):
         prec = _prec_value(prec)
         return self._m * prec
 
@@ -470,8 +470,7 @@ class ConstDivision(ConstVectBase):
     def dependencies_depth1(self):
         return self._consts
 
-    @cached_method
-    def needed_prec(self, prec):
+    def needed_prec_depth1(self, prec):
         prec = _prec_value(prec)
         return prec + self._inc
 
@@ -557,7 +556,7 @@ class ConstMul(ConstVectBase):
     def dependencies_depth1(self):
         return [self._const_vec]
 
-    def needed_prec(self, prec):
+    def needed_prec_depth1(self, prec):
         if self._scalar_const._chi5_degree() > 0:
             raise NotImplementedError
         return _prec_value(prec)
