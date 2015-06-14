@@ -268,6 +268,20 @@ class ConstVectBase(object):
         '''
         pass
 
+    def walk(self):
+        '''Returns a generator that yields all dependencies of self and Self.
+        It yields Elements that have less dependencies early.
+        '''
+        dep_dpth1 = self.dependencies_depth1()
+        if not dep_dpth1:
+            yield self
+        else:
+            for c in dep_dpth1:
+                for a in c.walk():
+                    yield a
+            yield self
+
+
 class ConstVectValued(ConstVectBase):
     def __init__(self, sym_wt, consts, inc, tp):
         self._sym_wt = sym_wt

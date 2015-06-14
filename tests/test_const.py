@@ -88,5 +88,20 @@ class ConstsTest(unittest.TestCase):
         self.assertEqual(precs[c2], 13)
         self.assertEqual(precs[c1], 14)
 
+    def test_walk(self):
+        '''Test the method walk of ConstVectBase.
+        '''
+        j = 10
+        c1 = ConstVectValued(j, [SMFC([5, 5])], 0, None)
+        c2 = ConstDivision([c1], [1], SMFC([10]), 1)
+        c3 = ConstVectValuedHeckeOp(c2, 2)
+        c4 = ConstDivision([c1], [1], SMFC([12]), 1)
+        c5 = ConstDivision([c3, c4], [1, -1], SMFC([10]), 1)
+        self.assertEqual(list(c1.walk()), [c1])
+        self.assertEqual(list(c2.walk()), [c1, c2])
+        self.assertEqual(list(c3.walk()), [c1, c2, c3])
+        self.assertEqual(list(c4.walk()), [c1, c4])
+        self.assertEqual(list(c5.walk()), [c1, c2, c3, c1, c4, c5])
+
 suite = unittest.TestLoader().loadTestsFromTestCase(ConstsTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
