@@ -11,7 +11,7 @@ import hashlib
 import time
 
 from sage.all import (cached_method, mul, fork, matrix, QQ, gcd, latex,
-                      PolynomialRing)
+                      PolynomialRing, ZZ)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
@@ -36,6 +36,14 @@ gens_latex_name = {4: "\\varphi_{4}",
                    10: "\\chi_{10}",
                    12: "\\chi_{12}",
                    35: "\\chi_{35}"}
+
+def _prec_value(prec):
+    if prec in ZZ:
+        return prec
+    elif isinstance(prec, PrecisionDeg2):
+        return prec._max_value()
+    else:
+        raise NotImplementedError
 
 class ScalarModFormConst(object):
     def __init__(self, wts):
@@ -238,6 +246,24 @@ class ConstVectBase(object):
     def __eq__(self, other):
         return isinstance(other, ConstVectBase) and hash(self) == hash(other)
 
+    @abstractmethod
+    def needed_prec(self, prec):
+        '''prec: an integer or an instance of PrecisionDeg2.
+        This method should return a non-negative integer.
+        To compute self with precision prec, dependencies_depth1 and instances
+        of ScalarModFormConst that self depends on have to be
+        with precision this value.
+        '''
+        pass
+
+    @abstractmethod
+    def dependencies_depth1(self):
+        '''This method should return a list of instances of (child classes of)
+        ConstVectBase needed for the computation of self.
+        It is not necessary to add dependencies of the dependencies to
+        the list.
+        '''
+        pass
 
 class ConstVectValued(ConstVectBase):
     def __init__(self, sym_wt, consts, inc, tp):
@@ -246,6 +272,9 @@ class ConstVectValued(ConstVectBase):
         self._inc = inc
         self._type = tp
         self._latex_alias_name = None
+
+    def dependencies_depth1(self):
+        return []
 
     def _set_latex_alias_name(self, name):
         self._latex_alias_name = name
@@ -288,10 +317,13 @@ class ConstVectValued(ConstVectBase):
                self.inc, self.type)
         return res
 
-    def calc_form(self, prec):
+    def needed_prec(self, prec):
+        prec = _prec_value(prec)
         nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
-        if nm_of_x5 > 0:
-            prec += nm_of_x5//2
+        return prec + nm_of_x5//2
+
+    def calc_form(self, prec):
+        prec = self.needed_prec(prec)
 
         funcs = {2: self._calc_form2,
                  3: self._calc_form3,
@@ -386,6 +418,13 @@ class ConstVectValuedHeckeOp(ConstVectBase):
         return ("ConstVectValuedHeckeOp",
                 self._const_vec._key, self._m)
 
+    def dependencies_depth1(self):
+        return [self._const_vec]
+
+    def needed_prec(self, prec):
+        prec = _prec_value(prec)
+        return self._m * prec
+
     def calc_form(self, prec):
         f = self._const_vec.calc_form(self._m * prec)
         return self.calc_form_from_f(f, prec)
@@ -398,6 +437,12 @@ class ConstVectValuedHeckeOp(ConstVectBase):
 
 
 class ConstDivision(ConstVectBase):
+    '''Returns a construction for a vector valued modulular form by dividing
+    a scalar valued modular form.
+    This construction correponds to
+    sum(F*a for F, a in zip(consts, coeffs)) / scalar_const.
+    Needed prec is increased by inc.
+    '''
     def __init__(self, consts, coeffs, scalar_const, inc):
         self._consts = consts
         self._coeffs = coeffs
@@ -418,6 +463,14 @@ class ConstDivision(ConstVectBase):
             coeffs=str(self._coeffs),
             scc=self._scalar_const,
             inc=str(self._inc))
+
+    def dependencies_depth1(self):
+        return self._consts
+
+    @cached_method
+    def needed_prec(self, prec):
+        prec = _prec_value(prec)
+        return prec + self._inc
 
     def calc_form(self, prec):
         forms = [c.calc_form(prec + self._inc) for c in self._consts]
@@ -497,6 +550,14 @@ class ConstMul(ConstVectBase):
     def calc_form(self, prec):
         f = self._const_vec.calc_form(prec)
         return self.calc_form_from_f(f, prec)
+
+    def dependencies_depth1(self):
+        return [self._const_vec]
+
+    def needed_prec(self, prec):
+        if self._scalar_const._chi5_degree() > 0:
+            raise NotImplementedError
+        return _prec_value(prec)
 
     def calc_form_from_f(self, f, prec):
         g = self._scalar_const.calc_form(prec)
