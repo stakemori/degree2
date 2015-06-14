@@ -585,6 +585,7 @@ def needed_precs(vec_const, prec):
     dependencies(vec_const) and set([vec_const])
     and whose values are equal to needed_prec_depth1.
     '''
+    prec = _prec_value(prec)
     dep_dpth1 = vec_const.dependencies_depth1()
     res = {}
     nprec = vec_const.needed_prec_depth1(prec)
