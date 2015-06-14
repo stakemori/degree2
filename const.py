@@ -619,6 +619,25 @@ class CalculatorVectValued(object):
         idcs = find_linearly_indep_indices(ms, matrix(ms).rank())
         return [consts[i] for i in idcs]
 
+    def all_dependencies(self):
+        '''Returns a set of all dependencies needed for the computation.
+        '''
+        return reduce(lambda x, y: x.union(y),
+                      (dependencies(c) for c in self._const_vecs))
+
+    def all_needed_precs(self, prec):
+        '''Returns a dict whose set of keys is equal to the union of
+        all_dependencies and set(self._const_vecs) and whose values are
+        equal to needed_prec.
+        '''
+        prec = _prec_value(prec)
+        res = {}
+        dcts = [needed_precs(c, prec) for c in self._const_vecs]
+        kys = self.all_dependencies()
+        for c in kys:
+            res[c] = max(d.get(c, prec) for d in dcts)
+        return res
+
     def calc_forms_and_save(self, prec, force=False, verbose=False,
                             do_fork=False):
 
