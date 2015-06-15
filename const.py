@@ -647,13 +647,20 @@ class CalculatorVectValued(object):
         prec = _prec_value(prec)
         res = {}
         dcts = [needed_precs(c, prec) for c in self._const_vecs]
-        kys = self.all_dependencies()
+        kys = self.all_dependencies().union(set(self._const_vecs))
         for c in kys:
             res[c] = max(d.get(c, prec) for d in dcts)
         return res
 
     def calc_forms_and_save(self, prec, force=False, verbose=False,
                             do_fork=False):
+        '''Compute self._const_vecs and save the result to self._data_dir.
+        If force is True, then this fucntion overwrites existing files.
+        If verbose is True, then it shows a message when each computation is
+        done.
+        If do_fork is True, fork the process in each computation.
+        '''
+        computed_consts = []
 
         if not os.path.exists(self._data_dir):
             raise IOError("%s does not exist."%(self._data_dir,))
@@ -664,78 +671,22 @@ class CalculatorVectValued(object):
         if verbose:
             print("Start: " + time.ctime())
 
-        hecke_consts = [c for c in self._const_vecs
-                        if isinstance(c, ConstVectValuedHeckeOp)]
-        division_consts = [c for c in self._const_vecs
-                           if isinstance(c, ConstDivision) and
-                           not isinstance(c, ConstDivision0)]
-        normal_consts = [c for c in self._const_vecs
-                         if isinstance(c, ConstVectValued)]
-        hecke_req_consts = [c for c in normal_consts if
-                            any((d._const_vec == c for d in hecke_consts))]
-        division_req_consts = [c for c in normal_consts if
-                               any((c in d._consts for d in division_consts))]
-        _reqs = hecke_req_consts + division_req_consts
-        _not_req_normal_consts = [c for c in normal_consts if c not in _reqs]
-
-        mul_consts = [c for c in self._const_vecs if isinstance(c, ConstMul)]
-
-        division_consts0 = [c for c in self._const_vecs if
-                            isinstance(c, ConstDivision0)]
-
-        def calc(pr):
+        def calc_and_save(c, pr):
             c.calc_form_and_save(pr, self._data_dir, force=force)
             if verbose:
                 print(msg(c))
 
         if do_fork:
-            calc = fork(calc)
+            calc_and_save = fork(calc_and_save)
 
-        for c in hecke_req_consts:
-            hcs = [d for d in hecke_consts if d._const_vec == c]
-            m = max([d._m for d in hcs])
-            calc(m * prec)
+        all_precs = self.all_needed_precs(prec)
 
-        for c in division_req_consts:
-            ds = [d for d in division_consts if c in d._consts]
-            inc = max([d._inc for d in ds])
-            calc(prec + inc)
-
-        for c in _not_req_normal_consts:
-            calc(prec)
-
-        def calc1(cont, c):
-            c.do_and_save(cont, self._data_dir, force=force)
-            if verbose:
-                print(msg(c))
-
-        if do_fork:
-            calc1 = fork(calc1)
-
-        def cont_func_one(c):
-            def cont():
-                f = c._const_vec.load_form(self._data_dir)
-                return c.calc_form_from_f(f, prec)
-            return cont
-
-        def cont_func_multiple(c):
-            def cont():
-                forms = [d.load_form(self._data_dir) for d in c._consts]
-                return c.calc_from_forms(forms, prec)
-            return cont
-
-        for c in hecke_consts:
-            calc1(cont_func_one(c), c)
-
-        for c in division_consts:
-            calc1(cont_func_multiple(c), c)
-
-        for c in mul_consts:
-            calc1(cont_func_one(c), c)
-
-        for c in division_consts0:
-            calc1(cont_func_multiple(c), c)
-
+        for c in self._const_vecs:
+            for b in c.walk():
+                # There may be duplication.
+                if b not in computed_consts:
+                    calc_and_save(b, all_precs[b])
+                    computed_consts.append(b)
 
     def forms_dict(self, prec):
         return {c: (c.load_form(self._data_dir))._down_prec(prec)
