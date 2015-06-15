@@ -502,7 +502,7 @@ class ConstDivision(ConstVectBase):
     def calc_from_forms(self, forms, prec):
         f = self._scalar_const.calc_form(prec + self._inc)
         g = sum((a*f for a, f in zip(self._coeffs, forms)))
-        return g.divide(f, prec)
+        return g.divide(f, prec, parallel=True)
 
     def _latex_(self):
         if (any(c._latex_alias_name is None for c in self._consts) or
