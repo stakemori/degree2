@@ -11,7 +11,7 @@ import hashlib
 import time
 
 from sage.all import (cached_method, mul, fork, matrix, QQ, gcd, latex,
-                      PolynomialRing, ZZ)
+                      PolynomialRing, ZZ, load)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
@@ -219,10 +219,19 @@ class ConstVectBase(object):
     def calc_form_and_save(self, prec, data_dir, force=False):
         def calc():
             return self.calc_form(prec)
-        self.do_and_save(calc, data_dir, force=force)
+        self.do_and_save(prec, calc, data_dir, force=force)
 
-    def do_and_save(self, cont, data_dir, force=False):
-        if force or (not os.path.exists(self._fname(data_dir))):
+    def do_and_save(self, prec, cont, data_dir, force=False):
+        fl = self._fname(data_dir)
+        do_compute = False
+        if force or (not os.path.exists(fl)):
+            do_compute = True
+        else:
+            d = load(fl)
+            prec_saved = PrecisionDeg2._from_dict_to_object(d["prec"])
+            if prec_saved < PrecisionDeg2(prec):
+                do_compute = True
+        if do_compute:
             f = cont()
             self.save_form(f, data_dir)
 
