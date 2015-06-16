@@ -223,7 +223,13 @@ class ConstVectBase(object):
             return self.calc_form(prec)
         self._do_and_save(prec, calc, data_dir, force=force)
 
-    def _do_and_save(self, prec, cont, data_dir, force=False):
+    def _do_and_save(self, prec, call_back, data_dir, force=False):
+        '''Try to compute a modular form with prec by call_back and
+        save the result to data_dir.
+        If force is True, it overwrites the existing file.
+        If the cache file exists and its prec is greater than or equal to
+        prec, then this function does not call call_back.
+        '''
         fl = self._fname(data_dir)
         do_compute = False
         if force or (not os.path.exists(fl)):
@@ -234,7 +240,7 @@ class ConstVectBase(object):
             if prec_saved < PrecisionDeg2(prec):
                 do_compute = True
         if do_compute:
-            f = cont()
+            f = call_back()
             self.save_form(f, data_dir)
 
     @abstractproperty
