@@ -11,7 +11,7 @@ import hashlib
 import time
 
 from sage.all import (cached_method, mul, fork, matrix, QQ, gcd, latex,
-                      PolynomialRing, ZZ, load)
+                      PolynomialRing, ZZ)
 
 from degree2.all import degree2_modular_forms_ring_level1_gens
 
@@ -221,25 +221,23 @@ class ConstVectBase(object):
     def calc_form_and_save(self, prec, data_dir, force=False):
         def calc():
             return self.calc_form(prec)
-        self._do_and_save(prec, calc, data_dir, force=force)
+        self._do_and_save(calc, data_dir, force=force)
 
-    def _do_and_save(self, prec, call_back, data_dir, force=False):
-        '''Try to compute a modular form with prec by call_back and
-        save the result to data_dir.
-        If force is True, it overwrites the existing file.
-        If the cache file exists and its prec is greater than or equal to
-        prec, then this function does not call call_back.
+    def _saved_form_has_suff_prec(self, prec, data_dir):
+        '''Return true if the precision of the cached form in data_dir
+        has greater than or equal to given prec.
         '''
-        fl = self._fname(data_dir)
-        do_compute = False
-        if force or (not os.path.exists(fl)):
-            do_compute = True
+        f = self.load_form(data_dir)
+        if f.prec >= PrecisionDeg2(prec):
+            return True
         else:
-            d = load(fl)
-            prec_saved = PrecisionDeg2._from_dict_to_object(d["prec"])
-            if prec_saved < PrecisionDeg2(prec):
-                do_compute = True
-        if do_compute:
+            return False
+
+    def _do_and_save(self, call_back, data_dir, force=False):
+        '''Compute a modular form by call_back save the result to data_dir.
+        If force is True, it overwrites the existing file.
+        '''
+        if force or not os.path.exists(self._fname(data_dir)):
             f = call_back()
             self.save_form(f, data_dir)
 
