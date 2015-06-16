@@ -690,6 +690,14 @@ class CalculatorVectValued(object):
             res[c] = max(d.get(c, prec) for d in dcts)
         return res
 
+    def rdep(self, const):
+        '''Returns a subset of the union of all_dependencies and
+        set(self._const_vecs) cosisting elements
+        that depend on const with depth1.
+        '''
+        return {c for c in self.all_dependencies().union(set(self._const_vecs))
+                if const in c.dependencies_depth1()}
+
     def calc_forms_and_save(self, prec, verbose=False, do_fork=False):
         '''Compute self._const_vecs and save the result to self._data_dir.
         If verbose is True, then it shows a message when each computation is
