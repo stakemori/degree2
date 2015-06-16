@@ -203,6 +203,14 @@ class ConstVectBase(object):
         pass
 
     @abstractmethod
+    def _latex_using_dpd_depth1(self, dpd_dct):
+        '''dpd_dct is a dictionary whose set of keys is equal to
+        self.dependencies_depth1() and its value is a variable name.
+        This method returns a LaTeX expression of self.
+        '''
+        pass
+
+    @abstractmethod
     def weight(self):
         pass
 
@@ -317,13 +325,9 @@ class ConstVectValued(ConstVectBase):
         self._consts = consts
         self._inc = inc
         self._type = tp
-        self._latex_alias_name = None
 
     def dependencies_depth1(self):
         return []
-
-    def _set_latex_alias_name(self, name):
-        self._latex_alias_name = name
 
     @property
     def sym_wt(self):
@@ -425,6 +429,9 @@ class ConstVectValued(ConstVectBase):
         else:
             raise NotImplementedError
 
+    def _latex_using_dpd_depth1(self, dpd_dct):
+        return self._latex()
+
     def _latex(self):
         lcs = [c._latex_() for c in self.consts]
         return latex_rankin_cohen(self.inc, self.sym_wt, lcs)
@@ -488,6 +495,9 @@ class ConstVectValuedHeckeOp(ConstVectBase):
     def _latex_(self):
         return "\\mathrm{T}(%s) %s"%(self._m, self._const_vec._latex_())
 
+    def _latex_using_dpd_depth1(self, dpd_dct):
+        return r"%s \mid \mathrm{T}(%s)"%(dpd_dct[self._const_vec], self._m)
+
 
 class ConstDivision(ConstVectBase):
     '''Returns a construction for a vector valued modulular form by dividing
@@ -544,21 +554,17 @@ class ConstDivision(ConstVectBase):
         forms = [depds_dct[c] for c in self._consts]
         return self.calc_from_forms(forms, prec)
 
-    def _latex_(self):
-        if (any(c._latex_alias_name is None for c in self._consts) or
-            any(v not in QQ for v in self._coeffs)):
-            raise NotImplementedError
-        else:
-            names = [c._latex_alias_name is None for c in self._consts]
-            _gcd = QQ(gcd(self._coeffs))
-            coeffs = [c / _gcd for c in self._coeffs]
-            coeffs_names = [(c, n) for c, n in zip(coeffs, names)
-                            if c != 0]
-            tail_terms = ["%s %s %s"%("+" if c > 0 else "-", c, n)
-                          for c, n in coeffs_names[-1]]
-            head_term = str(coeffs_names[0]) + " " + coeffs_names[0]
-            return r"%s \left(%s\right)"%(latex(_gcd),
-                                          " ".join([head_term] + tail_terms))
+    def _latex_using_dpd_depth1(self, dpd_dct):
+        names = [dpd_dct[c] for c in self._consts]
+        _gcd = QQ(gcd(self._coeffs))
+        coeffs = [c / _gcd for c in self._coeffs]
+        coeffs_names = [(c, n) for c, n in zip(coeffs, names)
+                        if c != 0]
+        tail_terms = ["%s %s %s"%("+" if c > 0 else "-", c, n)
+                      for c, n in coeffs_names[-1]]
+        head_term = str(coeffs_names[0]) + " " + coeffs_names[1]
+        return r"%s \left(%s\right)"%(latex(_gcd),
+                                      " ".join([head_term] + tail_terms))
 
 
 class ConstDivision0(ConstDivision):
@@ -622,6 +628,10 @@ class ConstMul(ConstVectBase):
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
         f = depds_dct[self._const_vec]
         return self.calc_form_from_f(f, prec)
+
+    def _latex_using_dpd_depth1(self, dpd_dct):
+        return "%s %s"%(self._scalar_const._latex_(),
+                        dpd_dct[self._const_vec])
 
 
 def dependencies(vec_const):
