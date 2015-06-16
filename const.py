@@ -291,6 +291,18 @@ class ConstVectBase(object):
             yield self
 
 
+    @abstractmethod
+    def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
+        '''depds_dct is a dictionary whose set of keys contains
+        dependencies_depth1. And its at an element of dependencies_depth1
+        is a modular form with precision prec.
+        This method computes a modular form corresponding to self form
+        depds_dct.
+        '''
+        pass
+
+
+
 class ConstVectValued(ConstVectBase):
     def __init__(self, sym_wt, consts, inc, tp):
         self._sym_wt = sym_wt
@@ -347,6 +359,9 @@ class ConstVectValued(ConstVectBase):
         prec = _prec_value(prec)
         nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
         return prec + nm_of_x5//2
+
+    def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
+        return self.calc_form(prec)
 
     def calc_form(self, prec):
         prec = self.needed_prec_depth1(prec)
@@ -458,6 +473,10 @@ class ConstVectValuedHeckeOp(ConstVectBase):
     def calc_form_from_f(self, f, prec):
         return f.hecke_operator_acted(self._m, prec)
 
+    def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
+        f = depds_dct[self._const_vec]
+        return self.calc_form_from_f(f, prec)
+
     def _latex_(self):
         return "\\mathrm{T}(%s) %s"%(self._m, self._const_vec._latex_())
 
@@ -512,6 +531,10 @@ class ConstDivision(ConstVectBase):
         f = self._scalar_const.calc_form(prec + self._inc)
         g = sum((a*f for a, f in zip(self._coeffs, forms)))
         return g.divide(f, prec, parallel=True)
+
+    def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
+        forms = [depds_dct[c] for c in self._consts]
+        return self.calc_from_forms(forms, prec)
 
     def _latex_(self):
         if (any(c._latex_alias_name is None for c in self._consts) or
@@ -587,6 +610,10 @@ class ConstMul(ConstVectBase):
     def calc_form_from_f(self, f, prec):
         g = self._scalar_const.calc_form(prec)
         return f*g
+
+    def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
+        f = depds_dct[self._const_vec]
+        return self.calc_form_from_f(f, prec)
 
 
 def dependencies(vec_const):
