@@ -221,9 +221,9 @@ class ConstVectBase(object):
     def calc_form_and_save(self, prec, data_dir, force=False):
         def calc():
             return self.calc_form(prec)
-        self.do_and_save(prec, calc, data_dir, force=force)
+        self._do_and_save(prec, calc, data_dir, force=force)
 
-    def do_and_save(self, prec, cont, data_dir, force=False):
+    def _do_and_save(self, prec, cont, data_dir, force=False):
         fl = self._fname(data_dir)
         do_compute = False
         if force or (not os.path.exists(fl)):
