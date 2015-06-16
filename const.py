@@ -198,6 +198,8 @@ class ConstVectBase(object):
 
     @abstractmethod
     def calc_form(self, prec):
+        '''Return the corresponding modular form with precision prec.
+        '''
         pass
 
     @abstractmethod
@@ -555,7 +557,7 @@ class ConstDivision(ConstVectBase):
 
 class ConstDivision0(ConstDivision):
     '''
-    This will be computed lastly.
+    This class is obsolete. Use ConstDivision instead.
     '''
     def __init__(self, consts, coeffs, scalar_const):
         ConstDivision.__init__(self, consts, coeffs, scalar_const, 0)
@@ -688,10 +690,8 @@ class CalculatorVectValued(object):
             res[c] = max(d.get(c, prec) for d in dcts)
         return res
 
-    def calc_forms_and_save(self, prec, force=False, verbose=False,
-                            do_fork=False):
+    def calc_forms_and_save(self, prec, verbose=False, do_fork=False):
         '''Compute self._const_vecs and save the result to self._data_dir.
-        If force is True, then this fucntion overwrites existing files.
         If verbose is True, then it shows a message when each computation is
         done.
         If do_fork is True, fork the process in each computation.
