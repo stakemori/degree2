@@ -616,7 +616,7 @@ class ConstMul(ConstVectBase):
         return _prec_value(prec)
 
     def calc_form_from_f(self, f, prec):
-        g = self._scalar_const.calc_form(self.needed_prec_depth1())
+        g = self._scalar_const.calc_form(self.needed_prec_depth1(prec))
         return f*g
 
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
