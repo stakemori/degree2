@@ -683,6 +683,7 @@ class CalculatorVectValued(object):
         return reduce(lambda x, y: x.union(y),
                       (dependencies(c) for c in self._const_vecs))
 
+    @cached_method
     def all_needed_precs(self, prec):
         '''Returns a dict whose set of keys is equal to the union of
         all_dependencies and set(self._const_vecs) and whose values are
@@ -696,7 +697,7 @@ class CalculatorVectValued(object):
             res[c] = max(d.get(c, prec) for d in dcts)
         return res
 
-    def rdep(self, const):
+    def rdeps(self, const):
         '''Returns a subset of the union of all_dependencies and
         set(self._const_vecs) cosisting elements
         that depend on const with depth1.
@@ -704,39 +705,63 @@ class CalculatorVectValued(object):
         return {c for c in self.all_dependencies().union(set(self._const_vecs))
                 if const in c.dependencies_depth1()}
 
-    def calc_forms_and_save(self, prec, verbose=False, do_fork=False):
+    def rdep_prec(self, const, prec):
+        '''We have to compute const with this precision to compute self._consts
+        with precision prec.
+        '''
+        d = self.all_needed_precs(prec)
+        _rdeps = self.rdeps(const)
+        if _rdeps:
+            return max(d[a] for a in _rdeps)
+        else:
+            return _prec_value(prec)
+
+    def calc_forms_and_save(self, prec, verbose=False, do_fork=False,
+                            force=False):
         '''Compute self._const_vecs and save the result to self._data_dir.
         If verbose is True, then it shows a message when each computation is
         done.
+        If force is True, then it overwrites existing files.
         If do_fork is True, fork the process in each computation.
         '''
-        computed_consts = []
-
         if not os.path.exists(self._data_dir):
             raise IOError("%s does not exist."%(self._data_dir,))
 
-        def msg(c):
-            return "{c} finished. {t}".format(c=repr(c), t=str(time.ctime()))
+        def msg(c, prc):
+            return "{t}: Computing {c} with prec {prc}".format(
+                c=repr(c),
+                t=str(time.ctime()),
+                prc=str(prc))
 
         if verbose:
             print("Start: " + time.ctime())
 
-        def calc_and_save(c, pr):
-            c.calc_form_and_save(pr, self._data_dir, force=force)
-            if verbose:
-                print(msg(c))
+        computed_consts = []
+
+        def calc_and_save(c, prc):
+            def call_back():
+                depds_dct = {dp: dp.load_form(self._data_dir)
+                             for dp in  c.dependencies_depth1()}
+                f = c.calc_form_from_dependencies_depth_1(prc, depds_dct)
+                return f
+
+            c._do_and_save(call_back, self._data_dir, force=force)
 
         if do_fork:
             calc_and_save = fork(calc_and_save)
 
-        all_precs = self.all_needed_precs(prec)
-
         for c in self._const_vecs:
             for b in c.walk():
-                # There may be duplication.
                 if b not in computed_consts:
-                    calc_and_save(b, all_precs[b])
+                    prc = self.rdep_prec(b, prec)
+                    if verbose:
+                        print(msg(b, prc))
+                    if not b._saved_form_has_suff_prec(prc, self._data_dir):
+                        calc_and_save(b, self.rdep_prec(b, prec))
                     computed_consts.append(b)
+
+        if verbose:
+            print("Finished: " + time.ctime())
 
     def forms_dict(self, prec):
         return {c: (c.load_form(self._data_dir))._down_prec(prec)
