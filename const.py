@@ -224,9 +224,11 @@ class ConstVectBase(object):
         self._do_and_save(calc, data_dir, force=force)
 
     def _saved_form_has_suff_prec(self, prec, data_dir):
-        '''Return true if the precision of the cached form in data_dir
-        has greater than or equal to given prec.
+        '''Return true if the cache file exists and the precision of the
+        cached form in data_dir has greater than or equal to given prec.
         '''
+        if not os.path.exists(self._fname(data_dir)):
+            return False
         f = self.load_form(data_dir)
         if f.prec >= PrecisionDeg2(prec):
             return True
