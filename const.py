@@ -560,11 +560,13 @@ class ConstDivision(ConstVectBase):
         coeffs = [c / _gcd for c in self._coeffs]
         coeffs_names = [(c, n) for c, n in zip(coeffs, names)
                         if c != 0]
-        tail_terms = ["%s %s %s"%("+" if c > 0 else "-", c, n)
-                      for c, n in coeffs_names[-1]]
-        head_term = str(coeffs_names[0]) + " " + coeffs_names[1]
-        return r"%s \left(%s\right)"%(latex(_gcd),
-                                      " ".join([head_term] + tail_terms))
+        tail_terms = ["%s %s %s"%("+" if c > 0 else "", c, n)
+                      for c, n in coeffs_names[1:]]
+        c0, n0 = coeffs_names[0]
+        head_term = str(c0) + " " + str(n0)
+        return r"{pol} \left({terms}\right)".format(
+            pol=latex(_gcd * self._scalar_const._polynomial_expr()**(-1)),
+            terms=" ".join([head_term] + tail_terms))
 
 
 class ConstDivision0(ConstDivision):
