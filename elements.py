@@ -369,12 +369,14 @@ class QexpLevel1(FormalQexp):
                         key=lambda x: x[0])]
         return SymWtGenElt(forms, self.prec, self.base_ring)
 
-    def change_ring(self, R, hom=None):
+    def change_ring(self, R=None, hom=None):
         '''
         Returns a Fourier expansion whose base ring is changed.
         '''
         if hom is None:
             hom = R
+        if R is None:
+            R = hom.codomain()
         fc_map = {}
         for k, v in self.fc_dct.iteritems():
             fc_map[k] = hom(v)
@@ -807,17 +809,13 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
         data_dict = load(filename)
         return cls._from_dict_to_object(data_dict)
 
-    def change_ring(self, R, hom=None):
+    def change_ring(self, R=None, hom=None):
         '''
         Returns a Fourier expansion whose base ring is changed.
         '''
-        if hom is None:
-            hom = R
-        fc_map = {}
-        for k, v in self.fc_dct.iteritems():
-            fc_map[k] = hom(v)
-        res = ModFormQexpLevel1(self.wt, fc_map, self.prec,
-                                base_ring=R,
+        f = QexpLevel1.change_ring(self, R=R, hom=hom)
+        res = ModFormQexpLevel1(self.wt, f.fc_dct, self.prec,
+                                base_ring=f.base_ring,
                                 is_cuspidal=self._is_cuspidal)
         return res
 
@@ -986,11 +984,11 @@ class SymWtGenElt(object):
         res_br = common_base_ring(res_forms)
         return SymWtGenElt(res_forms, prec, base_ring=res_br)
 
-    def change_ring(self, R, hom=None):
+    def change_ring(self, R=None, hom=None):
         '''Return a Fourier expansion whose base_ring is changed.
         '''
-        forms = [f.change_ring(R, hom=hom) for f in self.forms]
-        return SymWtGenElt(forms, self.prec, base_ring=R)
+        forms = [f.change_ring(R=R, hom=hom) for f in self.forms]
+        return SymWtGenElt(forms, self.prec, base_ring=forms[0].base_ring)
 
 class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
     '''
@@ -1099,9 +1097,10 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
         else:
             return res
 
-    def change_ring(self, R, hom=None):
-        forms = [f.change_ring(R, hom=hom) for f in self.forms]
-        return SymWtModFmElt(forms, self.wt, self.prec, base_ring=R)
+    def change_ring(self, R=None, hom=None):
+        forms = [f.change_ring(R=R, hom=hom) for f in self.forms]
+        return SymWtModFmElt(forms, self.wt, self.prec,
+                             base_ring=forms[0].base_ring)
 
 
 def divide(f, g, prec):
