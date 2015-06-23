@@ -986,6 +986,11 @@ class SymWtGenElt(object):
         res_br = common_base_ring(res_forms)
         return SymWtGenElt(res_forms, prec, base_ring=res_br)
 
+    def change_ring(self, R, hom=None):
+        '''Return a Fourier expansion whose base_ring is changed.
+        '''
+        forms = [f.change_ring(R, hom=hom) for f in self.forms]
+        return SymWtGenElt(forms, self.prec, base_ring=R)
 
 class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
     '''
@@ -1093,6 +1098,10 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
                                  base_ring=res.base_ring)
         else:
             return res
+
+    def change_ring(self, R, hom=None):
+        forms = [f.change_ring(R, hom=hom) for f in self.forms]
+        return SymWtModFmElt(forms, self.wt, self.prec, base_ring=R)
 
 
 def divide(f, g, prec):
