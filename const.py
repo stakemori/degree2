@@ -564,8 +564,10 @@ class ConstDivision(ConstVectBase):
                       for c, n in coeffs_names[1:]]
         c0, n0 = coeffs_names[0]
         head_term = str(c0) + " " + str(n0)
-        return r"{pol} \left({terms}\right)".format(
-            pol=latex(_gcd * self._scalar_const._polynomial_expr()**(-1)),
+        return r"\frac{{{pol_num}}}{{{pol_dnm}}} \left({terms}\right)".format(
+            pol_dnm=latex(_gcd.denominator() *
+                          self._scalar_const._polynomial_expr()),
+            pol_num=latex(_gcd.numerator()),
             terms=" ".join([head_term] + tail_terms))
 
 
