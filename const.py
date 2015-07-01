@@ -262,9 +262,9 @@ class ConstVectBase(object):
     @property
     def _unique_name(self):
         '''
-        Returns a unique name by using hashlib.md5.
+        Returns a unique name by using hashlib.sha1.
         '''
-        m = hashlib.md5()
+        m = hashlib.sha1()
         m.update(str(self._key))
         return m.hexdigest()
 
