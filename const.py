@@ -120,7 +120,7 @@ class ScalarModFormConst(object):
 
     def _polynomial_expr(self):
         R = PolynomialRing(QQ,
-                           names="varphi4, varphi6, chi10, chi12, chi35, chi5")
+                           names="phi4, phi6, chi10, chi12, chi35, chi5")
         es4, es6, chi10, chi12, chi35, chi5 = R.gens()
         d = {4: es4, 6: es6, 10: chi10, 12: chi12, 35: chi35, 5: chi5}
         return self._calc_from_gens_dict(d)
