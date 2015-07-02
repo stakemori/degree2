@@ -30,8 +30,8 @@ from degree2.basic_operation import PrecisionDeg2
 
 scalar_wts = [4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
-gens_latex_name = {4: "\\varphi_{4}",
-                   6: "\\varphi_{6}",
+gens_latex_name = {4: "\\phi_{4}",
+                   6: "\\phi_{6}",
                    5: "\\chi_{5}",
                    10: "\\chi_{10}",
                    12: "\\chi_{12}",
