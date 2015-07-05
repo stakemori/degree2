@@ -783,3 +783,9 @@ class CalculatorVectValued(object):
 
     def unique_names_dict(self):
         return {c: c._unique_name for c in self._const_vecs}
+
+
+def check_collision(consts):
+    keys = [a._key for a in consts]
+    names = [a._unique_name for a in consts]
+    assert len(keys) == len(names)
