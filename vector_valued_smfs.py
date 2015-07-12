@@ -23,9 +23,11 @@ from degree2.all import (rankin_cohen_pair_sym,
                          rankin_cohen_pair_det2_sym,
                          rankin_cohen_triple_det_sym4)
 
+from degree2.tsushima_dimension_formula import hilbert_series_maybe
 from degree2.scalar_valued_smfs import degree2_modular_forms_ring_level1_gens \
     as deg2_ring_gens
-
+from degree2.const import ConstMul
+from degree2.const import ScalarModFormConst as SMFC
 
 def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     r'''
@@ -88,6 +90,68 @@ class VectorValuedSiegelModularForms(HeckeModule):
         if bd is None:
             bd = frozenset(self.prec)
         return self._linearly_indep_tuples_of_given_bd(bd)
+
+
+def _from_ts_wts(ts):
+    lsts = [[4], [6], [10], [12]]
+    return (reduce(operator.add, (a * b for a, b in zip(lsts, t)))
+            for t in ts)
+
+
+class GivenWtBase(VectorValuedSiegelModularForms):
+    '''A base class for the space of vector valued Siegel modular
+    forms of weight det^wt Sym(j).
+    '''
+    def __init__(self, sym_wt, wt, prec, calculator=None, gen_consts=None):
+        super(GivenWtBase, self).__init__(wt, sym_wt, prec)
+        self._calculator = calculator
+        self._gen_consts = gen_consts
+
+    def dimension(self):
+        if self.sym_wt == 8 and self.wt == 4:
+            return 1
+        elif self.sym_wt <= 10 and self.wt <= 4:
+            return 0
+        elif self.wt > 4:
+            pl = hilbert_series_maybe(self.sym_wt, prec=self.wt + 1)
+            return pl[self.wt]
+        else:
+            raise NotImplementedError(
+                "The dimensions of small determinant weights"
+                + " are not known in general.")
+
+    def _basis_const(self):
+        '''This method should yield a generator that consists of an instance of
+        ConstMul.'''
+        raise NotImplementedError
+
+    def _basis_const_base(self, ignored_dct):
+        '''This method is used for implmentation of _basis_const.
+        ignored_dct is a dictionary whose key is an element of self._gen_consts
+        and its value is in [4, 6, 10, 12].
+        For exmaple if ignored_dct = {c: 4} and F is a vector valued modular
+        form that corresponds to c, then
+        we do not use F * (a monomial including es4) when constructing a basis.
+        '''
+        wt_to_idx = {4: 0, 6: 1, 10: 2, 12: 3}
+        for c in self._gen_consts:
+            k = c.weight()
+            if c in ignored_dct:
+                idx = wt_to_idx[ignored_dct[c]]
+                ts = [t for t in tuples_even_wt_modular_forms(self.wt - k)
+                      if t[idx]]
+            else:
+                ts = tuples_even_wt_modular_forms(self.wt - k)
+            for t in _from_ts_wts(ts):
+                yield ConstMul(c, SMFC(t))
+
+    @cached_method
+    def basis(self):
+        gens_dct = self._calculator.forms_dict(self.prec)
+        res = []
+        for bc in self._basis_const():
+            res.append(bc.calc_form_from_f(gens_dct[bc._const_vec], self.prec))
+        return res
 
 
 class VvsmfSym2_4(VectorValuedSiegelModularForms):
