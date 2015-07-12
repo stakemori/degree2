@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''This module provides functions odd_gen_consts and ignored_dct.'''
+'''This module provides functions gen_consts and ignored_dct.'''
 
 import os
 from degree2.const import ScalarModFormConst as SMFC
@@ -166,7 +166,7 @@ def odd_consts():
     return res
 
 
-def odd_gen_consts():
+def gen_consts():
     '''A list of constructions of generators of M_{Sym(10)}^{odd}.
     '''
     res = [_sym10_wt9_const(),
@@ -181,12 +181,12 @@ def odd_gen_consts():
 
 
 def ignored_dct():
-    consts = odd_gen_consts()
+    consts = gen_consts()
     consts = [c for c in consts if c.weight() in [21, 23]]
     return {c: 6 for c in consts}
 
 
-calculator = CalculatorVectValued(odd_gen_consts(), data_dir)
+calculator = CalculatorVectValued(gen_consts(), data_dir)
 # calculator.calc_forms_and_save(5, verbose=True)
 
 # calculator23 = CalculatorVectValued(sym10_wt23_consts, data_dir)
@@ -290,7 +290,7 @@ class Sym10Wt19SpDiv(VectorValuedSiegelModularForms):
 
 def det_of_gens(prec):
     d = calculator.forms_dict(prec)
-    cs = odd_gen_consts()[:11]
+    cs = gen_consts()[:11]
     wt = sum([c.weight() for c in cs]) + (10*11)//2
     mat = [d[c].forms for c in cs]
     f = det_deg2(mat, wt=wt)
@@ -314,8 +314,3 @@ def test_det_is_divisible_by_power_of_x35():
     es4 = eisenstein_series_degree2(4, 22)
     es6 = eisenstein_series_degree2(6, 22)
     assert f222 == (x35**6) * (es4**3 - es6**2) * a
-
-
-# def basis_of_given_wt(wt):
-#     gen_consts = odd_gen_consts()
-#     gens_dct = for c in gen_consts

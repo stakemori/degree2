@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-'''This modules provides functions even_gen_consts and ignored_dct.
+'''This modules provides functions gen_consts and ignored_dct.
 '''
 from sage.all import cached_method, Integer, matrix
 import os
@@ -217,7 +217,7 @@ wt12_consts = _wt12_consts + [_wt12_mul_const_f6(), _wt12_mul_const_f8()]
 wt14_consts = _wt14_consts + _wt14_consts_mul()
 
 
-def even_gen_consts():
+def gen_consts():
     return ([_wt6_const(), _wt8_const()] +
             _wt10_consts + _wt12_consts + _wt14_consts +
             _wt16_consts + [_wt18_consts[0]] + [_wt20_consts[0]])
@@ -225,7 +225,7 @@ def even_gen_consts():
 def ignored_dct():
     '''Return value will be passed to GivenWtBase._basis_const_base.
     '''
-    consts = even_gen_consts()
+    consts = gen_consts()
     consts = [c for c in consts if c.weight() in [18, 20]]
     return {c: 6 for c in consts}
 
@@ -244,12 +244,12 @@ def even_consts():
     res.append(_wt8_const())
     return res
 
-calculator = CalculatorVectValued(even_gen_consts(), data_dir)
+calculator = CalculatorVectValued(gen_consts(), data_dir)
 
 
 def det_of_gens(prec):
     d = calculator.forms_dict(prec)
-    cs = even_gen_consts()[:11]
+    cs = gen_consts()[:11]
     wt = sum([c.weight() for c in cs]) + (10*11)//2
     mat = [d[c].forms for c in cs]
     f = det_deg2(mat, wt=wt)
