@@ -26,8 +26,11 @@ from degree2.all import (rankin_cohen_pair_sym,
 from degree2.tsushima_dimension_formula import hilbert_series_maybe
 from degree2.scalar_valued_smfs import degree2_modular_forms_ring_level1_gens \
     as deg2_ring_gens
-from degree2.const import ConstMul
+from degree2.const import ConstMul, CalculatorVectValued
 from degree2.const import ScalarModFormConst as SMFC
+
+from degree2.vector_valued_impl.utils import data_dir
+import degree2.vector_valued_impl as vec_impl
 
 def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     r'''
@@ -152,6 +155,38 @@ class GivenWtBase(VectorValuedSiegelModularForms):
         for bc in self._basis_const():
             res.append(bc.calc_form_from_f(gens_dct[bc._const_vec], self.prec))
         return res
+
+
+class Sym10Even(GivenWtBase):
+    '''A class for the module M_{det^wt Sym(10)} where wt is even.
+    '''
+    def __init__(self, wt, prec, data_directory=None):
+        if data_directory is None:
+            data_directory = data_dir
+        consts = vec_impl.sym10.even_structure.gen_consts()
+        calculator = CalculatorVectValued(consts, data_directory)
+        super(Sym10Even, self).__init__(wt, prec, calculator=calculator,
+                                        gen_consts=consts)
+
+    def _basis_const(self):
+        ignored_dct = vec_impl.sym10.even_structure.ignored_dct()
+        return self._basis_const_base(ignored_dct)
+
+
+class Sym10Odd(GivenWtBase):
+    '''A class for the module M_{det^wt Sym(10)} where wt is odd.
+    '''
+    def __init__(self, wt, prec, data_directory=None):
+        if data_directory is None:
+            data_directory = data_dir
+        consts = vec_impl.sym10.odd_structure.gen_consts()
+        calculator = CalculatorVectValued(consts, data_directory)
+        super(Sym10Odd, self).__init__(wt, prec, calculator=calculator,
+                                       gen_consts=consts)
+
+    def _basis_const(self):
+        ignored_dct = vec_impl.sym10.odd_structure.ignored_dct()
+        return self._basis_const_base(ignored_dct)
 
 
 class VvsmfSym2_4(VectorValuedSiegelModularForms):
