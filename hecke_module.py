@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import operator
 
 import sage
-from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix, identity_matrix,
+from sage.all import (factor, ZZ, QQ, PolynomialRing, matrix,
                       zero_vector, vector, gcd, valuation)
 
 from sage.misc.cachefunc import cached_method
@@ -13,6 +13,7 @@ from degree2.utils import (_is_triple_of_integers, is_number, uniq,
 
 from degree2.basic_operation import reduced_form_with_sign, number_of_procs
 
+from degree2.modular_form_module import ModularFormModule
 
 class HalfIntegralMatrices2(object):
     '''
@@ -330,39 +331,12 @@ class HeckeModuleElement(object):
             + (-a2 + a1 - 1) * x**4 - x**5
 
 
-class HeckeModule(object):
+class HeckeModule(ModularFormModule):
     __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def basis(self):
-        '''
-        Should return a list [b_i for i = 0, ..., n-1]
-        b_i should be an instance of HeckeModuleElement
-        '''
-        pass
-
-    @abstractmethod
-    def linearly_indep_tuples(self):
-        '''
-        Should return a list [t_i for i = 0, ..., n-1] so that
-        matrix(b_i[t_j]) must be regular, where
-        self.basis() = [b_i for i = 0, ..., n-1].
-        t_i should be a triple of integers in the scalar valued case.
-        In the vector valued case, t_i should be a tuple (t, i)
-        where t is a triple of integers and i is an integer
-        (see the definition of __getitem__ of vector valued Siegel
-        modular forms).
-        '''
-        pass
 
     @cached_method
     def hecke_matrix(self, a):
-        basis = self.basis()
-        lin_indep_tuples = self.linearly_indep_tuples()
-        m1 = matrix([[f[t] for t in lin_indep_tuples] for f in basis])
-        m2 = matrix([[f.hecke_operator(a, t) for t in lin_indep_tuples]
-                     for f in basis])
-        return (m2 * m1**(-1)).transpose()
+        return self.matrix_representaion(lambda f, t: f.hecke_operator(a, t))
 
     def hecke_charpoly(self, a, var='x', algorithm='linbox'):
         return self.hecke_matrix(a).charpoly(var, algorithm)
@@ -373,62 +347,14 @@ class HeckeModule(object):
         has no double eigenvalues,
         this method returns an eigenform whose eigenvalue is eigenvalue.
         '''
-        basis = self.basis()
-        dim = len(basis)
-        if hasattr(lm, "parent"):
-            K = lm.parent()
-            if hasattr(K, "fraction_field"):
-                K = K.fraction_field()
-        else:
-            K = QQ
-        A = self.hecke_matrix(2)
-        S = PolynomialRing(K, names="x")
-        x = S.gens()[0]
-        f = S(A.charpoly())
-        g = S(f // (x - lm))
-        cffs_g = [g[y] for y in range(dim)]
-        A_pws = []
-        C = identity_matrix(dim)
-        for i in range(dim):
-            A_pws.append(C)
-            C = A*C
-
-        for i in range(dim):
-            clm_i = [a.columns()[i] for a in A_pws]
-            w = sum((a*v for a, v in zip(cffs_g, clm_i)))
-            if w != 0:
-                egvec = w
-                break
-
-        res = sum([a * b for a, b in zip(egvec, basis)])
-        if all([hasattr(b, "_construction") for b in basis]):
-            res._construction = sum([a * b._construction
-                                     for a, b in zip(egvec, basis)])
-        return res
+        return self.eigenvector_with_eigenvalue(
+            lambda f, t: f.hecke_operator(2, t), lm)
 
     def is_eigen_form(self, f, tupls=False):
         if tupls is False:
             tupls = self.linearly_indep_tuples()
         lm = f.hecke_eigenvalue(2)
         return all([f.hecke_operator(2, t) == lm * f[t] for t in tupls])
-
-    def _to_vector(self, fm):
-        '''
-        Returns a vector corresponding to fm.
-        By this method, self.basis() becomes the standard basis.
-        '''
-        lin_indep_tuples = self.linearly_indep_tuples()
-        m1 = matrix([[f[t] for t in lin_indep_tuples] for f in self.basis()])
-        v = vector([fm[t] for t in lin_indep_tuples])
-        return v * m1**(-1)
-
-    def _to_form(self, v):
-        '''
-        The inverse to _to_vector.
-        '''
-        basis = self.basis()
-        return sum((f*a for a, f in zip(v, basis)))
-
 
     def basis_of_subsp_annihilated_by(self, pol, a=2, parallel=False):
         '''
@@ -445,15 +371,11 @@ class HeckeModule(object):
             res = [self._to_form(v) for v in B.kernel().basis()]
         return res
 
-    def contains(self, f):
-        '''If self._to_form(self._to_vector(f)) is equal to f with this
-        precision, then return True otherwise False.
-        f may not be contained in self even if this method returns True.
-        '''
-        if self._to_form(self._to_vector(f)) == f:
-            return True
-        else:
-            return False
+    def basis(self):
+        pass
+
+    def linearly_indep_tuples(self):
+        pass
 
 
 def reprs_of_double_cosets(p, i):
