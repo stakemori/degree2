@@ -128,9 +128,8 @@ class TestVectorValued(unittest.TestCase):
         f4_15 = vvld_smfs(4, 15, prec).basis()[0]
         e4 = eisenstein_series_degree2(4, prec)
         g4_15 = vector_valued_rankin_cohen(e4, f4_10)
-        t = (1, 0, 1)
-        self.assertTrue(f4_15[t].vec != 0)
-        self.assertEqual(f4_15 * QQ(-766402560), g4_15 * QQ(8294400))
+        t = f4_15._none_zero_tpl()
+        self.assertEqual(f4_15 * g4_15[t], g4_15 * f4_15[5])
 
         es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(5)
         f = es6
