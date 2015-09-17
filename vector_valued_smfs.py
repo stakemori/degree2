@@ -30,10 +30,31 @@ from degree2.const import ConstMul, CalculatorVectValued
 from degree2.const import ScalarModFormConst as SMFC
 
 from degree2.vector_valued_impl.utils import data_dir
+
 import degree2.vector_valued_impl as vec_impl
+import degree2.vector_valued_impl.sym2 as vec_impl_sym2
+import degree2.vector_valued_impl.sym4 as vec_impl_sym4
+import degree2.vector_valued_impl.sym10 as vec_impl_sym10
 
 
-def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
+def _consts_i_dct():
+    consts_i_dct = {(2, 0): (vec_impl_sym2.even_structure.gen_consts(),
+                             vec_impl_sym2.even_structure.ignored_dct()),
+                    (2, 1): (vec_impl_sym2.odd_structure.gen_consts(),
+                             vec_impl_sym2.odd_structure.ignored_dct()),
+                    (4, 0): (vec_impl_sym4.even_structure.gen_consts(),
+                             vec_impl_sym4.even_structure.ignored_dct()),
+                    (4, 1): (vec_impl_sym4.odd_structure.gen_consts(),
+                             vec_impl_sym4.odd_structure.ignored_dct()),
+                    (10, 0): (vec_impl_sym10.even_structure.gen_consts(),
+                              vec_impl_sym10.even_structure.ignored_dct()),
+                    (10, 1): (vec_impl_sym10.odd_structure.gen_consts(),
+                              vec_impl_sym10.odd_structure.ignored_dct())}
+    return consts_i_dct
+
+
+def vector_valued_siegel_modular_forms(sym_wt, wt, prec,
+                                       data_directory=data_dir):
     r'''
     Returns the space of vector valued Siegel modular forms of degree 2
     and weight \det^{wt} \otimes sym(sym_wt).
@@ -41,10 +62,13 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     if sym_wt not in [2, 4, 10]:
         raise NotImplementedError
 
-    constructor = {2: VectorValuedSMFsSym2,
-                   4: VectorValuedSMFsSym4}
+    consts_i_dct = _consts_i_dct()
 
-    return constructor[sym_wt](wt, sym_wt, prec)
+    parity = wt % 2
+    gen_consts, ignored_dct = consts_i_dct[(sym_wt, parity)]
+    _symj_cls = sym_j_give_wt_class(10, parity, gen_consts, ignored_dct,
+                                    data_directory=data_directory)
+    return _symj_cls(wt, prec)
 
 
 class VectorValuedSiegelModularForms(HeckeModule):
@@ -191,6 +215,30 @@ class Sym10Odd(GivenWtBase):
     def _basis_const(self):
         ignored_dct = vec_impl.sym10.odd_structure.ignored_dct()
         return self._basis_const_base(ignored_dct)
+
+
+def sym_j_give_wt_class(j, parity, gen_consts, ignored_dct,
+                        data_directory=data_dir):
+    '''Return a class for the module M_{det^wt Sym(j)}.
+    Here wt equiv parity mod 2.
+    '''
+
+    class _Symj(GivenWtBase):
+
+        def __init__(self, wt, prec, data_directory=data_dir):
+            calculator = CalculatorVectValued(gen_consts, data_directory)
+            super(_Symj, self).__init__(wt, prec, calculator=calculator,
+                                        gen_consts=gen_consts)
+
+        def _basis_const(self):
+            return self._basis_const_base(ignored_dct())
+
+    return _Symj
+
+
+def calculator_symj(j, parity, data_directory=data_dir):
+    consts, _ = _consts_i_dct()[j, parity]
+    return CalculatorVectValued(consts, data_directory)
 
 
 class VvsmfSym2_4(VectorValuedSiegelModularForms):
