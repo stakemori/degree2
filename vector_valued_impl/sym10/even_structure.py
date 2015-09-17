@@ -1,7 +1,7 @@
 # -*- coding: utf-8; mode: sage -*-
 '''This modules provides functions gen_consts and ignored_dct.
 '''
-from sage.all import cached_method, Integer, matrix
+from sage.all import Integer, matrix
 import os
 from degree2.const import ScalarModFormConst as SMFC
 from degree2.const import (CalculatorVectValued, ConstDivision,
@@ -9,11 +9,9 @@ from degree2.const import (CalculatorVectValued, ConstDivision,
 from degree2.utils import find_linearly_indep_indices
 from degree2.all import ModularFormsDegree2
 from degree2.basic_operation import PrecisionDeg2
-from degree2.vector_valued_smfs import VectorValuedSiegelModularForms
 from degree2.interpolate import det_deg2
 from degree2.scalar_valued_smfs import (eisenstein_series_degree2,
                                         ModFormQexpLevel1,
-                                        x10_with_prec, x12_with_prec,
                                         x35_with_prec)
 from degree2.vector_valued_impl.utils import data_dir
 
@@ -270,70 +268,3 @@ def test_det_is_divisible_x35_fifth():
     assert f187 * g[(16, 5, 10)] == g * f187[(16, 5, 10)]
 
 # test_det_is_divisible_x35_fifth() # No Error!
-
-class Sym10Wt20(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 20, 10, prec)
-
-    def dimension(self):
-        return 17
-
-    @cached_method
-    def basis(self):
-        return _wt20_mul_basis(self.prec)
-
-class Sym10Wt10Gen(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 10, 10, prec)
-
-    def dimension(self):
-        return 13
-
-    @cached_method
-    def basis(self):
-        cal = CalculatorVectValued(wt18_consts, data_dir)
-        d = cal.forms_dict(self.prec)
-        f = eisenstein_series_degree2(8, self.prec)
-        return [d[c].divide(f, self.prec.value) for c in wt18_consts]
-
-
-class Sym10Wt8Gen(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 8, 10, prec)
-
-    def dimension(self):
-        return 13
-
-    @cached_method
-    def basis(self):
-        prec_p1 = self.prec.value + 1
-        d = calculator.forms_dict(prec_p1)
-        f = x10_with_prec(prec_p1)
-        return [d[c].divide(f, self.prec.value) for c in wt18_consts]
-
-# class Sym10Wt6Gen(VectorValuedSiegelModularForms):
-#     def __init__(self, prec):
-#         VectorValuedSiegelModularForms.__init__(self, 6, 10, prec)
-
-#     def dimension(self):
-#         return 13
-
-#     @cached_method
-#     def basis(self):
-#         d = calculator.forms_dict(self.prec)
-#         f = (es6_with_prec(self.prec))**2
-#         return [d[c].divide(f, self.prec) for c in wt18_consts]
-
-class Sym10Wt6Gen1(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 6, 10, prec)
-
-    def dimension(self):
-        return 13
-
-    @cached_method
-    def basis(self):
-        prec_p1 = self.prec.value + 1
-        d = calculator.forms_dict(prec_p1)
-        f = x12_with_prec(prec_p1)
-        return [d[c].divide(f, self.prec.value) for c in wt18_consts]

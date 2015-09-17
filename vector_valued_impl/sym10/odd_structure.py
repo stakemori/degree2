@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 '''This module provides functions gen_consts and ignored_dct.'''
 
-import os
 from degree2.const import ScalarModFormConst as SMFC
 from degree2.const import (CalculatorVectValued, ConstDivision,
                            ConstMul, ConstVectValued)
-from degree2.elements import ModFormQexpLevel1
-from degree2.interpolate import det_deg2
-from degree2.scalar_valued_smfs import (eisenstein_series_degree2,
-                                        x35_with_prec)
 
-from degree2.vector_valued_smfs import VectorValuedSiegelModularForms
-from sage.all import QQ, ComplexField, PolynomialRing, cached_method
+from sage.all import QQ, PolynomialRing
 from degree2.vector_valued_impl.utils import data_dir
 
 # from vector_valued_const.const import ConstVectValuedHeckeOp as CVH
@@ -190,127 +184,3 @@ calculator = CalculatorVectValued(gen_consts(), data_dir)
 # calculator.calc_forms_and_save(5, verbose=True)
 
 # calculator23 = CalculatorVectValued(sym10_wt23_consts, data_dir)
-
-
-def _sym10wt15_basis(prec):
-    cs = _sym10_wt15_consts()
-    d = calculator.forms_dict(prec)
-    forms = [d[c] for c in cs]
-    c9 = _sym10_wt9_const()
-    c11 = _sym10_wt11_const()
-    f9 = d[c9]
-    f11 = d[c11]
-    es4 = eisenstein_series_degree2(4, prec)
-    es6 = eisenstein_series_degree2(6, prec)
-    forms.extend([f9*es6, f11*es4])
-    return forms
-
-
-class Sym10Wt15(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 15, 10, prec)
-
-    def dimension(self):
-        return 5
-
-    @cached_method
-    def basis(self):
-        return _sym10wt15_basis(self.prec)
-
-
-class Sym10Wt13(VectorValuedSiegelModularForms):
-    def __init__(self, prec):
-        VectorValuedSiegelModularForms.__init__(self, 13, 10, prec)
-
-    def dimension(self):
-        return 2
-
-    @cached_method
-    def basis(self):
-        return _sym10wt13basis(self.prec)
-
-
-def test_sym10wt13():
-    prec = 5
-    R = PolynomialRing(QQ, names="x")
-    x = R.gens()[0]
-    M = Sym10Wt13(prec)
-    assert M.hecke_charpoly(2) == x**2 - QQ(31680)*x - QQ(4460544000)
-    nonlift = M.eigenform_with_eigenvalue_t2(QQ(-52800))
-    hecke_pol = nonlift.euler_factor_of_standard_l(2)
-    S = PolynomialRing(ComplexField(prec=100), names="x")
-    hecke_pol = S(hecke_pol)
-    assert all(((a.abs() - 1).abs() < QQ(10)**(-10)
-                for a, _ in hecke_pol.roots()))
-
-
-def _sym10wt13basis(prec):
-    d = calculator.forms_dict(prec)
-    f9 = d[_sym10_wt9_const()]
-    f13 = d[_sym10_wt13_const()]
-    es4 = eisenstein_series_degree2(4, prec)
-    return [f13, f9*es4]
-
-def test_sym10wt15_wt19_subsp():
-    es4 = eisenstein_series_degree2(4, 5)
-    ls = [f*es4 for f in _sym10wt15_basis(5)]
-    M = Sym10Wt19SpDiv(5)
-    assert all((M._to_form(M._to_vector(f)) == f for f in ls))
-
-
-def sym10wt19_basis(prec):
-    d = calculator.forms_dict(prec)
-    res = [d[c] for c in sym10_19_consts]
-    es4 = eisenstein_series_degree2(4, prec)
-    es6 = eisenstein_series_degree2(6, prec)
-    f9 = d[_sym10_wt9_const()]
-    res.append(f9 * (es4 * es6))
-    return res
-
-
-class Sym10Wt19SpDiv(VectorValuedSiegelModularForms):
-    def __init__(self, prec, f=None):
-        self._f = f
-        if f is not None:
-            VectorValuedSiegelModularForms.__init__(self, 19 - f.wt, 10, prec)
-        else:
-            VectorValuedSiegelModularForms.__init__(self, 19, 10, prec)
-
-    def dimension(self):
-        return 9
-
-    @cached_method
-    def basis(self):
-        if self._f is not None:
-            finv = (self._f)**(-1)
-            return [f * finv for f in sym10wt19_basis(self.prec.value)]
-        else:
-            return sym10wt19_basis(self.prec.value)
-
-
-def det_of_gens(prec):
-    d = calculator.forms_dict(prec)
-    cs = gen_consts()[:11]
-    wt = sum([c.weight() for c in cs]) + (10*11)//2
-    mat = [d[c].forms for c in cs]
-    f = det_deg2(mat, wt=wt)
-    f.save_as_binary(os.path.join(data_dir, "gens_odd_det.sobj"))
-
-# f222 = ModFormQexpLevel1.load_from(os.path.join(data_dir, "gens_odd_det.sobj"))
-# x35 = x35_with_prec(22)
-# g210 = x35**6
-# es4 = eisenstein_series_degree2(4, 22)
-# es6 = eisenstein_series_degree2(6, 22)
-# x12 = x12_with_prec(22)
-# forms12 = [es4**3, es6**2, x12]
-# forms222 = [f*g210 for f in forms12]
-# f222 == 1699931020215770911950165827439569141760000*(forms222[0] -forms222[1])
-
-def test_det_is_divisible_by_power_of_x35():
-    x35 = x35_with_prec(22)
-    f222 = ModFormQexpLevel1.load_from(os.path.join(data_dir,
-                                                    "gens_odd_det.sobj"))
-    a = QQ(1699931020215770911950165827439569141760000)
-    es4 = eisenstein_series_degree2(4, 22)
-    es6 = eisenstein_series_degree2(6, 22)
-    assert f222 == (x35**6) * (es4**3 - es6**2) * a
