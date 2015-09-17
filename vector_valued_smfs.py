@@ -32,7 +32,6 @@ from degree2.const import ScalarModFormConst as SMFC
 from degree2.vector_valued_impl.utils import data_dir
 import degree2.vector_valued_impl as vec_impl
 
-import degree2.vector_valued_impl.sym10.module_of_given_wt as sym10_mod
 
 def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     r'''
@@ -42,9 +41,6 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     if sym_wt not in [2, 4, 10]:
         raise NotImplementedError
 
-    if sym_wt == 10:
-        return sym10_mod.sym10_space(wt, prec)
-
     constructor = {2: VectorValuedSMFsSym2,
                    4: VectorValuedSMFsSym4}
 
@@ -52,6 +48,7 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
 
 
 class VectorValuedSiegelModularForms(HeckeModule):
+
     def __init__(self, wt, sym_wt, prec):
         self._wt = wt
         self._sym_wt = sym_wt
@@ -107,9 +104,11 @@ def _from_ts_wts(ts):
 
 
 class GivenWtBase(VectorValuedSiegelModularForms):
+
     '''A base class for the space of vector valued Siegel modular
     forms of weight det^wt Sym(j).
     '''
+
     def __init__(self, sym_wt, wt, prec, calculator=None, gen_consts=None):
         super(GivenWtBase, self).__init__(wt, sym_wt, prec)
         self._calculator = calculator
@@ -163,11 +162,11 @@ class GivenWtBase(VectorValuedSiegelModularForms):
 
 
 class Sym10Even(GivenWtBase):
+
     '''A class for the module M_{det^wt Sym(10)} where wt is even.
     '''
-    def __init__(self, wt, prec, data_directory=None):
-        if data_directory is None:
-            data_directory = data_dir
+
+    def __init__(self, wt, prec, data_directory=data_dir):
         consts = vec_impl.sym10.even_structure.gen_consts()
         calculator = CalculatorVectValued(consts, data_directory)
         super(Sym10Even, self).__init__(wt, prec, calculator=calculator,
@@ -179,11 +178,11 @@ class Sym10Even(GivenWtBase):
 
 
 class Sym10Odd(GivenWtBase):
+
     '''A class for the module M_{det^wt Sym(10)} where wt is odd.
     '''
-    def __init__(self, wt, prec, data_directory=None):
-        if data_directory is None:
-            data_directory = data_dir
+
+    def __init__(self, wt, prec, data_directory=data_dir):
         consts = vec_impl.sym10.odd_structure.gen_consts()
         calculator = CalculatorVectValued(consts, data_directory)
         super(Sym10Odd, self).__init__(wt, prec, calculator=calculator,
@@ -195,6 +194,7 @@ class Sym10Odd(GivenWtBase):
 
 
 class VvsmfSym2_4(VectorValuedSiegelModularForms):
+
     def basis(self):
         raise NotImplementedError
 
@@ -204,20 +204,22 @@ class VvsmfSym2_4(VectorValuedSiegelModularForms):
         '''
         R = PowerSeriesRing(QQ, names="t", default_prec=self.wt + 1)
         t = R.gens()[0]
-        dnm = (1 - t**4) * (1 - t**6) * (1 - t**10) * (1 - t**12)
+        dnm = (1 - t ** 4) * (1 - t ** 6) * (1 - t ** 10) * (1 - t ** 12)
         if self.sym_wt == 2:
-            if self.wt%2 == 0:
-                nm = (t**10 + t**14 + 2 * t**16 + t**18 - t**20 - t**26 -
-                      t**28 + t**32)
+            if self.wt % 2 == 0:
+                nm = (t ** 10 + t ** 14 + 2 * t ** 16 + t ** 18 - t ** 20 - t ** 26 -
+                      t ** 28 + t ** 32)
             else:
-                nm = t**21 + t**23 + t**27 + t**29 - t**33
-            return (nm/dnm)[self.wt]
+                nm = t ** 21 + t ** 23 + t ** 27 + t ** 29 - t ** 33
+            return (nm / dnm)[self.wt]
         elif self.sym_wt == 4:
-            nm = (1 + t**7) * (t**8 + t**10 + t**12 + t**14 + t**16)
-            return (nm/dnm)[self.wt]
+            nm = (1 + t ** 7) * \
+                (t ** 8 + t ** 10 + t ** 12 + t ** 14 + t ** 16)
+            return (nm / dnm)[self.wt]
 
 
 class VectorValuedSMFsSym2(VvsmfSym2_4):
+
     @cached_method
     def basis(self):
         if self.dimension() == 0:
@@ -236,7 +238,7 @@ class VectorValuedSMFsSym2(VvsmfSym2_4):
 
         k = self.wt
 
-        if k%2 == 0:
+        if k % 2 == 0:
             res = []
             f10 = rankin_cohen_pair_sym(2, es4, es6)
             f14 = rankin_cohen_pair_sym(2, es4, x10)
@@ -271,6 +273,7 @@ class VectorValuedSMFsSym2(VvsmfSym2_4):
 
 
 class VectorValuedSMFsSym4(VvsmfSym2_4):
+
     @cached_method
     def basis(self):
         if self.dimension() == 0:
@@ -281,12 +284,12 @@ class VectorValuedSMFsSym4(VvsmfSym2_4):
             gens = [es4, es6, x10, x12]
             res = []
             for t in tuples_even_wt_modular_forms(wt):
-                res.append(mul([f**i for i, f in zip(t, gens)]))
+                res.append(mul([f ** i for i, f in zip(t, gens)]))
             return res
 
         k = self.wt
 
-        if k%2 == 0:
+        if k % 2 == 0:
             f8 = rankin_cohen_pair_sym(4, es4, es4)
             f10 = rankin_cohen_pair_sym(4, es4, es6)
             f12 = rankin_cohen_pair_det2_sym(4, es4, es6)
