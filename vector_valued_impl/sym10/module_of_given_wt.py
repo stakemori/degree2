@@ -4,15 +4,15 @@ This module also provides a function 'relation' that returns
 a linear relation as a dictionary among generators.
 '''
 
-from degree2.vector_valued_smfs import VectorValuedSiegelModularForms
+import degree2.vector_valued_smfs
 from degree2.tsushima_dimension_formula import hilbert_series_maybe
 import operator
 from degree2.const import ConstMul, CalculatorVectValued
 from degree2.const import ScalarModFormConst as SMFC
 from degree2.scalar_valued_smfs import tuples_even_wt_modular_forms
-from sym10_vecvld_structure.utils import data_dir
-from sym10_vecvld_structure.even_structure import even_gen_consts
-from sym10_vecvld_structure.odd_structure import odd_gen_consts
+from degree2.vector_valued_impl.utils import data_dir
+from degree2.vector_valued_impl.sym10.even_structure import gen_consts as even_gen_consts
+from degree2.vector_valued_impl.sym10.odd_structure import gen_consts as odd_gen_consts
 
 from sage.all import cached_method, QQ, gcd
 
@@ -22,7 +22,7 @@ def _from_ts_wts(ts):
             for t in ts)
 
 
-class Sym10GivenWtBase(VectorValuedSiegelModularForms):
+class Sym10GivenWtBase(degree2.vector_valued_smfs.VectorValuedSiegelModularForms):
     def __init__(self, wt, prec, calculator=None, gen_consts=None):
         super(Sym10GivenWtBase, self).__init__(wt, 10, prec)
         self._calculator = calculator
