@@ -136,8 +136,8 @@ class GivenWtBase(VectorValuedSiegelModularForms):
     def _basis_const_base(self, ignored_dct):
         '''This method is used for implmentation of _basis_const.
         ignored_dct is a dictionary whose key is an element of self._gen_consts
-        and its value is in [4, 6, 10, 12].
-        For exmaple if ignored_dct = {c: 4} and F is a vector valued modular
+        and its value is a sub lift of [4, 6, 10, 12].
+        For exmaple if ignored_dct = {c: [4]} and F is a vector valued modular
         form that corresponds to c, then
         we do not use F * (a monomial including es4) when constructing a basis.
         '''
@@ -145,9 +145,9 @@ class GivenWtBase(VectorValuedSiegelModularForms):
         for c in self._gen_consts:
             k = c.weight()
             if c in ignored_dct:
-                idx = wt_to_idx[ignored_dct[c]]
+                idcs = (wt_to_idx[w] for w in ignored_dct[c])
                 ts = [t for t in tuples_even_wt_modular_forms(self.wt - k)
-                      if t[idx]]
+                      if all(t[i] == 0 for i in idcs)]
             else:
                 ts = tuples_even_wt_modular_forms(self.wt - k)
             for t in _from_ts_wts(ts):

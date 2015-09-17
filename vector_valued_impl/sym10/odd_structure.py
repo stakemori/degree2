@@ -177,7 +177,7 @@ def gen_consts():
 def ignored_dct():
     consts = gen_consts()
     consts = [c for c in consts if c.weight() in [21, 23]]
-    return {c: 6 for c in consts}
+    return {c: [6] for c in consts}
 
 
 calculator = CalculatorVectValued(gen_consts(), data_dir)

@@ -225,7 +225,7 @@ def ignored_dct():
     '''
     consts = gen_consts()
     consts = [c for c in consts if c.weight() in [18, 20]]
-    return {c: 6 for c in consts}
+    return {c: [6] for c in consts}
 
 def even_consts():
     '''A list of constructions needed for calculation of generators.
