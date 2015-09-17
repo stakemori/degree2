@@ -32,13 +32,18 @@ from degree2.const import ScalarModFormConst as SMFC
 from degree2.vector_valued_impl.utils import data_dir
 import degree2.vector_valued_impl as vec_impl
 
+import degree2.vector_valued_impl.sym10.module_of_given_wt as sym10_mod
+
 def vector_valued_siegel_modular_forms(sym_wt, wt, prec):
     r'''
     Returns the space of vector valued Siegel modular forms of degree 2
     and weight \det^{wt} \otimes sym(sym_wt).
     '''
-    if sym_wt not in [2, 4]:
+    if sym_wt not in [2, 4, 10]:
         raise NotImplementedError
+
+    if sym_wt == 10:
+        return sym10_mod.sym10_space(wt, prec)
 
     constructor = {2: VectorValuedSMFsSym2,
                    4: VectorValuedSMFsSym4}
