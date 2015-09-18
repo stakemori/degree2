@@ -38,6 +38,15 @@ In the following, we illustrate how we install this package in
     cat ~/sage_packages/degree2/config/example_config.sage >> ~/.sage/init.sage
     ```
 
+1. (Optional) Set `degree2.vector_valued_imp.utils.data_dir` to an
+   existing directory. And download cache data for vector valued
+   Siegel modular forms to this directory.
+
+    ```python
+    import degree2.vector_valued_imp.utils.data_dir
+    degree2.vector_valued_imp.utils.data_dir = '/path/to/data/dir'
+    ```
+
 ## Basic Usage
 
 * Siegel-Eisenstein of degree two can be obtained by the function
