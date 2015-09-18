@@ -8,7 +8,7 @@ from degree2.const import ScalarModFormConst as SMFC
 from degree2.const import ConstVectValued
 
 def cvv(w1, w2, w3):
-    return ConstVectValued(2, [SMFC([w] for w in [w1, w2, w3])], inc=1,
+    return ConstVectValued(4, [SMFC([w]) for w in [w1, w2, w3]], inc=1,
                            tp=None)
 
 def gen_consts():

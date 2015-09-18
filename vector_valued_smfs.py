@@ -32,24 +32,27 @@ from degree2.const import ScalarModFormConst as SMFC
 from degree2.vector_valued_impl.utils import data_dir
 
 import degree2.vector_valued_impl as vec_impl
-import degree2.vector_valued_impl.sym2 as vec_impl_sym2
-import degree2.vector_valued_impl.sym4 as vec_impl_sym4
-import degree2.vector_valued_impl.sym10 as vec_impl_sym10
+import degree2.vector_valued_impl.sym2.even_structure as impl_sym2_even
+import degree2.vector_valued_impl.sym2.odd_structure as impl_sym2_odd
+import degree2.vector_valued_impl.sym4.even_structure as impl_sym4_even
+import degree2.vector_valued_impl.sym4.odd_structure as impl_sym4_odd
+import degree2.vector_valued_impl.sym10.even_structure as impl_sym10_even
+import degree2.vector_valued_impl.sym10.odd_structure as impl_sym10_odd
 
 
 def _consts_i_dct():
-    consts_i_dct = {(2, 0): (vec_impl_sym2.even_structure.gen_consts(),
-                             vec_impl_sym2.even_structure.ignored_dct()),
-                    (2, 1): (vec_impl_sym2.odd_structure.gen_consts(),
-                             vec_impl_sym2.odd_structure.ignored_dct()),
-                    (4, 0): (vec_impl_sym4.even_structure.gen_consts(),
-                             vec_impl_sym4.even_structure.ignored_dct()),
-                    (4, 1): (vec_impl_sym4.odd_structure.gen_consts(),
-                             vec_impl_sym4.odd_structure.ignored_dct()),
-                    (10, 0): (vec_impl_sym10.even_structure.gen_consts(),
-                              vec_impl_sym10.even_structure.ignored_dct()),
-                    (10, 1): (vec_impl_sym10.odd_structure.gen_consts(),
-                              vec_impl_sym10.odd_structure.ignored_dct())}
+    consts_i_dct = {(2, 0): (impl_sym2_even.gen_consts(),
+                             impl_sym2_even.ignored_dct()),
+                    (2, 1): (impl_sym2_odd.gen_consts(),
+                             impl_sym2_odd.ignored_dct()),
+                    (4, 0): (impl_sym4_even.gen_consts(),
+                             impl_sym4_even.ignored_dct()),
+                    (4, 1): (impl_sym4_odd.gen_consts(),
+                             impl_sym4_odd.ignored_dct()),
+                    (10, 0): (impl_sym10_even.gen_consts(),
+                              impl_sym10_even.ignored_dct()),
+                    (10, 1): (impl_sym10_odd.gen_consts(),
+                              impl_sym10_odd.ignored_dct())}
     return consts_i_dct
 
 
@@ -66,7 +69,7 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec,
 
     parity = wt % 2
     gen_consts, ignored_dct = consts_i_dct[(sym_wt, parity)]
-    _symj_cls = sym_j_give_wt_class(10, parity, gen_consts, ignored_dct,
+    _symj_cls = sym_j_give_wt_class(sym_wt, parity, gen_consts, ignored_dct,
                                     data_directory=data_directory)
     return _symj_cls(wt, prec)
 
@@ -227,11 +230,11 @@ def sym_j_give_wt_class(j, parity, gen_consts, ignored_dct,
 
         def __init__(self, wt, prec, data_directory=data_dir):
             calculator = CalculatorVectValued(gen_consts, data_directory)
-            super(_Symj, self).__init__(wt, prec, calculator=calculator,
+            super(_Symj, self).__init__(j, wt, prec, calculator=calculator,
                                         gen_consts=gen_consts)
 
         def _basis_const(self):
-            return self._basis_const_base(ignored_dct())
+            return self._basis_const_base(ignored_dct)
 
     return _Symj
 
