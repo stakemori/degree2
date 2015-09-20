@@ -65,7 +65,7 @@ class RamanujanConjandKlingen(unittest.TestCase):
         less than or equal to 29 and
         Hecke eigenvalues of Kligen-Eisenstein series.
         '''
-        prec = 6
+        prec = 10
         for k, j in CartesianProduct(range(4, 30), [2, 4, 10]):
             M = vvsmf(j, k, prec)
             if M.dimension() > 0:
