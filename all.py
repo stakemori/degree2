@@ -18,3 +18,5 @@ from degree2.rankin_cohen_diff import (
     rankin_cohen_pair_det2_sym,
     rankin_cohen_triple_det_sym2,
     rankin_cohen_triple_det_sym4)
+
+from degree2.basic_operation import number_of_procs as degree2_number_of_procs
