@@ -406,9 +406,21 @@ class SymTensorRepElt(object):
         vec is a returned valued of
         degree2.SymWtModFmElt.__getitem__.
         '''
-        self.vec = vec
-        self.sym_wt = len(vec) - 1
-        self.wt = wt
+        self._vec = vec
+        self._sym_wt = len(vec) - 1
+        self._wt = wt
+
+    @property
+    def vec(self):
+        return self._vec
+
+    @property
+    def sym_wt(self):
+        return self._sym_wt
+
+    @property
+    def wt(self):
+        return self._wt
 
     @classmethod
     def zero(cls, j, wt):
@@ -490,3 +502,6 @@ class SymTensorRepElt(object):
             return self.vec / other.vec
         else:
             raise NotImplementedError
+
+    def __getitem__(self, i):
+        return self.vec[i]
