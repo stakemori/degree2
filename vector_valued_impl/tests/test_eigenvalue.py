@@ -1,8 +1,8 @@
 from sage.all import (ComplexField, NumberField, PolynomialRing, CuspForms, QQ,
-                      CartesianProduct)
+                      CartesianProduct, fork)
 import unittest
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
-
+from degree2.basic_operation import number_of_procs
 
 def _hecke_pol_klingen(k, j):
     '''k: even.
@@ -29,6 +29,7 @@ def _hecke_pol_krs_lift():
 
 
 class RamanujanConjandKlingen(unittest.TestCase):
+
     def assert_hecke_eigen_values(self, f, complex_prec=300):
         '''f is a Hecke eigenform.
         Assert for all embeddings from the Hecke field to the
@@ -66,10 +67,11 @@ class RamanujanConjandKlingen(unittest.TestCase):
         Hecke eigenvalues of Kligen-Eisenstein series.
         '''
         prec = 10
-        for k, j in CartesianProduct(range(4, 30), [2, 4, 10]):
+
+        @fork
+        def _check(k, j):
             M = vvsmf(j, k, prec)
             if M.dimension() > 0:
-                print k, j
                 self.assertEqual(M.dimension(), len(M.basis()))
                 _chply = M.hecke_charpoly(2)
                 for cply, _ in _chply.factor():
@@ -77,6 +79,10 @@ class RamanujanConjandKlingen(unittest.TestCase):
                     a = K.gens()[0]
                     f = M.eigenform_with_eigenvalue_t2(a)
                     self.assert_hecke_eigen_values(f)
+
+        with number_of_procs(1):
+            for k, j in CartesianProduct(range(4, 30), [2, 4, 10]):
+                _check(k, j)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(RamanujanConjandKlingen)
 unittest.TextTestRunner(verbosity=2).run(suite)
