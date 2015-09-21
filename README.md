@@ -38,14 +38,23 @@ In the following, we illustrate how we install this package in
     cat ~/sage_packages/degree2/config/example_config.sage >> ~/.sage/init.sage
     ```
 
-1. (Optional) Set `degree2.vector_valued_imp.utils.data_dir` to an
-   existing directory. And download cache data for vector valued
-   Siegel modular forms to this directory.
+1. (Optional for vector valued Siegel modular forms) Set `degree2.vector_valued_impl.utils.data_dir` to an
+   existing directory. And
+   [download cache data for vector valued Siegel modular forms](https://drive.google.com/file/d/0B7X8tHAWVjfDN1h0SnNEM3JCcXc/view?usp=sharing).
+   For example, we use '/home/your_user_name/degree2_data/vector_valued' for the
+   data directory.
 
-    ```python
-    import degree2.vector_valued_imp.utils.data_dir
-    degree2.vector_valued_imp.utils.data_dir = '/path/to/data/dir'
+    ```sh
+    cd /home/your_user_name/degree2_data  # And download vector_valued.tar.gz to this directory.
+    tar xf vector_valued.tar.gz
     ```
+
+    Put the following lines to `~/.sage/init.sage`.
+    ```python
+    import degree2.vector_valued_impl.utils
+    degree2.vector_valued_impl.utils.data_dir= '/home/your_user_name/degree2_data/vector_valued'
+    ```
+
 
 ## Basic Usage
 
