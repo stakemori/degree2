@@ -166,6 +166,51 @@ In the following, we illustrate how we install this package in
     polynomial of Siegel-Eisenstein series of weight 4, 6 and cusp
     forms of weight 10, 12 and 35.
 
+* To construct, the space of vector valued Siegel modular forms of
+  weight `det^* Sym(j)`, where `j = 2, 4, 10`, you can use the
+  function `vector_valued_siegel_modular_forms` in the module
+  `degree2.vector_valued_smfs`.  This function uses structure theorems
+  of weights `det^* Sym(j)` for `j = 2, 4, 10`.  Structure theorems
+  are known if `j = 6, 8`, but I have not implemented them yet.
+
+  The following code illustrate how one can construct a basis of the space of
+  Siegel modular forms of weight `det^13 Sym(10)`.
+
+    ```python
+    sage: from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
+    sage: M = vvsmf(10, 13, prec=6)
+    sage: M.dimension()
+    2
+    sage: M.basis()
+    [Vector valued modular form of weight det^13 Sym(10) with prec = diag_max 6,
+     Vector valued modular form of weight det^13 Sym(10) with prec = diag_max 6]
+    sage: f = M.basis()[0]
+    sage: f[(2, 1, 3)]
+    (0, 1574304, 7610976, 33371712, 42535584, -3229632, 47605824, 112992768, -22784544, -10237632, -2096640)
+    sage: f[(2, 1, 3)][1]
+    1574304
+    ```
+  You can construct Hecke eigenforms in a similar way to the scalar
+  valued case.
+
+    ```python
+    sage: M.hecke_charpoly(2).factor()
+    (x - 84480) * (x + 52800)
+    sage: g = M.eigenform_with_eigenvalue_t2(84480)
+    sage: g.euler_factor_of_spinor_l(2).factor()
+    (1 - 133632*x + 8589934592*x^2) * (1 + 49152*x + 8589934592*x^2)
+    ```
+
+  The function `vector_valued_siegel_modular_forms` uses Python's module `multiprocessing`.
+  Sometimes it consumes much memory.
+  To avoid multi-processing, use the following with statement.
+
+    ```python
+    sage: with degree2_number_of_procs(1):
+    ....:    N = vvsmf(10, 20, prec=10)
+    ....:    h = N.basis()[0]
+    ```
+
 ## License
 Licensed under the [GPL Version 3][GPL]
 [GPL]: http://www.gnu.org/licenses/gpl.html
