@@ -166,15 +166,15 @@ In the following, we illustrate how we install this package in
     polynomial of Siegel-Eisenstein series of weight 4, 6 and cusp
     forms of weight 10, 12 and 35.
 
-* To construct, the space of vector valued Siegel modular forms of
-  weight `det^* Sym(j)`, where `j = 2, 4, 10`, you can use the
+* To construct the space of vector valued Siegel modular forms of
+  weight det^* Sym(j), where j = 2, 4, 10, you can use the
   function `vector_valued_siegel_modular_forms` in the module
   `degree2.vector_valued_smfs`.  This function uses structure theorems
-  of weights `det^* Sym(j)` for `j = 2, 4, 10`.  Structure theorems
-  are known if `j = 6, 8`, but I have not implemented them yet.
+  of weights det^* Sym(j) for j = 2, 4, 10.  Structure theorems
+  are known if j = 6, 8, but I have not implemented them yet.
 
   The following code illustrate how one can construct a basis of the space of
-  Siegel modular forms of weight `det^13 Sym(10)`.
+  Siegel modular forms of weight det^13 Sym(10).
 
     ```python
     sage: from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
