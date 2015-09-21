@@ -129,7 +129,12 @@ class TestVectorValued(unittest.TestCase):
         e4 = eisenstein_series_degree2(4, prec)
         g4_15 = vector_valued_rankin_cohen(e4, f4_10)
         t = f4_15._none_zero_tpl()
-        self.assertEqual(f4_15 * g4_15[t], g4_15 * f4_15[5])
+        i = 0
+        for a in range(11):
+            if f4_15[(t, a)] != 0:
+                i = a
+                break
+        self.assertEqual(f4_15 * g4_15[(t, i)], g4_15 * f4_15[(t, i)])
 
         es4, es6, _, _, _ = degree2_modular_forms_ring_level1_gens(5)
         f = es6
