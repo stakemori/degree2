@@ -171,7 +171,7 @@ class GivenWtBase(VectorValuedSiegelModularForms):
         for c in self._gen_consts:
             k = c.weight()
             if c in ignored_dct:
-                idcs = (wt_to_idx[w] for w in ignored_dct[c])
+                idcs = [wt_to_idx[w] for w in ignored_dct[c]]
                 ts = [t for t in tuples_even_wt_modular_forms(self.wt - k)
                       if all(t[i] == 0 for i in idcs)]
             else:
