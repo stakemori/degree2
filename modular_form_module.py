@@ -74,9 +74,14 @@ class ModularFormModule(object):
                 break
 
         res = sum([a * b for a, b in zip(egvec, basis)])
-        if all([hasattr(b, "_construction") for b in basis]):
+        # TODO: Use a construction class to construct basis.
+        if all(hasattr(b, "_construction") and
+               b._construction is not None for b in basis):
             res._construction = sum([a * b._construction
                                      for a, b in zip(egvec, basis)])
+
+        if hasattr(res, 'set_parent_space'):
+            res.set_parent_space(self)
         return res
 
     def _to_vector(self, fm):

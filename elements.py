@@ -50,6 +50,8 @@ class FormalQexp(CommRingLikeElment):
         self._is_gen = False
         self._sym_wt = 0
 
+        self._parent_space = None
+
     def __add__(self, other):
         raise NotImplementedError
 
@@ -77,6 +79,15 @@ class FormalQexp(CommRingLikeElment):
     @property
     def sym_wt(self):
         return 0
+
+    @property
+    def parent_space(self):
+        '''Similar to self.parent() in Sage.
+        '''
+        return self._parent_space
+
+    def set_parent_space(self, space):
+        self._parent_space = space
 
     def __str__(self):
         return self.fc_dct.__str__()

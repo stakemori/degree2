@@ -625,15 +625,6 @@ class CuspFormsDegree2(AbstSpaceOfLevel1):
     def klingeneisensteinAndCuspForms(self):
         return KlingenEisensteinAndCuspForms(self.wt, self.prec)
 
-    def eigenform_with_eigenvalue_t2(self, root):
-        '''
-        Returns an eigenform whose eigenvalue is root.  It assumes the
-        characteristic polynomial of T(2) acting on
-        KlingenEisensteinAndCuspForms has no double roots.
-        '''
-        N = self.klingeneisensteinAndCuspForms()
-        return N.eigenform_with_eigenvalue_t2(root)
-
     def dimension(self):
         return self.klingeneisensteinAndCuspForms().dimension_of_cuspforms()
 
