@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from math import sqrt
 import multiprocessing
 
-from sage.all import Integer, ZZ, gcd, QQ, mod
+from sage.all import Integer, ZZ, gcd, QQ, mod, floor, sqrt
 
 from sage.misc.cachefunc import cached_function
 from degree2.utils import (list_group_by, partition_weighted,
@@ -324,7 +323,7 @@ def _spos_def_mats_lt(tpl):
             a = 4 * (n - n1) * (m - m1)
             if r**2 <= a:
                 yield (n1, 0, m1)
-            sq = int(2 * sqrt(n1 * m1))
+            sq = int(floor(2 * sqrt(n1 * m1)))
             for r1 in range(1, sq + 1):
                 if (r - r1)**2 <= a:
                     yield (n1, r1, m1)

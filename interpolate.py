@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from sage.all import PolynomialRing, QQ, matrix, ZZ
-from math import sqrt
+from sage.all import PolynomialRing, QQ, matrix, ZZ, sqrt, floor
 import multiprocessing
 
 from degree2.basic_operation import PrecisionDeg2
@@ -16,7 +15,7 @@ def _to_polynomial(f, val1):
     I = R.ideal([q1**(prec + 1), q2**(prec + 1)])
     S = R.quotient_ring(I)
     res = sum([sum([f.fc_dct.get((n, r, m), 0) * QQ(val1)**r
-                    for r in range(-int(2*sqrt(n*m)), int(2*sqrt(n*m))+1)])
+                    for r in range(-int(floor(2*sqrt(n*m))), int(floor(2*sqrt(n*m)))+1)])
                * q1**n * q2**m
                for n in range(prec + 1)
                for m in range(prec + 1)])
@@ -79,7 +78,7 @@ def interpolate_deg2(dct, bd, autom=True, parity=None):
     for n in range(bd + 1):
         for m in range(bd + 1):
             pl = t_pol_dct(n, m)
-            for r in range(-int(2*sqrt(n*m)), int(2*sqrt(n*m))+1):
+            for r in range(-int(floor(2*sqrt(n*m))), int(floor(2*sqrt(n*m)))+1):
                 fc_dct[(n, r, m)] = pl[r + 2 * bd]
     return fc_dct
 
