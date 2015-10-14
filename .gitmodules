@@ -1,0 +1,3 @@
+[submodule "siegel_series"]
+	path = siegel_series
+	url = git@github.com:stakemori/siegel_series.git
