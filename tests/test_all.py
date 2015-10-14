@@ -13,7 +13,7 @@ def test_module_names():
 from degree2.tests import (test_fc_mul_add, test_eigenforms, test_divide,
                            test_save_load, test_interpolate,
                            test_gens, misc_test, test_prec_class,
-                           test_vecor_valued, test_consts)
+                           test_vector_valued, test_const)
 
 # def import_tests():
 #     for f in test_module_names():
