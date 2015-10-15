@@ -156,7 +156,12 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
         raise ValueError(msg)
     if not (l > 0 and l % 2 == 0 and l <= f.wt):
         raise ValueError(msg)
-    S = f.parent_space
+    if space_of_cusp_form is not None:
+        S = space_of_cusp_form
+    else:
+        S = f.parent_space
+    if S is None:
+        raise RuntimeError("Please specify the space of cusp form explicitly.")
     tpls = S.linearly_indep_tuples()
     pull_back_dct = {t: epsilon_tilde_l_k_degree2(
         l + 2, f.wt, A1,
@@ -177,6 +182,5 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
     else:
         num = sum(sum(ei[d - 1 - j] * chply[d - j + i]
                       for j in range(i, d)) * lam ** i for i in range(d))
-        num = f.base_ring(num)
         return num / (phi_d_lam * f[int(A1[0, 0]), int(2 * A1[0, 1]), int(A1[1, 1])] *
                       f[t])
