@@ -9,12 +9,11 @@ Experimental Mathematics (2010), 19:1, 65-77
 Original implementation was done by H. Katsurada by the wolfram language.
 '''
 from sage.all import (PolynomialRing, QQ, mul, ZZ, floor, sqrt,
-                      matrix, block_matrix, zeta)
+                      matrix, zeta)
 
-from degree2.siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 # from siegel_series.impl import siegel_series_dim1, siegel_series_dim2, X
 # from siegel_series.local_invariants import xi_p
-from degree2.siegel_series.utils import non_deg_submatrix
+from degree2.siegel_series.pullback_of_siegel_eisen import eisenstein_pullback_coeff
 
 
 def binomial(x, m):
@@ -98,36 +97,15 @@ def epsilon_tilde_l_k_degree2(l, k, A1, A2):
     '''
     const_term = zeta(3 - 2 * l) * zeta(5 - 2 * l) * zeta(1 - l)
 
-    a1_0, a1_1 = A1[0, 0], A1[1, 1]
-    a2_0, a2_1 = A2[0, 0], A2[1, 1]
     G = G_poly(l, k - l)
     y1, y2, y3 = G.parent().gens()
     G_y1_y3 = G.subs({y2: A1.det() * A2.det()})
     br = G.parent().base_ring()
-    res = 0
-    es = sess(weight=l, degree=4)
-    for r00 in _r_iter(a1_0, a2_0):
-        for r01 in _r_iter(a1_0, a2_1):
-            for r10 in _r_iter(a1_1, a2_0):
-                for r11 in _r_iter(a1_1, a2_1):
-                    R = matrix([[ZZ(r00), ZZ(r01)],
-                                [ZZ(r10), ZZ(r11)]])
-                    mat = block_matrix(
-                        [[A1, R / ZZ(2)], [R.transpose() / ZZ(2), A2]])
-                    mat_det = mat.det()
-                    should_add = False
-                    if mat_det == 0:
-                        r = mat.rank()
-                        u = non_deg_submatrix(mat)
-                        mat1 = (
-                            u * mat * u.transpose()).submatrix(nrows=r, ncols=r)
-                        if mat1.is_positive_definite():
-                            should_add = True
-                    elif mat.is_positive_definite():
-                        should_add = True
-                    if should_add:
-                        res += (br(G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat_det})) *
-                                es.fourier_coefficient(mat))
+
+    def func(a, A1, A2, R, mat):
+        return br(G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()})) * a
+
+    res = eisenstein_pullback_coeff(l, A1, A2, func=func)
     return res * (-1) ** (l // 2 + 1) * ZZ(2) ** (-2) * (l - 2) * const_term
 
 
