@@ -8,6 +8,8 @@ from degree2.all import degree2_modular_forms_ring_level1_gens
 from degree2.scalar_valued_smfs import x10_with_prec
 from degree2.const import ScalarModFormConst as SMFC
 from unittest import skip
+
+
 class ConstsTest(unittest.TestCase):
 
     @skip("OK")
@@ -21,10 +23,9 @@ class ConstsTest(unittest.TestCase):
         c = SMFC({(4, 6): 1})
         self.assertTrue(c.calc_form(prec), es4 * es6)
         c = SMFC([4, 4, 10, 12])
-        self.assertTrue(c.calc_form(prec), es4**2 * x10 * x12)
+        self.assertTrue(c.calc_form(prec), es4 ** 2 * x10 * x12)
         c = SMFC({(4, 4, 6): 1, (4, 10): -1})
-        self.assertTrue(c.calc_form(prec), es4**2 * es6 - es4 * x10)
-
+        self.assertTrue(c.calc_form(prec), es4 ** 2 * es6 - es4 * x10)
 
     @skip("OK")
     def test_division_multiplication(self):

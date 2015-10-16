@@ -18,11 +18,11 @@ def _partition(num_ls, n):
     Returns a list of indices.
     '''
     m = len(num_ls)
-    wts = [sum(num_ls[:i+1]) for i in range(m)]
-    av_wt = RR(wts[-1])/RR(n)
+    wts = [sum(num_ls[:i + 1]) for i in range(m)]
+    av_wt = RR(wts[-1]) / RR(n)
 
     def fn(i):
-        return max(ceil(RR(wts[i])/RR(av_wt)), 1)
+        return max(ceil(RR(wts[i]) / RR(av_wt)), 1)
     return [list(v) for _, v in groupby(range(m), fn)]
 
 
@@ -96,10 +96,10 @@ def group(ls, n):
     '''
     Partition of ls into n lists.
     '''
-    m = len(ls)//n
-    if len(ls)%n == 0:
-        return [ls[i*n:i*n+n] for i in range(m)]
-    return [ls[i*n:i*n+n] for i in range(m)] + [ls[n*m:]]
+    m = len(ls) // n
+    if len(ls) % n == 0:
+        return [ls[i * n:i * n + n] for i in range(m)]
+    return [ls[i * n:i * n + n] for i in range(m)] + [ls[n * m:]]
 
 
 def mul(ls):
@@ -116,7 +116,7 @@ def uniq(ls):
 
 
 def combination(n, m):
-    return factorial(n)/(factorial(m) * factorial(n-m))
+    return factorial(n) / (factorial(m) * factorial(n - m))
 
 
 @cached_function
@@ -134,8 +134,8 @@ def naive_det_func(n):
         else:
             _det_func = naive_det_func(n - 1)
             ls1 = [l[:-1] for l in ls]
-            return (-1)**(n+1) * \
-                sum([(-1)**i *
+            return (-1) ** (n + 1) * \
+                sum([(-1) ** i *
                      _det_func(removed_list_at(i, ls1)) * ls[i][-1]
                      for i in range(n)])
     return _det
@@ -148,7 +148,7 @@ def naive_det(m):
     else:
         res = 0
         for i, a in zip(range(n), m[0]):
-            res += (-1)**i * a * naive_det(
+            res += (-1) ** i * a * naive_det(
                 [[b for j, b in zip(range(n), l) if i != j]
                  for l in m[1:]])
         return res
@@ -183,7 +183,7 @@ def det(m):
         sgn *= -1
     if j != 0:
         sgn *= -1
-    inv = (m[0][0])**(-1)
+    inv = (m[0][0]) ** (-1)
     l0 = [a * inv for a in m[0][1:]]
     m1 = []
     for v in m[1:]:
@@ -198,6 +198,7 @@ def linearly_indep_rows_index_list(A, r):
     [A.rows()[i] for i in lst] has length r and linearly independent.
     '''
     return find_linearly_indep_indices(A, r)
+
 
 def find_linearly_indep_indices(vectors, r):
     '''
@@ -223,7 +224,7 @@ def find_linearly_indep_indices(vectors, r):
         for j in range(ncls):
             if not first[j] == 0:
                 a = first[j]
-                v = a**(-1) * first
+                v = a ** (-1) * first
                 nonzero_col_index = j
                 break
 
@@ -239,11 +240,10 @@ def find_linearly_indep_indices(vectors, r):
             acc.append(first_r_idx + acc[-1] + 1)
 
 
-
 def polynomial_func(pl):
     l = pl.coefficients()
     m = len(l)
-    return lambda y: sum([y**i * l[i] for i in range(m)])
+    return lambda y: sum([y ** i * l[i] for i in range(m)])
 
 
 def is_number(a):

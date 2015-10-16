@@ -28,6 +28,7 @@ def to_sorted_fc_list(fc_dct):
 
 
 class FormalQexp(CommRingLikeElment):
+
     '''
     A parent class of QexpLevel1 and QseriesTimesQminushalf.
     '''
@@ -145,9 +146,11 @@ cache_gens_power = False
 
 
 class QexpLevel1(FormalQexp):
+
     '''
     A class of formal Fourier series of degree 2.
     '''
+
     def __init__(self, fc_dct, prec, base_ring=QQ, is_cuspidal=False):
         '''
         fc_dct is a dictionary whose set of keys is PrecisionDeg2(prec).
@@ -302,7 +305,7 @@ class QexpLevel1(FormalQexp):
         dic = dict()
         for k, v in self.fc_dct.iteritems():
             (n, r, m) = k
-            dic[k] = (4*n*m - r**2) * v
+            dic[k] = (4 * n * m - r ** 2) * v
         return QexpLevel1(dic, self.prec, self.base_ring)
 
     def phi_operator(self):
@@ -334,18 +337,18 @@ class QexpLevel1(FormalQexp):
         return gcd([QQ(norm(self.fc_dct[t])) for t in PrecisionDeg2(bd)])
 
     def gcd_of_norms_ratio_theta4(self, bd=False):
-        return self.theta_operator4().gcd_of_norms(bd)/self.gcd_of_norms(bd)
+        return self.theta_operator4().gcd_of_norms(bd) / self.gcd_of_norms(bd)
 
     def ratio_theta4(self):
         I = self.gcd_of_coefficients()
         J = self.theta_operator4().gcd_of_coefficients()
-        return J * I**(-1)
+        return J * I ** (-1)
 
     def _differential_operator_monomial(self, a, b, c):
         '''
         del_tau^a del_z^b del_w^c
         '''
-        fcmap = {(n, r, m): n**a * r**b * m**c * v for (n, r, m), v
+        fcmap = {(n, r, m): n ** a * r ** b * m ** c * v for (n, r, m), v
                  in self.fc_dct.iteritems()}
         res = QexpLevel1(fcmap, self.prec, base_ring=self.base_ring,
                          is_cuspidal=self._is_cuspidal)
@@ -369,11 +372,11 @@ class QexpLevel1(FormalQexp):
         (r1, r2, r3) = R.gens()
         S = PolynomialRing(R, "u1, u2")
         (u1, u2) = S.gens()
-        pl = (r1*u1**2 + r2*u1*u2 + r3*u2**2)**(j//2)
+        pl = (r1 * u1 ** 2 + r2 * u1 * u2 + r3 * u2 ** 2) ** (j // 2)
         pldct = pl.dict()
         formsdict = {}
         for (_, i), ply in pldct.iteritems():
-            formsdict[i] = sum([v*self._differential_operator_monomial(a, b, c)
+            formsdict[i] = sum([v * self._differential_operator_monomial(a, b, c)
                                 for (a, b, c), v in ply.dict().iteritems()])
         forms = [x for _, x in
                  sorted([(i, v) for i, v in formsdict.iteritems()],
@@ -414,7 +417,7 @@ class QexpLevel1(FormalQexp):
         prec = self.prec
         R = self.base_ring
         if a != R(1):
-            return (self * a**(-1))._inverse() * a**(-1)
+            return (self * a ** (-1))._inverse() * a ** (-1)
         res_dict = {(0, 0, 0): R(1)}
 
         def norm(t):
@@ -464,7 +467,7 @@ def _mul_q_half_monom(f, a=1):
     res_dc = {}
     fc_dct = f.fc_dct
     for n, r, m in prec:
-        if 4*(n + a)*(m + a)-(r - a)**2 <= 0:
+        if 4 * (n + a) * (m + a) - (r - a) ** 2 <= 0:
             res_dc[(n, r, m)] = 0
         else:
             res_dc[(n, r, m)] = fc_dct[(n + a, r - a, m + a)]
@@ -472,11 +475,13 @@ def _mul_q_half_monom(f, a=1):
 
 
 class QseriesTimesQminushalf(FormalQexp):
+
     '''
     An instance of this class represents a formal qexpansion
     q1^(-1/2) * t^(1/2) * q2^(-1/2) sum_{n, r, m} a(n, r, m) q1^n t^r q2^m.
     A typical instance of this class is a return value of x5__with_prec.
     '''
+
     def __init__(self, f):
         '''
         f = sum_{n, r, m} a(n, r, m) q1^n t^r q2^m in the notation above.
@@ -491,9 +496,9 @@ class QseriesTimesQminushalf(FormalQexp):
 
     def __getitem__(self, t):
         if self._mul_dct == {}:
-            self._mul_dct = {(n - QQ(1)/QQ(2),
-                              r + QQ(1)/QQ(2),
-                              m - QQ(1)/QQ(2)): v
+            self._mul_dct = {(n - QQ(1) / QQ(2),
+                              r + QQ(1) / QQ(2),
+                              m - QQ(1) / QQ(2)): v
                              for (n, r, m), v in self.f_part.fc_dct.items()}
         return self._mul_dct[t]
 
@@ -524,7 +529,7 @@ class QseriesTimesQminushalf(FormalQexp):
         elif other == 1:
             return self
         elif is_number(other) and other > 0:
-            f = (self.f_part)**other
+            f = (self.f_part) ** other
             q, r = divmod(other, 2)
             g = _mul_q_half_monom(f, a=q)
             if r == 0:
@@ -535,20 +540,22 @@ class QseriesTimesQminushalf(FormalQexp):
             raise NotImplementedError
 
     def _differential_operator_monomial(self, a, b, c):
-        fcmap = {(n, r, m): ((n - QQ(1)/QQ(2))**a *
-                             (r + QQ(1)/QQ(2))**b *
-                             (m - QQ(1)/QQ(2))**c * v)
+        fcmap = {(n, r, m): ((n - QQ(1) / QQ(2)) ** a *
+                             (r + QQ(1) / QQ(2)) ** b *
+                             (m - QQ(1) / QQ(2)) ** c * v)
                  for (n, r, m), v in self.f_part.fc_dct.iteritems()}
         f = QexpLevel1(fcmap, self.prec, base_ring=self.base_ring)
         return QseriesTimesQminushalf(f)
 
 
 class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
+
     '''
     An instance of QseriesTimesQminushalf and can be regard as modular form.
     (i.e. multiple of x5 by a modular form of level 1).
     A typical instance of this class is a return value of x5__with_prec.
     '''
+
     def __init__(self, f, wt):
         QseriesTimesQminushalf.__init__(self, f)
         self.__wt = wt
@@ -573,7 +580,7 @@ class ModFormQsrTimesQminushalf(QseriesTimesQminushalf):
     def __add__(self, other):
         res = QseriesTimesQminushalf.__add__(self, other)
         if (isinstance(other, ModFormQsrTimesQminushalf) and
-            self.wt == other.wt):
+                self.wt == other.wt):
             return ModFormQsrTimesQminushalf(res.f_part, self.wt)
         else:
             return res
@@ -593,6 +600,7 @@ def is_hol_mod_form(f):
 
 
 class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
+
     def __init__(self, wt, fc_dct, prec, base_ring=QQ,
                  is_cuspidal=False,
                  given_reduced_tuples_only=False):
@@ -604,11 +612,11 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
         self._construction = None
         prec = PrecisionDeg2(prec)
         if given_reduced_tuples_only:
-            if is_cuspidal or wt%2 == 1: # level 1 specific.
+            if is_cuspidal or wt % 2 == 1:  # level 1 specific.
                 for rdf, col in \
                         prec.group_by_reduced_forms_with_sgn().iteritems():
                     for t, sgn in col:
-                        fc_dct[t] = fc_dct[rdf] * sgn**wt
+                        fc_dct[t] = fc_dct[rdf] * sgn ** wt
             else:
                 for rdf, col in prec.group_by_reduced_forms().iteritems():
                     for t in col:
@@ -662,7 +670,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             return self.fc_dct[idx]
         except KeyError:
             t, e = reduced_form_with_sign(idx)
-            return self.fc_dct[t] * e**(self.wt) # level 1 specific
+            return self.fc_dct[t] * e ** (self.wt)  # level 1 specific
 
     def __mul__(self, other):
         if is_number(other):
@@ -728,8 +736,8 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
     def satisfies_maass_relation_for(self, n, r, m):
         if (n, r, m) == (0, 0, 0):
             return True
-        return self[(n, r, m)] == sum([d**(self.wt - 1) *
-                                       self[(1, r/d, m*n/(d**2))]
+        return self[(n, r, m)] == sum([d ** (self.wt - 1) *
+                                       self[(1, r / d, m * n / (d ** 2))]
                                        for d in divisors(gcd((n, r, m)))])
 
     def _none_zero_tpl(self):
@@ -751,9 +759,9 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
             res = self
             pl = 1
             if (hasattr(self, "_construction") and
-                self._construction is not None):
-                pl = a**(-1) * self._construction
-            res = a**(-1) * self
+                    self._construction is not None):
+                pl = a ** (-1) * self._construction
+            res = a ** (-1) * self
             res._construction = pl
             return res
         else:
@@ -858,6 +866,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
 
 
 class SymWtGenElt(object):
+
     '''
     Let Symm(j) be the symmetric tensor representation of degree j of GL2.
     Symm(j) is the space of homogenous polynomials of u1 and u2 of degree j.
@@ -865,6 +874,7 @@ class SymWtGenElt(object):
     An instance of this class corresponds to
     a tuple of j Fourier expansions of degree 2.
     '''
+
     def __init__(self, forms, prec, base_ring=QQ):
         prec = PrecisionDeg2(prec)
         self.__base_ring = base_ring
@@ -919,7 +929,7 @@ class SymWtGenElt(object):
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
-            is_number(t[1])):
+                is_number(t[1])):
             tpl, i = t
             return self.forms[i][tpl]
         else:
@@ -1001,11 +1011,14 @@ class SymWtGenElt(object):
         forms = [f.change_ring(R=R, hom=hom) for f in self.forms]
         return SymWtGenElt(forms, self.prec, base_ring=forms[0].base_ring)
 
+
 class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
+
     '''
     An instance of this class corresponding to
     vector valued Siegel modular form of degree 2.
     '''
+
     def __init__(self, forms, wt, prec, base_ring=QQ):
         SymWtGenElt.__init__(self, forms, prec, base_ring)
         self.__wt = wt
@@ -1084,7 +1097,7 @@ class SymWtModFmElt(SymWtGenElt, HeckeModuleElement):
 
     def __getitem__(self, t):
         if (isinstance(t, tuple) and isinstance(t[0], tuple) and
-            is_number(t[1])):
+                is_number(t[1])):
             tpl, i = t
             return self.forms[i][tpl]
         else:
@@ -1126,7 +1139,7 @@ def divide(f, g, prec):
     n0, r0, m0 = f_ts[0]
     a0 = f[(n0, r0, m0)]
     # Normalize f
-    f = f * a0**(-1)
+    f = f * a0 ** (-1)
 
     for n, r, m in ts:
         if g[(n + n0, r + r0, m + m0)] == 0:
@@ -1136,10 +1149,10 @@ def divide(f, g, prec):
     ts_res = ts[len(res_dct):]
     for n, r, m in ts_res:
         n1, r1, m1 = n + n0, r + r0, m + m0
-        s = sum((f.fc_dct[(n1-a, r1-b, m1-c)] * res_dct[(a, b, c)]
+        s = sum((f.fc_dct[(n1 - a, r1 - b, m1 - c)] * res_dct[(a, b, c)]
                  for a, b, c in _spos_def_mats_lt((n1, r1, m1))
                  if not ((a == n and b == r and c == m) or
-                         f.fc_dct[(n1-a, r1-b, m1-c)] == 0)))
+                         f.fc_dct[(n1 - a, r1 - b, m1 - c)] == 0)))
         res_dct[(n, r, m)] = g[(n1, r1, m1)] - s
     res = QexpLevel1(res_dct, prec)
     return res * a0
@@ -1148,7 +1161,7 @@ def divide(f, g, prec):
 def modulo(x, p, K):
     d = K.degree()
     a = K.gens()[0]
-    a_s = [a**i for i in range(d)]
+    a_s = [a ** i for i in range(d)]
     xl = x.list()
     xl_p = [mod(b, p).lift() for b in xl]
     return sum(list(imap(operator.mul, a_s, xl_p)))

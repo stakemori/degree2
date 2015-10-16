@@ -68,8 +68,8 @@ def _inc_weight(Q):
         rdct[r11] = 4 * r11
         rdct[r12] = 2 * r12
     t = [t for t, v in Q.dict().iteritems() if v != 0][0]
-    a = Q.map_coefficients(lambda f: f.subs(rdct))[t] / Q.subs({u1: 2*u1})[t]
-    return int(log(a)/log(2))
+    a = Q.map_coefficients(lambda f: f.subs(rdct))[t] / Q.subs({u1: 2 * u1})[t]
+    return int(log(a) / log(2))
 
 
 def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
@@ -106,7 +106,7 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
     def monom_mul(tpl, v, flist):
         tpls = group(tpl, 3)
         l = zip(flist, tpls)
-        return ((v * mul([QQ(2)**(-t[1]) for _, t in l])) *
+        return ((v * mul([QQ(2) ** (-t[1]) for _, t in l])) *
                 mul((f._differential_operator_monomial(*t) for f, t in l)))
 
     def rankin_cohen(flist):
@@ -127,8 +127,8 @@ def _pair_gens_r_s():
     RS_ring = PolynomialRing(QQ, names=rnames)
     (r11, r12, r22, s11, s12, s22) = RS_ring.gens()
     (u1, u2) = PolynomialRing(RS_ring, names=unames).gens()
-    r = r11 * u1**2 + 2 * r12 * u1 * u2 + r22 * u2**2
-    s = s11 * u1**2 + 2 * s12 * u1 * u2 + s22 * u2**2
+    r = r11 * u1 ** 2 + 2 * r12 * u1 * u2 + r22 * u2 ** 2
+    s = s11 * u1 ** 2 + 2 * s12 * u1 * u2 + s22 * u2 ** 2
     return (RS_ring.gens(), (u1, u2), (r, s))
 
 
@@ -194,31 +194,31 @@ def rankin_cohen_triple_det_sym8(f, g, h):
 
 def _rankin_cohen_pair_sym_pol(j, k, l):
     _, _, (r, s) = _pair_gens_r_s()
-    m = j//2
-    return sum([(-1)**i * combination(m + l - 1, i) *
+    m = j // 2
+    return sum([(-1) ** i * combination(m + l - 1, i) *
                 combination(m + k - 1, m - i) *
-                r**i * s**(m - i) for i in range(m + 1)])
+                r ** i * s ** (m - i) for i in range(m + 1)])
 
 
 def _rankin_cohen_pair_det2_sym_pol(j, k, l):
     (r11, r12, r22, s11, s12, s22), _, (r, s) = _pair_gens_r_s()
-    m = j//2
-    Q = sum([(-1)**i * combination(m + l, i) * combination(m + k, m - i) *
-             r**i * s**(m - i) for i in range(m + 1)])
-    Qx = sum([(-1)**i * combination(m + l, i) * combination(m + k, m - i) *
-              i * r**(i - 1) * s**(m - i) for i in range(1, m + 1)])
-    Qy = sum([(-1)**i * combination(m + l, i) * combination(m + k, m - i) *
-              (m - i) * r**i * s**(m - i - 1) for i in range(0, m)])
-    detR = r11 * r22 - r12**2
-    detS = s11 * s22 - s12**2
+    m = j // 2
+    Q = sum([(-1) ** i * combination(m + l, i) * combination(m + k, m - i) *
+             r ** i * s ** (m - i) for i in range(m + 1)])
+    Qx = sum([(-1) ** i * combination(m + l, i) * combination(m + k, m - i) *
+              i * r ** (i - 1) * s ** (m - i) for i in range(1, m + 1)])
+    Qy = sum([(-1) ** i * combination(m + l, i) * combination(m + k, m - i) *
+              (m - i) * r ** i * s ** (m - i - 1) for i in range(0, m)])
+    detR = r11 * r22 - r12 ** 2
+    detS = s11 * s22 - s12 ** 2
     # det(R+S)
-    detRpS = (-r12**2 + r11*r22 + r22*s11 - QQ(2) * r12 * s12
-              - s12**2 + r11*s22 + s11*s22)
-    Q2 = ((2*k - 1) * (2*l - 1) * detRpS - (2*k - 1) * (2*k + 2*l - 1) * detS -
-          (2*l - 1)*(2*k + 2*l - 1)*detR)
-    Q = (QQ(4)**(-1) * Q2 * Q +
-         QQ(2)**(-1) *
-         ((2*l - 1) * detR * s - (2*k - 1) * detS * r) *
+    detRpS = (-r12 ** 2 + r11 * r22 + r22 * s11 - QQ(2) * r12 * s12
+              - s12 ** 2 + r11 * s22 + s11 * s22)
+    Q2 = ((2 * k - 1) * (2 * l - 1) * detRpS - (2 * k - 1) * (2 * k + 2 * l - 1) * detS -
+          (2 * l - 1) * (2 * k + 2 * l - 1) * detR)
+    Q = (QQ(4) ** (-1) * Q2 * Q +
+         QQ(2) ** (-1) *
+         ((2 * l - 1) * detR * s - (2 * k - 1) * detS * r) *
          (Qx - Qy))
     return Q
 
@@ -227,7 +227,7 @@ def _rankin_cohen_triple_det_sym2_pol(k1, k2, k3):
     (r11, r12, r22, s11, s12, s22, t11, t12, t22), (u1, u2) = _triple_gens()
 
     m0 = matrix([[r11, s11, t11],
-                 [2*r12, 2*s12, 2*t12],
+                 [2 * r12, 2 * s12, 2 * t12],
                  [k1, k2, k3]])
 
     m1 = matrix([[r11, s11, t11],
@@ -235,80 +235,81 @@ def _rankin_cohen_triple_det_sym2_pol(k1, k2, k3):
                  [r22, s22, t22]])
 
     m2 = matrix([[k1, k2, k3],
-                 [2*r12, 2*s12, 2*t12],
+                 [2 * r12, 2 * s12, 2 * t12],
                  [r22, s22, t22]])
-    Q = m0.det() * u1**2 - 2 * m1.det() * u1 * u2 + m2.det() * u2**2
+    Q = m0.det() * u1 ** 2 - 2 * m1.det() * u1 * u2 + m2.det() * u2 ** 2
     return Q
 
 
 def _rankin_cohen_triple_det_sym4_pol(k1, k2, k3):
     (r11, r12, r22, s11, s12, s22, t11, t12, t22), (u1, u2) = _triple_gens()
 
-    m00 = matrix([[(k1 + 1)*r11, k2, k3],
-                  [r11**2, s11, t11],
-                  [r11*r12, s12, t12]])
+    m00 = matrix([[(k1 + 1) * r11, k2, k3],
+                  [r11 ** 2, s11, t11],
+                  [r11 * r12, s12, t12]])
 
-    m01 = matrix([[k1, (k2 + 1)*s11, k3],
-                 [r11, s11**2, t11],
-                 [r12, s11*s12, t12]])
+    m01 = matrix([[k1, (k2 + 1) * s11, k3],
+                  [r11, s11 ** 2, t11],
+                  [r12, s11 * s12, t12]])
 
-    m10 = matrix([[(k1 + 1)*r12, k2, k3],
-                 [r11*r12, s11, t11],
-                 [r12**2, s12, t12]])
+    m10 = matrix([[(k1 + 1) * r12, k2, k3],
+                  [r11 * r12, s11, t11],
+                  [r12 ** 2, s12, t12]])
 
-    m11 = matrix([[k1, (k2 + 1)*s12, k3],
-                 [r11, s11*s12, t11],
-                 [r12, s12**2, t12]])
+    m11 = matrix([[k1, (k2 + 1) * s12, k3],
+                  [r11, s11 * s12, t11],
+                  [r12, s12 ** 2, t12]])
 
-    m12 = matrix([[(k1 + 1)*r11, k2, k3],
-                 [r11**2, s11, t11],
-                 [r11*r22, s22, t22]])
+    m12 = matrix([[(k1 + 1) * r11, k2, k3],
+                  [r11 ** 2, s11, t11],
+                  [r11 * r22, s22, t22]])
 
-    m13 = matrix([[k1, (k2 + 1)*s11, k3],
-                 [r11, s11**2, t11],
-                 [r22, s11*s22, t22]])
+    m13 = matrix([[k1, (k2 + 1) * s11, k3],
+                  [r11, s11 ** 2, t11],
+                  [r22, s11 * s22, t22]])
 
-    m20 = matrix([[(k1 + 1)*r12, k2, k3],
-                 [r11*r12, s11, t11],
-                 [r22*r12, s22, t22]])
+    m20 = matrix([[(k1 + 1) * r12, k2, k3],
+                  [r11 * r12, s11, t11],
+                  [r22 * r12, s22, t22]])
 
-    m21 = matrix([[k1, (k2 + 1)*s12, k3],
-                 [r11, s11*s12, t11],
-                 [r22, s22*s12, t22]])
+    m21 = matrix([[k1, (k2 + 1) * s12, k3],
+                  [r11, s11 * s12, t11],
+                  [r22, s22 * s12, t22]])
 
-    m30 = matrix([[(k1 + 1)*r12, k2, k3],
-                 [r12**2, s12, t12],
-                 [r12*r22, s22, t22]])
+    m30 = matrix([[(k1 + 1) * r12, k2, k3],
+                  [r12 ** 2, s12, t12],
+                  [r12 * r22, s22, t22]])
 
-    m31 = matrix([[k1, (k2 + 1)*s12, k3],
-                 [r12, s12**2, t12],
-                 [r22, s12*s22, t22]])
+    m31 = matrix([[k1, (k2 + 1) * s12, k3],
+                  [r12, s12 ** 2, t12],
+                  [r22, s12 * s22, t22]])
 
-    m32 = matrix([[(k1 + 1)*r22, k2, k3],
-                 [r11*r22, s11, t11],
-                 [r22**2, s22, t22]])
+    m32 = matrix([[(k1 + 1) * r22, k2, k3],
+                  [r11 * r22, s11, t11],
+                  [r22 ** 2, s22, t22]])
 
-    m33 = matrix([[k1, (k2 + 1)*s22, k3],
-                 [r11, s11*s22, t11],
-                 [r22, s22**2, t22]])
+    m33 = matrix([[k1, (k2 + 1) * s22, k3],
+                  [r11, s11 * s22, t11],
+                  [r22, s22 ** 2, t22]])
 
-    m40 = matrix([[(k1 + 1)*r22, k2, k3],
-                 [r22*r12, s12, t12],
-                 [r22**2, s22, t22]])
+    m40 = matrix([[(k1 + 1) * r22, k2, k3],
+                  [r22 * r12, s12, t12],
+                  [r22 ** 2, s22, t22]])
 
-    m41 = matrix([[k1, (k2 + 1)*s22, k3],
-                 [r12, s22*s12, t12],
-                 [r22, s22**2, t22]])
+    m41 = matrix([[k1, (k2 + 1) * s22, k3],
+                  [r12, s22 * s12, t12],
+                  [r22, s22 ** 2, t22]])
 
-    Q0 = (k2 + 1)*m00.det() - (k1 + 1)*m01.det()
-    Q1 = (2*(k2 + 1)*m10.det() - 2*(k1 + 1)*m11.det()
-          + (k2 + 1)*m12.det() - (k1 + 1)*m13.det())
-    Q2 = 3*(k2 + 1)*m20.det() - 3*(k1 + 1)*m21.det()
-    Q3 = (2*(k2 + 1)*m30.det() - 2*(k1 + 1)*m31.det()
-          + (k2 + 1)*m32.det() - (k1 + 1)*m33.det())
-    Q4 = (k2 + 1)*m40.det() - (k1 + 1)*m41.det()
+    Q0 = (k2 + 1) * m00.det() - (k1 + 1) * m01.det()
+    Q1 = (2 * (k2 + 1) * m10.det() - 2 * (k1 + 1) * m11.det()
+          + (k2 + 1) * m12.det() - (k1 + 1) * m13.det())
+    Q2 = 3 * (k2 + 1) * m20.det() - 3 * (k1 + 1) * m21.det()
+    Q3 = (2 * (k2 + 1) * m30.det() - 2 * (k1 + 1) * m31.det()
+          + (k2 + 1) * m32.det() - (k1 + 1) * m33.det())
+    Q4 = (k2 + 1) * m40.det() - (k1 + 1) * m41.det()
 
-    Q = Q0*u1**4 + Q1*u1**3*u2 + Q2*u1**2*u2**2 + Q3*u1*u2**3 + Q4*u2**4
+    Q = Q0 * u1 ** 4 + Q1 * u1 ** 3 * u2 + Q2 * u1 ** 2 * \
+        u2 ** 2 + Q3 * u1 * u2 ** 3 + Q4 * u2 ** 4
     return Q
 
 
@@ -318,17 +319,17 @@ def _rankin_cohen_triple_det_sym8_pol(k1, k2, k3):
     def _mat_det(l):
         return matrix([[r11, s11, t11],
                        [r12, s12, t12],
-                       l + [2*k3]]).det()
+                       l + [2 * k3]]).det()
 
-    ls = [[2*k1 + 6, 2*k2],
-          [2*k1 + 4, 2*k2 + 2],
-          [2*k1 + 2, 2*k2 + 4],
-          [2*k1, 2*k2 + 6]]
+    ls = [[2 * k1 + 6, 2 * k2],
+          [2 * k1 + 4, 2 * k2 + 2],
+          [2 * k1 + 2, 2 * k2 + 4],
+          [2 * k1, 2 * k2 + 6]]
 
-    coeffs = [(2*k2 + 2) * (2*k2 + 4) * (2*k2 + 6) * r11**3,
-              -3 * (2*k1 + 6) * (2*k2 + 4) * (2*k2 + 6) * r11**2 * s11,
-              3 * (2*k1 + 4) * (2*k1 + 6) * (2*k2 + 6) * r11 * s11**2,
-              -(2 * k1 + 2) * (2*k1 + 4) * (2*k1 + 6) * s11**3]
+    coeffs = [(2 * k2 + 2) * (2 * k2 + 4) * (2 * k2 + 6) * r11 ** 3,
+              -3 * (2 * k1 + 6) * (2 * k2 + 4) * (2 * k2 + 6) * r11 ** 2 * s11,
+              3 * (2 * k1 + 4) * (2 * k1 + 6) * (2 * k2 + 6) * r11 * s11 ** 2,
+              -(2 * k1 + 2) * (2 * k1 + 4) * (2 * k1 + 6) * s11 ** 3]
     Q0 = sum([c * _mat_det(l) for c, l in zip(coeffs, ls)])
     A = matrix([[1, u1], [0, 1]])
 
@@ -344,7 +345,7 @@ def _rankin_cohen_triple_det_sym8_pol(k1, k2, k3):
     for rs in [[r11, r12, r22], [s11, s12, s22], [t11, t12, t22]]:
         subs_dct.update(_subs_dct(rs))
     Q0_subs = Q0.subs(subs_dct)
-    return sum([Q0_subs[(i, 0)] * u1**(8-i) * u2**i for i in range(9)])
+    return sum([Q0_subs[(i, 0)] * u1 ** (8 - i) * u2 ** i for i in range(9)])
 
 
 def _bracket_vec_val(vecs):
@@ -366,7 +367,7 @@ def _bracket_vec_val(vecs):
     u, v = S.gens()
 
     def _pol(gens):
-        return sum([a * u**(j - i) * v**i
+        return sum([a * u ** (j - i) * v ** i
                     for i, a in zip(range(j + 1), gens)])
 
     f_x, f_y, f_z = [_pol(gens) for gens in [gens_x, gens_y, gens_z]]
@@ -407,7 +408,7 @@ def vector_valued_rankin_cohen(f, vec_val):
     sym_wt = vec_val.sym_wt
     base_ring = _common_base_ring(f.base_ring, vec_val.base_ring)
     diff_tau = (f.differentiate_wrt_tau(),
-                f.differentiate_wrt_z() * QQ(2)**(-1),
+                f.differentiate_wrt_z() * QQ(2) ** (-1),
                 f.differentiate_wrt_w())
 
     def diff_v(vec_val):
@@ -428,8 +429,8 @@ def vector_valued_rankin_cohen(f, vec_val):
     crs_prd1 = _cross_prod(diff_tau, diff_d(vec_val))
     forms1 = _bracket_vec_val(crs_prd1)
     prec = common_prec(forms1)
-    res1 = (vec_val.wt + sym_wt//2 - 1) * SWGElt(forms1, prec,
-                                                 base_ring=base_ring)
+    res1 = (vec_val.wt + sym_wt // 2 - 1) * SWGElt(forms1, prec,
+                                                   base_ring=base_ring)
 
     forms2 = _bracket_vec_val(_cross_prod_diff(diff_d(vec_val)))
     res2 = f.wt * f * SWGElt(forms2, prec, base_ring=base_ring)
@@ -451,7 +452,7 @@ def _cross_prod_diff(vec_vals):
         return differential_monom(f, 1, 0, 0)
 
     def d2(f):
-        return differential_monom(f, 0, 1, 0) * QQ(2)**(-1)
+        return differential_monom(f, 0, 1, 0) * QQ(2) ** (-1)
 
     def d3(f):
         return differential_monom(f, 0, 0, 1)
@@ -484,7 +485,7 @@ def m_operator(k1, k2, k3):
 
     def bracket_op(rs):
         r1, r2, r3 = rs
-        return r1 * u1**2 + 2 * r2*u1*u2 + r3 * u2**2
+        return r1 * u1 ** 2 + 2 * r2 * u1 * u2 + r3 * u2 ** 2
 
     def x_op_val(f):
         r, s, t = f.parent().gens()

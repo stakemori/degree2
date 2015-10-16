@@ -16,28 +16,32 @@ data_dir = opath.join(opath.dirname(opath.abspath(__file__)),
                       "data",
                       "eigen_forms")
 
+
 def load_cache(fl):
     return load(opath.join(data_dir, fl))
 
 
 def _alpha20_3():
     x = var("x")
-    K = NumberField(x**2 - ZZ(1378464)*x + ZZ(328189501440), "alpha20_3")
+    K = NumberField(x ** 2 - ZZ(1378464) * x + ZZ(328189501440), "alpha20_3")
     return K.gens()[0]
 
 alpha20_1 = 119538120
 alpha20_2 = -840960
 alpha20_3 = _alpha20_3()
 
+
 def _a47():
     x = var("x")
-    K = NumberField(x**3 - x**2 - ZZ(524706)*x + ZZ(103406706), names="a47")
+    K = NumberField(
+        x ** 3 - x ** 2 - ZZ(524706) * x + ZZ(103406706), names="a47")
     return K.gens()[0]
 
 a47 = _a47()
 
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
+
 
 def polynomial_to_form(f, prec):
     es4 = eisenstein_series_degree2(4, prec)
@@ -46,10 +50,10 @@ def polynomial_to_form(f, prec):
     x12 = x12_with_prec(prec)
     x35 = x35_with_prec(prec)
     gens = [es4, es6, x10, x12, x35]
-    def monom(t):
-        return reduce(operator.mul, [f**a for f, a in zip(gens, t)])
-    return sum([a * monom(t) for t, a in f.dict().iteritems()])
 
+    def monom(t):
+        return reduce(operator.mul, [f ** a for f, a in zip(gens, t)])
+    return sum([a * monom(t) for t, a in f.dict().iteritems()])
 
 
 x47_fc_dct = load_cache("x47_fc_dct.sobj")
@@ -59,13 +63,15 @@ f20_3_dct = load_cache("f20_3_dct.sobj")
 cons20 = load_cache("cons20.sobj")
 cons47 = load_cache("cons47.sobj")
 
+
 class TestEigenforms(unittest.TestCase):
+
     def test_wt_20_eigen(self):
         N20 = KlingenEisensteinAndCuspForms(20)
         pl = N20.hecke_charpoly(2)
         x = pl.parent().gens()[0]
         pl1 = ((x + Integer(840960)) *
-               (x**Integer(2) - Integer(1378464)*x + Integer(328189501440)))
+               (x ** Integer(2) - Integer(1378464) * x + Integer(328189501440)))
         self.assertTrue(pl == (x - Integer(119538120)) * pl1)
 
         x = var("x")
@@ -91,7 +97,7 @@ class TestEigenforms(unittest.TestCase):
         pl = S20.hecke_charpoly(2)
         x = pl.parent().gens()[0]
 
-        pl1 = (x**Integer(2) - Integer(1378464)*x + Integer(328189501440))
+        pl1 = (x ** Integer(2) - Integer(1378464) * x + Integer(328189501440))
         self.assertTrue(pl == (x + Integer(840960)) * pl1)
         self.assertTrue(pl == S20.hecke_matrix(2).charpoly("x"))
 
@@ -110,7 +116,7 @@ class TestEigenforms(unittest.TestCase):
 
     def test_wt_47_eigen(self):
         KS47 = KlingenEisensteinAndCuspForms(47)
-        lambda2 = (-ZZ(957874176)/ZZ(13)*a47**2 - ZZ(818321817600)/ZZ(13)*a47 -
+        lambda2 = (-ZZ(957874176) / ZZ(13) * a47 ** 2 - ZZ(818321817600) / ZZ(13) * a47 -
                    ZZ(34324755775488))
         x47 = KS47.eigenform_with_eigenvalue_t2(lambda2)
         x47 = x47.normalize(x47[(2, -1, 3)])
@@ -149,12 +155,12 @@ class TestEigenforms(unittest.TestCase):
     def test_cusp_sp_wt28_hecke_charpoly(self):
         R = PolynomialRing(QQ, names="x")
         x = R.gens()[0]
-        pl = (x**Integer(7) - Integer(599148384)*x**Integer(6) +
-              Integer(85597740037545984)*x**Integer(5) +
-              Integer(4052196666582552432082944)*x**Integer(4) -
-              Integer(992490558368877866775830593536000)*x**Integer(3) -
-              Integer(7786461340613962559507216233894458163200)*x**Integer(2) +
-              Integer(2554655965904300151500968857660777576875950080000)*x +
+        pl = (x ** Integer(7) - Integer(599148384) * x ** Integer(6) +
+              Integer(85597740037545984) * x ** Integer(5) +
+              Integer(4052196666582552432082944) * x ** Integer(4) -
+              Integer(992490558368877866775830593536000) * x ** Integer(3) -
+              Integer(7786461340613962559507216233894458163200) * x ** Integer(2) +
+              Integer(2554655965904300151500968857660777576875950080000) * x +
               Integer(2246305351725266922462270484154998253269432286576640000))
         S = CuspFormsDegree2(28)
         self.assertTrue(R(S.hecke_charpoly(2)) == pl)

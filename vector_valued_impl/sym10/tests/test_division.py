@@ -22,8 +22,10 @@ gens_consts = even_gen_consts() + odd_gen_consts()
 
 
 class Sym10GivenWtHeckeConstBase(VectorValuedSiegelModularForms):
+
     '''A parent class of Sym10Wt18HeckeConst and Sym10Wt19HeckeConst.
     '''
+
     def __init__(self, prec, wt, basis_consts):
         self._basis_consts = basis_consts
         self._calculator = CalculatorVectValued(self._basis_consts, data_dir)
@@ -39,8 +41,10 @@ class Sym10GivenWtHeckeConstBase(VectorValuedSiegelModularForms):
 
 
 class Sym10GivenWtBase(VectorValuedSiegelModularForms):
+
     '''A prarent class for a subspace of M_{det^k Sym(10)} with given basis.
     '''
+
     def __init__(self, prec, wt, bss):
         self._bss = bss
         super(Sym10GivenWtBase, self).__init__(wt, 10, prec)
@@ -53,16 +57,20 @@ class Sym10GivenWtBase(VectorValuedSiegelModularForms):
 
 
 class Sym10Wt18HeckeConst(Sym10GivenWtHeckeConstBase):
+
     '''A class for the module of weight det^18 Sym(10). CVH is used for
     constructing a basis.'''
+
     def __init__(self, prec):
         super(Sym10Wt18HeckeConst, self).__init__(
             prec, 18, _wt18_consts + [CVH(_wt18_consts[0], 2)])
 
 
 class Sym10Wt19HeckeConst(Sym10GivenWtHeckeConstBase):
+
     '''A class for the module of weight det^19 Sym(10). CVH is used for
     constructing a basis.'''
+
     def __init__(self, prec):
         super(Sym10Wt19HeckeConst, self).__init__(
             prec, 19, sym10_19_consts + [CVH(sym10_19_consts[0], 2)])
@@ -82,10 +90,12 @@ def _hecke_const_sp(prec, wt):
 
 
 class Sym10DivBase(VectorValuedSiegelModularForms):
+
     '''
     A class for f^(-1) M, where f is a scalar valued modular form.
     An instance of this class may less prec than the argument.
     '''
+
     def __init__(self, scalar_const, M, prec):
         self._scalar_const = scalar_const
         self._M = M
@@ -111,18 +121,22 @@ class Sym10DivBase(VectorValuedSiegelModularForms):
 
 
 class Sym10EvenDiv(Sym10DivBase):
+
     '''A class for f^(-1) M_{det^18 Sym(10)}, where f is a scalar valued
     modular form.
     '''
+
     def __init__(self, scalar_const, prec):
         M = _hecke_const_sp(prec, 18)
         super(Sym10EvenDiv, self).__init__(scalar_const, M, prec)
 
 
 class Sym10OddDiv(Sym10DivBase):
+
     '''A class for f^(-1) M_{det^19 Sym(10)}, where f is a scalar valued
     modular form.
     '''
+
     def __init__(self, scalar_const, prec):
         M = _hecke_const_sp(prec, 19)
         super(Sym10OddDiv, self).__init__(scalar_const, M, prec)
@@ -142,12 +156,12 @@ def _anihilate_pol(k, M):
     if k % 2 == 0:
         # Klingen-Eisenstein series
         f = CuspForms(1, k + 10).basis()[0]
-        return x - f[2] * (1 + QQ(2)**(k - 2))
+        return x - f[2] * (1 + QQ(2) ** (k - 2))
     elif k == 13:
         # Kim-Ramakrishnan-Shahidi lift
         f = CuspForms(1, 12).basis()[0]
         a = f[2]
-        return x - f[2]**3 + QQ(2)**12 * f[2]
+        return x - f[2] ** 3 + QQ(2) ** 12 * f[2]
     else:
         chrply = M.hecke_charpoly(2)
         dim = hilbert_series_maybe(10)[k]
@@ -168,9 +182,11 @@ def _find_const_of_e4_e6_of_same_wt(k):
 
 
 class TestDivision(unittest.TestCase):
+
     '''A class for testing whether generators constructed by dividing
     forms are given correctly.
     '''
+
     def test_division_generators(self):
         prec = 6
         div_consts = [c for c in gens_consts if isinstance(c, ConstDivision)]
@@ -181,7 +197,7 @@ class TestDivision(unittest.TestCase):
         gens_dct = calculator.forms_dict(prec)
         for c in div_consts:
             k = c.weight()
-            print "checking when k = %s"%(str(k), )
+            print "checking when k = %s" % (str(k), )
             if k % 2 == 0:
                 sccst = _find_const_of_e4_e6_of_same_wt(18 - k)
                 M = Sym10EvenDiv(sccst, prec)
@@ -194,10 +210,11 @@ class TestDivision(unittest.TestCase):
             # Check this prec is sufficient.
             mt = matrix(QQ, [[b[t] for b in N.basis()]
                              for t in N.linearly_indep_tuples()])
-            self.assertTrue(mt.is_invertible(), "False when k = %s"%(str(k),))
+            self.assertTrue(
+                mt.is_invertible(), "False when k = %s" % (str(k),))
             # Check our construction gives a holomorphic modular form
             self.assertTrue(N.contains(gens_dct[c]),
-                            "False when k = %s"%(str(k),))
+                            "False when k = %s" % (str(k),))
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDivision)
 unittest.TextTestRunner(verbosity=2).run(suite)

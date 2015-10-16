@@ -33,9 +33,11 @@ def common_prec(forms):
 
 
 class PrecisionDeg2(object):
+
     '''
     An instance of this class is immutable and used for a dictionary's key.
     '''
+
     def __init__(self, prec):
         if isinstance(prec, PrecisionDeg2):
             self.__prec = prec.__prec
@@ -110,7 +112,7 @@ class PrecisionDeg2(object):
     def pos_defs(self):
         for t in self:
             n, r, m = t
-            if 4*n*m - r**2 != 0:
+            if 4 * n * m - r ** 2 != 0:
                 yield t
 
     def group_by_reduced_forms(self):
@@ -139,7 +141,7 @@ class PrecisionDeg2(object):
             n, r, m = t
             if t == (0, 0, 0):
                 r0.append(t)
-            elif 4*n*m - r**2 == 0:
+            elif 4 * n * m - r ** 2 == 0:
                 r1.append(t)
             else:
                 r2.append(t)
@@ -277,7 +279,7 @@ def reduced_form_with_sign(tpl):
     the unimodular equivalence.
     '''
     n, r, m = [ZZ(x) for x in tpl]
-    if 4*n*m - r**2 == 0:
+    if 4 * n * m - r ** 2 == 0:
         raise RuntimeError("tpl must be definite.")
     sign = 1
     while True:
@@ -286,13 +288,13 @@ def reduced_form_with_sign(tpl):
         if n > m:
             sign *= -1
             n, m = m, n
-        rem = mod(r, 2*n)
+        rem = mod(r, 2 * n)
         if rem > n:
-            u = r//(2*n) + 1
+            u = r // (2 * n) + 1
         else:
-            u = r//(2*n)
-        m = n * u**2 - r * u + m
-        r = r - 2*n*u
+            u = r // (2 * n)
+        m = n * u ** 2 - r * u + m
+        r = r - 2 * n * u
         if r < 0:
             sign *= -1
             r *= -1
@@ -308,7 +310,7 @@ def semi_pos_def_matarices(bd):
             a = 2 * bd
             yield (n, 0, m)
             for r in range(1, a + 1):
-                if r**2 <= 4 * n * m:
+                if r ** 2 <= 4 * n * m:
                     yield (n, r, m)
                     yield (n, -r, m)
 
@@ -321,13 +323,13 @@ def _spos_def_mats_lt(tpl):
     for n1 in range(n + 1):
         for m1 in range(m + 1):
             a = 4 * (n - n1) * (m - m1)
-            if r**2 <= a:
+            if r ** 2 <= a:
                 yield (n1, 0, m1)
             sq = int(floor(2 * sqrt(n1 * m1)))
             for r1 in range(1, sq + 1):
-                if (r - r1)**2 <= a:
+                if (r - r1) ** 2 <= a:
                     yield (n1, r1, m1)
-                if (r + r1)**2 <= a:
+                if (r + r1) ** 2 <= a:
                     yield (n1, -r1, m1)
 
 
@@ -356,7 +358,7 @@ def _partition_mul_fourier(prec, cuspidal=False, hol=False,
 
     def weight_fn(x):
         n, r, m = x
-        return max(16.0/9.0 * (ZZ(n) * ZZ(m))**(1.5) - ZZ(n) * ZZ(m) * abs(r),
+        return max(16.0 / 9.0 * (ZZ(n) * ZZ(m)) ** (1.5) - ZZ(n) * ZZ(m) * abs(r),
                    0)
 
     return partition_weighted(tpls, num_of_procs, weight_fn)
@@ -382,7 +384,7 @@ def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
         num_of_procs=current_num_of_procs.num_of_procs)
 
     def _mul_fourier1(tupls):
-        return {(n, r, m): sum((mp1[(n0, r0, m0)] * mp2[(n-n0, r-r0, m-m0)]
+        return {(n, r, m): sum((mp1[(n0, r0, m0)] * mp2[(n - n0, r - r0, m - m0)]
                                 for n0, r0, m0
                                 in _spos_def_mats_lt((n, r, m))))
                 for (n, r, m) in tupls}
@@ -405,5 +407,5 @@ def _mul_fourier_by_num(fc_dct, a, prec, cuspidal=False, hol=False):
         num_of_procs=current_num_of_procs.num_of_procs)
 
     def _mul_fourier_by_num1(ts):
-        return {t: a*fc_dct[t] for t in ts}
+        return {t: a * fc_dct[t] for t in ts}
     return _dict_parallel(_mul_fourier_by_num1, tss)

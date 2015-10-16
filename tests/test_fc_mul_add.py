@@ -25,7 +25,7 @@ ff_qsres6 = qsres6.change_ring(ffld)
 
 x10 = x10_with_prec(global_prec)
 qsrx10 = QexpLevel1(x10.fc_dct, global_prec, base_ring=ZZ,
-                         is_cuspidal=True)
+                    is_cuspidal=True)
 
 ff_x10 = x10.change_ring(ffld)
 ff_qsrx10 = qsrx10.change_ring(ffld)
@@ -36,7 +36,7 @@ ff_dzx10 = dzx10.change_ring(ffld)
 
 x12 = x12_with_prec(global_prec)
 qsrx12 = QexpLevel1(x12.fc_dct, global_prec, is_cuspidal=True,
-                         base_ring=ZZ)
+                    base_ring=ZZ)
 dzx12 = x12.differentiate_wrt_z()
 
 ff_x12 = x12.change_ring(ffld)
@@ -46,30 +46,30 @@ ff_dzx12 = dzx12.change_ring(ffld)
 x35 = x35_with_prec(global_prec)
 ff_x35 = x35.change_ring(ffld)
 
-dct_of_forms = {"es4"       : es4,
-                "qsres4"    : qsres4,
-                "es6"       : es6,
-                "qsres6"    : qsres6,
-                "x10"       : x10,
-                "qsrx10"    : qsrx10,
-                "x12"       : x12,
-                "qsrx12"    : qsrx12,
-                "dzx10"     : dzx10,
-                "dzx12"     : dzx12,
-                "x35"       : x35,
-                "2"         : 2,
-                "0"         : 0,
-                "F5_3"      : FiniteField(5)(3),
-                "ff_es4"    : ff_es4,
-                "ff_es6"    : ff_es6,
-                "ff_qsres4" : ff_qsres4,
-                "ff_qsrx10" : ff_qsrx10,
-                "ff_qsres6" : ff_qsres6,
-                "ff_x10"    : ff_x10,
-                "ff_x12"    : ff_x12,
-                "ff_x35"    : ff_x35,
-                "ff_dzx10"  : ff_dzx10,
-                "ff_dzx12"  : ff_dzx12}
+dct_of_forms = {"es4": es4,
+                "qsres4": qsres4,
+                "es6": es6,
+                "qsres6": qsres6,
+                "x10": x10,
+                "qsrx10": qsrx10,
+                "x12": x12,
+                "qsrx12": qsrx12,
+                "dzx10": dzx10,
+                "dzx12": dzx12,
+                "x35": x35,
+                "2": 2,
+                "0": 0,
+                "F5_3": FiniteField(5)(3),
+                "ff_es4": ff_es4,
+                "ff_es6": ff_es6,
+                "ff_qsres4": ff_qsres4,
+                "ff_qsrx10": ff_qsrx10,
+                "ff_qsres6": ff_qsres6,
+                "ff_x10": ff_x10,
+                "ff_x12": ff_x12,
+                "ff_x35": ff_x35,
+                "ff_dzx10": ff_dzx10,
+                "ff_dzx12": ff_dzx12}
 
 
 class TestDeg2fcMulAddFunctions(unittest.TestCase):
@@ -266,9 +266,9 @@ def dict_to_pol(dct, bd=global_prec, base_ring=QQ):
     l = PrecisionDeg2(bd)
     if not hasattr(dct, "__getitem__"):
         return dct
-    return sum([dct[(n, r, m)] * uu1**r * qq1**n * qq2**m
+    return sum([dct[(n, r, m)] * uu1 ** r * qq1 ** n * qq2 ** m
                 if r > 0 else dct[(n, r, m)]
-                * uu2**(-r) * qq1**n * qq2**m for n, r, m in l])
+                * uu2 ** (-r) * qq1 ** n * qq2 ** m for n, r, m in l])
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcMulAddFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)

@@ -37,6 +37,7 @@ gens_latex_name = {4: "\\phi_{4}",
                    12: "\\chi_{12}",
                    35: "\\chi_{35}"}
 
+
 def _prec_value(prec):
     if prec in ZZ:
         return prec
@@ -45,7 +46,9 @@ def _prec_value(prec):
     else:
         raise NotImplementedError
 
+
 class ScalarModFormConst(object):
+
     def __init__(self, wts):
         """
         Used for construction of scalar valued Siegel modular forms of
@@ -128,20 +131,21 @@ class ScalarModFormConst(object):
     def _latex_(self):
         return latex(self._polynomial_expr())
 
+
 def latex_expt(n):
     if n == 1:
         return ""
     else:
-        return "^{%s}"%str(n)
+        return "^{%s}" % str(n)
 
 
 def latex_rankin_cohen(i, j, lcs):
     if i == 0:
-        sub = "\\mathrm{Sym}(%s)"%(j,)
+        sub = "\\mathrm{Sym}(%s)" % (j,)
     else:
-        sub = "\\det%s \\mathrm{Sym}(%s)"%(latex_expt(i), j)
+        sub = "\\det%s \\mathrm{Sym}(%s)" % (latex_expt(i), j)
     l = ", ".join([c for c in lcs])
-    return "\\left\\{%s\\right\\}_{%s}"%(l, sub)
+    return "\\left\\{%s\\right\\}_{%s}" % (l, sub)
 
 scalar_mod_form_wts = {4: [[4]],
                        5: [[5]],
@@ -174,7 +178,7 @@ def rankin_cohen_quadruple_det_sym_1(j, f1, f2, f3, f4):
     """
     Returns a modular form of wt sym(j) det^(sum + 1).
     """
-    F = rankin_cohen_pair_sym(j, f1, f2)*f3
+    F = rankin_cohen_pair_sym(j, f1, f2) * f3
     return vector_valued_rankin_cohen(f4, F)
 
 
@@ -189,7 +193,7 @@ def rankin_cohen_quadruple_det3_sym_1(j, f1, f2, f3, f4):
     """
     Returns a modular form of wt sym(j) det^(sum + 3).
     """
-    F = rankin_cohen_pair_det2_sym(j, f1, f2)*f3
+    F = rankin_cohen_pair_det2_sym(j, f1, f2) * f3
     return vector_valued_rankin_cohen(f4, F)
 
 
@@ -224,7 +228,7 @@ class ConstVectBase(object):
         try:
             return SWMFE.load_from(self._fname(data_dir))
         except IOError:
-            raise IOError("cache file for %s is not found"%(repr(self), ))
+            raise IOError("cache file for %s is not found" % (repr(self), ))
 
     def calc_form_and_save(self, prec, data_dir, force=False):
         def calc():
@@ -306,7 +310,6 @@ class ConstVectBase(object):
                     yield a
             yield self
 
-
     @abstractmethod
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
         '''depds_dct is a dictionary whose set of keys contains
@@ -318,8 +321,8 @@ class ConstVectBase(object):
         pass
 
 
-
 class ConstVectValued(ConstVectBase):
+
     def __init__(self, sym_wt, consts, inc, tp):
         self._sym_wt = sym_wt
         self._consts = consts
@@ -357,7 +360,7 @@ class ConstVectValued(ConstVectBase):
             sym_wt=str(self.sym_wt),
             a=str(self.consts),
             b=str(self.inc),
-            c="None" if self.type is None else "'%s'"%self.type)
+            c="None" if self.type is None else "'%s'" % self.type)
 
     @property
     def _key(self):
@@ -370,7 +373,7 @@ class ConstVectValued(ConstVectBase):
     def needed_prec_depth1(self, prec):
         prec = _prec_value(prec)
         nm_of_x5 = sum(c._chi5_degree() for c in self.consts)
-        return prec + nm_of_x5//2
+        return prec + nm_of_x5 // 2
 
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
         return self.calc_form(prec)
@@ -441,18 +444,19 @@ class ConstVectValued(ConstVectBase):
         if self.type == "a":
             lcs = [c._latex_() for c in [f1, f2, f4]]
             lrc = latex_rankin_cohen(self.inc, self.sym_wt, lcs)
-            return "%s %s"%(f3._latex_(), lrc)
+            return "%s %s" % (f3._latex_(), lrc)
         elif self.type == "b":
             lrcp = latex_rankin_cohen(self.inc - 1,
                                       self.sym_wt,
                                       [c._latex_() for c in [f1, f2]])
 
-            lvec = "%s %s"%(f3._latex_(), lrcp)
+            lvec = "%s %s" % (f3._latex_(), lrcp)
             lcs = [f4._latex_(), lvec]
             return latex_rankin_cohen(1, self.sym_wt, lcs)
 
 
 class ConstVectValuedHeckeOp(ConstVectBase):
+
     def __init__(self, const_vec, m=2):
         self._const_vec = const_vec
         self._m = m
@@ -493,19 +497,21 @@ class ConstVectValuedHeckeOp(ConstVectBase):
         return self.calc_form_from_f(f, prec)
 
     def _latex_(self):
-        return "\\mathrm{T}(%s) %s"%(self._m, self._const_vec._latex_())
+        return "\\mathrm{T}(%s) %s" % (self._m, self._const_vec._latex_())
 
     def _latex_using_dpd_depth1(self, dpd_dct):
-        return r"%s \mid \mathrm{T}(%s)"%(dpd_dct[self._const_vec], self._m)
+        return r"%s \mid \mathrm{T}(%s)" % (dpd_dct[self._const_vec], self._m)
 
 
 class ConstDivision(ConstVectBase):
+
     '''Returns a construction for a vector valued modulular form by dividing
     a scalar valued modular form.
     This construction correponds to
     sum(F*a for F, a in zip(consts, coeffs)) / scalar_const.
     Needed prec is increased by inc.
     '''
+
     def __init__(self, consts, coeffs, scalar_const, inc):
         self._consts = consts
         self._coeffs = coeffs
@@ -547,7 +553,7 @@ class ConstDivision(ConstVectBase):
 
     def calc_from_forms(self, forms, prec):
         f = self._scalar_const.calc_form(prec + self._inc)
-        g = sum((a*f for a, f in zip(self._coeffs, forms)))
+        g = sum((a * f for a, f in zip(self._coeffs, forms)))
         return g.divide(f, prec, parallel=True)
 
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
@@ -560,7 +566,7 @@ class ConstDivision(ConstVectBase):
         coeffs = [c / _gcd for c in self._coeffs]
         coeffs_names = [(c, n) for c, n in zip(coeffs, names)
                         if c != 0]
-        tail_terms = ["%s %s %s"%("+" if c > 0 else "", c, n)
+        tail_terms = ["%s %s %s" % ("+" if c > 0 else "", c, n)
                       for c, n in coeffs_names[1:]]
         c0, n0 = coeffs_names[0]
         head_term = str(c0) + " " + str(n0)
@@ -572,9 +578,11 @@ class ConstDivision(ConstVectBase):
 
 
 class ConstDivision0(ConstDivision):
+
     '''
     This class is obsolete. Use ConstDivision instead.
     '''
+
     def __init__(self, consts, coeffs, scalar_const):
         ConstDivision.__init__(self, consts, coeffs, scalar_const, 0)
 
@@ -593,6 +601,7 @@ class ConstDivision0(ConstDivision):
 
 
 class ConstMul(ConstVectBase):
+
     def __init__(self, const, scalar_const):
         self._const_vec = const
         self._scalar_const = scalar_const
@@ -627,15 +636,15 @@ class ConstMul(ConstVectBase):
 
     def calc_form_from_f(self, f, prec):
         g = self._scalar_const.calc_form(self.needed_prec_depth1(prec))
-        return f*g
+        return f * g
 
     def calc_form_from_dependencies_depth_1(self, prec, depds_dct):
         f = depds_dct[self._const_vec]
         return self.calc_form_from_f(f, prec)
 
     def _latex_using_dpd_depth1(self, dpd_dct):
-        return "%s %s"%(self._scalar_const._latex_(),
-                        dpd_dct[self._const_vec])
+        return "%s %s" % (self._scalar_const._latex_(),
+                          dpd_dct[self._const_vec])
 
 
 def dependencies(vec_const):
@@ -669,6 +678,7 @@ def needed_precs(vec_const, prec):
 
 
 class CalculatorVectValued(object):
+
     def __init__(self, const_vecs, data_dir):
         self._const_vecs = const_vecs
         self._data_dir = data_dir
@@ -739,7 +749,7 @@ class CalculatorVectValued(object):
         If do_fork is True, fork the process in each computation.
         '''
         if not os.path.exists(self._data_dir):
-            raise IOError("%s does not exist."%(self._data_dir,))
+            raise IOError("%s does not exist." % (self._data_dir,))
 
         def msg(c, prc):
             return "{t}: Computing {c} with prec {prc}".format(
@@ -755,7 +765,7 @@ class CalculatorVectValued(object):
         def calc_and_save(c, prc):
             def call_back():
                 depds_dct = {dp: dp.load_form(self._data_dir)
-                             for dp in  c.dependencies_depth1()}
+                             for dp in c.dependencies_depth1()}
                 f = c.calc_form_from_dependencies_depth_1(prc, depds_dct)
                 return f
 

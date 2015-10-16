@@ -7,11 +7,11 @@ from degree2.basic_operation import (
     semi_pos_def_matarices, _spos_def_mats_lt)
 
 from degree2.scalar_valued_smfs import (KlingenEisensteinAndCuspForms,
-                                  eisenstein_series_degree2,
-                                  x10_with_prec,
-                                  x12_with_prec,
-                                  x5__with_prec,
-                                  degree2_modular_forms_ring_level1_gens)
+                                        eisenstein_series_degree2,
+                                        x10_with_prec,
+                                        x12_with_prec,
+                                        x5__with_prec,
+                                        degree2_modular_forms_ring_level1_gens)
 
 from degree2.rankin_cohen_diff import rankin_cohen_pair_sym
 
@@ -21,6 +21,7 @@ from degree2.utils import linearly_indep_rows_index_list, pmap
 
 
 class TestDeg2fcFunctions(unittest.TestCase):
+
     def test_reduced_form(self):
         def reduced_form_with_sign_test(tpl):
             mat = matrix([[1, 0], [0, 1]])
@@ -30,13 +31,13 @@ class TestDeg2fcFunctions(unittest.TestCase):
                 sign *= -1
                 mat = mat * matrix([[0, 1], [1, 0]])
                 (n, m) = m, n
-            rem = mod(r, 2*n)
+            rem = mod(r, 2 * n)
             if rem > n:
-                u = r//(2*n) + 1
+                u = r // (2 * n) + 1
             else:
-                u = r//(2*n)
-            m = n * u**2 - r * u + m
-            r = r - 2*n*u
+                u = r // (2 * n)
+            m = n * u ** 2 - r * u + m
+            r = r - 2 * n * u
             mat = mat * matrix([[1, -u], [0, 1]])
             if r < 0:
                 sign *= -1
@@ -2109,9 +2110,9 @@ class TestDeg2fcFunctions(unittest.TestCase):
         es4, es6, es10, es12 = [eisenstein_series_degree2(k, prec) for
                                 k in [4, 6, 10, 12]]
         f10 = es4 * es6 - es10
-        f12 = 3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12
-        f10 = f10 * (f10[(1, 1, 1)])**(-1)
-        f12 = f12 * (f12[(1, 1, 1)])**(-1)
+        f12 = 3 ** 2 * 7 ** 2 * es4 ** 3 + 2 * 5 ** 3 * es6 ** 2 - 691 * es12
+        f10 = f10 * (f10[(1, 1, 1)]) ** (-1)
+        f12 = f12 * (f12[(1, 1, 1)]) ** (-1)
         self.assertTrue(f10 == x10_with_prec(prec))
         self.assertTrue(f12 == x12_with_prec(prec))
 
@@ -2138,17 +2139,17 @@ class TestDeg2fcFunctions(unittest.TestCase):
 
     # @skip("OK")
     def test_pmap(self):
-        self.assertEqual([x**2 for x in range(100)],
-                         pmap(lambda x: x**2, range(100), num_of_procs=4))
+        self.assertEqual([x ** 2 for x in range(100)],
+                         pmap(lambda x: x ** 2, range(100), num_of_procs=4))
 
     def test_x5_mul(self):
         x5 = x5__with_prec(5)
         x10 = x10_with_prec(4)
         es4 = eisenstein_series_degree2(4, 5)
-        self.assertEqual(x10, x5**2)
-        self.assertEqual(x10 * x5, x5**3)
+        self.assertEqual(x10, x5 ** 2)
+        self.assertEqual(x10 * x5, x5 ** 3)
         self.assertEqual(x5 * es4, es4 * x5)
-        self.assertEqual((x5 + x5*es4)*x5, x10 + x10*es4)
+        self.assertEqual((x5 + x5 * es4) * x5, x10 + x10 * es4)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)

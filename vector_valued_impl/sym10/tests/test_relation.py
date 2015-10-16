@@ -10,14 +10,16 @@ data_dir = os.path.expanduser("~/data/vector_valued_sym10/test/")
 calculator = CalculatorVectValued(even_gen_consts() + odd_gen_consts(),
                                   data_dir)
 
+
 class TestRelation(unittest.TestCase):
+
     def test_relation(self):
         '''Test relations of weight 24, 26, 27 and 29.
         '''
         prec = 6
         forms_dict = calculator.forms_dict(prec)
         for wt in [24, 26, 27, 29]:
-            print "Checking when k = %s"%(wt,)
+            print "Checking when k = %s" % (wt,)
             M = sym10_space(wt, prec, data_directory=data_dir)
             rel = relation(wt, data_directory=data_dir)
             self.assertEqual(len(rel), M.dimension() + 1)

@@ -10153,12 +10153,14 @@ fc_dct35 = {(0, 0, 0): 0,
             (10, 18, 10): 0,
             (10, 19, 10): 0,
             (10, 20, 10): 0}
-
+
 global_prec = PrecisionDeg2([(34, -17, 51), (8, 35, 39), (12, 33, 27)])
 
+
 class TestDeg2Gens(unittest.TestCase):
-    def sub_dct(self, form, prec = PrecisionDeg2(10)):
-        return {k : form[k] for k in prec}
+
+    def sub_dct(self, form, prec=PrecisionDeg2(10)):
+        return {k: form[k] for k in prec}
 
     def test_es4(self):
         es4 = eisenstein_series_degree2(4, global_prec)
@@ -10181,4 +10183,4 @@ class TestDeg2Gens(unittest.TestCase):
         self.assertTrue(self.sub_dct(x35) == fc_dct35)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2Gens)
-unittest.TextTestRunner(verbosity = 2).run(suite)
+unittest.TextTestRunner(verbosity=2).run(suite)

@@ -6,6 +6,7 @@ a linear relation as a dictionary among generators.
 from sage.all import QQ, gcd
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 
+
 def relation(wt, data_directory=None):
     '''For a given weight wt, this funciton returns a dict whose set of keys
     is equal to a set of instances of ConstMul with weight wt.
@@ -14,7 +15,7 @@ def relation(wt, data_directory=None):
     '''
     wts = (24, 26, 27, 29)
     if wt not in wts:
-        raise ValueError("The weight must be in %s"%(wts,))
+        raise ValueError("The weight must be in %s" % (wts,))
     prec = 6
     M = vvsmf(10, wt, prec, data_directory=data_directory)
     mul_consts = M._basis_const_base([])

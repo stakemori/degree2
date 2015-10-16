@@ -37,6 +37,7 @@ def _number_to_hol_modform(a, prec):
 
 
 class SiegelEisensteinSeries(ModFormQexpLevel1):
+
     def __init__(self, wt, prec=5, base_ring=QQ, fc_dct=None):
         self.__wt = wt
         if fc_dct is None:
@@ -61,24 +62,24 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
         if tpl == (0, 0, 0):
             return 1
         else:
-            return self._fourier_coefficient(gcd(tpl), 4*n*m - r**2)
+            return self._fourier_coefficient(gcd(tpl), 4 * n * m - r ** 2)
 
     @cached_method
     def _fourier_coefficient(self, content, det_4):
 
         def zeta(s):
             k = ZZ(1 - s)
-            return -bernoulli(k)/k
+            return -bernoulli(k) / k
 
         k = self.wt
         if det_4 < 0:
             return 0
         elif det_4 == 0:
-            return 2/zeta(1-k) * sum([d**(k-1) for d in divisors(content)])
+            return 2 / zeta(1 - k) * sum([d ** (k - 1) for d in divisors(content)])
         else:
-            return 2*quadratic_L_function__exact(2-k, -det_4) *\
+            return 2 * quadratic_L_function__exact(2 - k, -det_4) *\
                 self._fc__unramfactor(content, det_4)\
-                / (zeta(1 - k) * zeta(3 - 2*k))
+                / (zeta(1 - k) * zeta(3 - 2 * k))
 
     @cached_method
     def _fc__unramfactor(self, content, det_4):
@@ -86,7 +87,7 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
         pfacs = prime_factors(det_4)
         fd = fundamental_discriminant(-det_4)
         l = [(p, valuation(content, p),
-              (valuation(det_4, p) - valuation(fd, p))/2) for p in pfacs]
+              (valuation(det_4, p) - valuation(fd, p)) / 2) for p in pfacs]
         return reduce(operator.mul,
                       [self._fc__unramfactor_at_p(p, ci, fi, chi)
                        for (p, ci, fi) in l])
@@ -95,7 +96,7 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
     def _fc__unramfactor_at_p(self, p, ci, fi, chi):
         k = self.wt
         return self._fc__unramfactor_at_p_1(p, ci, fi + 1) - \
-            chi(p) * p**(k - 2) * self._fc__unramfactor_at_p_1(p, ci, fi)
+            chi(p) * p ** (k - 2) * self._fc__unramfactor_at_p_1(p, ci, fi)
 
     @cached_method
     def _fc__unramfactor_at_p_1(self, p, a, b):
@@ -103,10 +104,10 @@ class SiegelEisensteinSeries(ModFormQexpLevel1):
             return 0
         a = min(a, b - 1)
         k = self.wt
-        r1 = (1-p**((k - 1)*(a + 1)))/(1-p**(k - 1))
-        rn2 = p**((2*k - 3)*b + k - 2) - p**(b + (k - 2)*(2*b - a))
-        rd2 = p**(k - 2) - 1
-        return (r1 - rn2/rd2)/(1 - p**(2*k - 3))
+        r1 = (1 - p ** ((k - 1) * (a + 1))) / (1 - p ** (k - 1))
+        rn2 = p ** ((2 * k - 3) * b + k - 2) - p ** (b + (k - 2) * (2 * b - a))
+        rd2 = p ** (k - 2) - 1
+        return (r1 - rn2 / rd2) / (1 - p ** (2 * k - 3))
 
 
 def degree2_modular_forms_ring_level1_gens(prec):
@@ -213,9 +214,9 @@ def x10_with_prec_inner(prec):
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es10 = eisenstein_series_degree2(10, prec)
-    chi10 = QQ(43867) * QQ(2**12 * 3**5 * 5**2 * 7 * 53)**(-1) * \
-        (es10 - es4*es6)
-    res = - 2**2 * chi10
+    chi10 = QQ(43867) * QQ(2 ** 12 * 3 ** 5 * 5 ** 2 * 7 * 53) ** (-1) * \
+        (es10 - es4 * es6)
+    res = - 2 ** 2 * chi10
     res._is_cuspidal = True
     res._is_gen = key
     Deg2global_gens_dict[key] = res
@@ -238,8 +239,8 @@ def x12_with_prec_inner(prec):
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es12 = eisenstein_series_degree2(12, prec)
-    chi12 = QQ(131 * 593)/QQ(2**13 * 3**7 * 5**3 * 7**2 * 337) * \
-        (3**2 * 7**2 * es4**3 + 2 * 5**3 * es6**2 - 691 * es12)
+    chi12 = QQ(131 * 593) / QQ(2 ** 13 * 3 ** 7 * 5 ** 3 * 7 ** 2 * 337) * \
+        (3 ** 2 * 7 ** 2 * es4 ** 3 + 2 * 5 ** 3 * es6 ** 2 - 691 * es12)
     res = 12 * chi12
     res._is_cuspidal = True
     res._is_gen = key
@@ -263,7 +264,7 @@ def x35_with_prec_inner(prec):
     l = pmap(lambda k: eisenstein_series_degree2(k, prec), [4, 6, 10, 12])
     res = diff_opetator_4(*l)
     a = res[(2, -1, 3)]
-    res = res * a**(-1)
+    res = res * a ** (-1)
     res._is_cuspidal = True
     res._is_gen = key
     Deg2global_gens_dict[key] = res
@@ -272,29 +273,29 @@ def x35_with_prec_inner(prec):
 
 @cached_function
 def x5_jacobi_pwsr(prec):
-    mx = int(ceil(sqrt(8 * prec)/QQ(2)) + 1)
-    mn = int(floor(-(sqrt(8 * prec) - 1)/QQ(2)))
-    mx1 = int(ceil((sqrt(8 * prec + 1) - 1)/QQ(2)) + 1)
-    mn1 = int(floor((-sqrt(8 * prec + 1) - 1)/QQ(2)))
+    mx = int(ceil(sqrt(8 * prec) / QQ(2)) + 1)
+    mn = int(floor(-(sqrt(8 * prec) - 1) / QQ(2)))
+    mx1 = int(ceil((sqrt(8 * prec + 1) - 1) / QQ(2)) + 1)
+    mn1 = int(floor((-sqrt(8 * prec + 1) - 1) / QQ(2)))
     R = LaurentPolynomialRing(QQ, names="t")
     t = R.gens()[0]
     S = PowerSeriesRing(R, names="q1")
     q1 = S.gens()[0]
-    eta_3 = sum([QQ(-1)**n * (2*n + 1) * q1**(n*(n + 1)//2)
-                 for n in range(mn1, mx1)]) + bigO(q1**(prec + 1))
-    theta = sum([QQ(-1)**n * q1**(((2*n + 1)**2 - 1)//8) * t**(n + 1)
+    eta_3 = sum([QQ(-1) ** n * (2 * n + 1) * q1 ** (n * (n + 1) // 2)
+                 for n in range(mn1, mx1)]) + bigO(q1 ** (prec + 1))
+    theta = sum([QQ(-1) ** n * q1 ** (((2 * n + 1) ** 2 - 1) // 8) * t ** (n + 1)
                  for n in range(mn, mx)])
     # ct = qexp_eta(ZZ[['q1']], prec + 1)
-    return theta * eta_3**3 * QQ(8)**(-1)
+    return theta * eta_3 ** 3 * QQ(8) ** (-1)
 
 
 def x5_jacobi_g(n, r, prec=40):
-    if n%2 == 0 or r%2 == 0:
+    if n % 2 == 0 or r % 2 == 0:
         return QQ(0)
     if n > prec:
         raise RuntimeError
-    psr = x5_jacobi_pwsr((prec - 1)//2)
-    l_pol = psr[(n - 1)//2]
+    psr = x5_jacobi_pwsr((prec - 1) // 2)
+    l_pol = psr[(n - 1) // 2]
     d = {}
     a_key = l_pol.dict().keys()[0]
     is_int_key = isinstance(a_key, int)
@@ -306,7 +307,7 @@ def x5_jacobi_g(n, r, prec=40):
             d[k[0]] = v
         else:
             raise RuntimeError
-    return d.get((r + 1)//2, 0)
+    return d.get((r + 1) // 2, 0)
 
 
 @cached_function
@@ -317,7 +318,7 @@ def x5__with_prec(prec):
     '''
     if prec not in ZZ:
         prec = prec._max_value()
-    pwsr_prec = (2*prec - 1)**2
+    pwsr_prec = (2 * prec - 1) ** 2
 
     def jacobi_g(n, r):
         return x5_jacobi_g(n, r, pwsr_prec)
@@ -326,15 +327,15 @@ def x5__with_prec(prec):
 
     fc_dct = {}
     for n, r, m in prec:
-        if 4*n*m - r**2 == 0:
+        if 4 * n * m - r ** 2 == 0:
             fc_dct[(n, r, m)] = 0
         else:
-            n1 = 2*n - 1
-            r1 = 2*r + 1
-            m1 = 2*m - 1
-            if 4 * n1 * m1 - r1**2 > 0:
-                fc_dct[(n, r, m)] = sum([d**4 * jacobi_g(n1*m1//(d**2),
-                                                         r1//d)
+            n1 = 2 * n - 1
+            r1 = 2 * r + 1
+            m1 = 2 * m - 1
+            if 4 * n1 * m1 - r1 ** 2 > 0:
+                fc_dct[(n, r, m)] = sum([d ** 4 * jacobi_g(n1 * m1 // (d ** 2),
+                                                           r1 // d)
                                          for d in
                                          gcd([n1, r1, m1]).divisors()])
     res = QexpLevel1(fc_dct, prec)
@@ -349,7 +350,8 @@ def y12_with_prec(prec):
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     x12 = x12_with_prec(prec)
-    y12 = 1/QQ(2**6 * 3**3)*(es4**3 - es6**2) + 2**4 * 3**2 * x12
+    y12 = 1 / QQ(2 ** 6 * 3 ** 3) * (es4 ** 3 - es6 ** 2) + \
+        2 ** 4 * 3 ** 2 * x12
     return y12.change_ring(ZZ)
 
 
@@ -359,18 +361,18 @@ def tuples_even_wt_modular_forms(wt):
     Returns the list of tuples (p, q, r, s) such that
     4p + 6q + 10r +12s = wt.
     '''
-    if wt < 0 or wt%2 == 1:
+    if wt < 0 or wt % 2 == 1:
         return []
-    w = wt/2
-    return [(p, q, r, s) for p in range(0, floor(w/2) + 1)
-            for q in range(0, floor(w/3) + 1)
-            for r in range(0, floor(w/5) + 1)
-            for s in range(0, floor(w/6) + 1)
-            if 2*p + 3*q + 5*r + 6*s == w]
+    w = wt / 2
+    return [(p, q, r, s) for p in range(0, floor(w / 2) + 1)
+            for q in range(0, floor(w / 3) + 1)
+            for r in range(0, floor(w / 5) + 1)
+            for s in range(0, floor(w / 6) + 1)
+            if 2 * p + 3 * q + 5 * r + 6 * s == w]
 
 
 def dimension_degree2(wt):
-    if wt%2 == 0:
+    if wt % 2 == 0:
         return len(tuples_even_wt_modular_forms(wt))
     else:
         return len(tuples_even_wt_modular_forms(wt - 35))
@@ -406,12 +408,14 @@ class AbstSpaceOfLevel1(HeckeModule):
 
 
 class SpaceOfModForms(AbstSpaceOfLevel1):
+
     '''
     The space of Siegel modular forms of degree 2.
     '''
+
     def __init__(self, wt, prec=False):
         self.__wt = wt
-        self.__prec = wt//10 * 2 if prec is False else prec
+        self.__prec = wt // 10 * 2 if prec is False else prec
 
     @property
     def wt(self):
@@ -444,7 +448,7 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
             x35 = x35_with_prec(prec)
             x35._set_construction(plx35)
             return [x35]
-        elif self.wt%2 == 1:
+        elif self.wt % 2 == 1:
             x35 = x35_with_prec(prec)
             bs = SpaceOfModForms(self.wt - 35, prec).basis()
             l = []
@@ -468,15 +472,17 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
 
 
 class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
+
     '''
     The space of Klingen-Eisenstein series and cupsforms.
     '''
+
     def __init__(self, wt, prec=False):
         self.__wt = wt
         if prec:
             self.__prec = PrecisionDeg2(prec)
         else:
-            self.__prec = PrecisionDeg2(wt//10 * 2)
+            self.__prec = PrecisionDeg2(wt // 10 * 2)
 
         self.__basis_cached = False
         self.__cached_basis = False
@@ -491,7 +497,7 @@ class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
 
     @cached_method
     def dimension(self):
-        if self.wt%2 == 0:
+        if self.wt % 2 == 0:
             return dimension_degree2(self.wt) - 1
         else:
             return dimension_degree2(self.wt)
@@ -516,14 +522,14 @@ class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
 
     @cached_method
     def dimension_of_cuspforms(self):
-        if self.wt%2 == 1:
+        if self.wt % 2 == 1:
             return self.dimension()
         S = CuspForms(1, self.wt)
         return self.dimension() - S.dimension()
 
     @cached_method
     def dimension_of_nolift_cuspforms(self):
-        if self.wt%2 == 1:
+        if self.wt % 2 == 1:
             return self.dimension()
         S = CuspForms(1, (self.wt - 1) * 2)
         return self.dimension_of_cuspforms() - S.dimension()
@@ -537,7 +543,7 @@ class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
         if self.__basis_cached:
             return self.__cached_basis
         prec = self.prec
-        if self.wt%2 == 1:
+        if self.wt % 2 == 1:
             M = SpaceOfModForms(self.wt, self.prec)
             return M.basis()
         # If wt is even,
@@ -561,7 +567,8 @@ class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
             A = es4 ** p1 * es6 ** q1
             for (p, q, _, _) in not_kl_or_cusp:
                 a = es4 ** p * es6 ** q - A
-                a._construction = ple4**p * ple6**q - ple4**p1 * ple6 ** q1
+                a._construction = ple4 ** p * \
+                    ple6 ** q - ple4 ** p1 * ple6 ** q1
                 res2.append(a)
         return res1 + res2
 
@@ -597,21 +604,23 @@ class KlingenEisensteinAndCuspForms(AbstSpaceOfLevel1):
         ts = self.linearly_indep_tuples()
         for t in ts:
             if f[t] != 0:
-                return f.hecke_operator(a, t)/f[t]
+                return f.hecke_operator(a, t) / f[t]
 
 
 class CuspFormsDegree2(AbstSpaceOfLevel1):
+
     '''
     The space of cusp forms of degree 2.  This class assumes that the
     characteristic polynomial of T(2) acting on
     KlingenEisensteinAndCuspForms has no double roots.
     '''
+
     def __init__(self, wt, prec=False):
         self.__wt = wt
         if prec:
             self.__prec = PrecisionDeg2(prec)
         else:
-            self.__prec = PrecisionDeg2(wt//10 * 2)
+            self.__prec = PrecisionDeg2(wt // 10 * 2)
 
     @property
     def wt(self):
@@ -636,7 +645,7 @@ class CuspFormsDegree2(AbstSpaceOfLevel1):
         no double roots.
         '''
         N = self.klingeneisensteinAndCuspForms()
-        if self.wt%2 == 1:
+        if self.wt % 2 == 1:
             return N.basis()
         return N.basis_of_subsp_annihilated_by(self.hecke_charpoly(2))
 
@@ -650,31 +659,31 @@ class CuspFormsDegree2(AbstSpaceOfLevel1):
             return self._hecke_tp2_charpoly(p, var=var, algorithm=algorithm)
 
     def _hecke_tp_charpoly(self, p, var='x', algorithm='linbox'):
-        a = p**(self.wt - 2) + 1
+        a = p ** (self.wt - 2) + 1
         N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
         R = PolynomialRing(QQ, names=var)
         x = R.gens()[0]
         f = R(S.hecke_matrix(p).charpoly(var=var, algorithm=algorithm))
-        f1 = f.subs({x: a**(-1) * x}) * a**m
+        f1 = f.subs({x: a ** (-1) * x}) * a ** m
         g = R(N.hecke_matrix(p).charpoly(var=var, algorithm=algorithm))
-        return R(g/f1)
+        return R(g / f1)
 
     def _hecke_tp2_charpoly(self, p, var='x', algorithm='linbox'):
-        u = p**(self.wt - 2)
+        u = p ** (self.wt - 2)
         N = self.klingeneisensteinAndCuspForms()
         S = CuspForms(1, self.wt)
         m = S.dimension()
         R = PolynomialRing(QQ, names=var)
         x = R.gens()[0]
         f = R(S.hecke_matrix(p).charpoly(var=var, algorithm=algorithm))
-        g = R(N.hecke_matrix(p**2).charpoly(var=var, algorithm=algorithm))
+        g = R(N.hecke_matrix(p ** 2).charpoly(var=var, algorithm=algorithm))
 
         def morph(a, b, f, m):
-            G = (-1)**m * f.subs({x: -x}) * f
-            alst = [[k//2, v] for k, v in G.dict().iteritems()]
-            F = sum([v * x**k for k, v in alst])
-            return a**m * F.subs({x: (x - b)/a})
-        f1 = morph(u**2 + u + 1, -p * u**3 - u**2 - p*u, f, m)
-        return R(g/f1)
+            G = (-1) ** m * f.subs({x: -x}) * f
+            alst = [[k // 2, v] for k, v in G.dict().iteritems()]
+            F = sum([v * x ** k for k, v in alst])
+            return a ** m * F.subs({x: (x - b) / a})
+        f1 = morph(u ** 2 + u + 1, -p * u ** 3 - u ** 2 - p * u, f, m)
+        return R(g / f1)

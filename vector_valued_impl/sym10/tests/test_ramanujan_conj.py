@@ -24,8 +24,8 @@ def _hecke_pol_klingen(k):
     f = CuspForms(1, k + 10).basis()[0]
     R = PolynomialRing(QQ, names="x")
     x = R.gens()[0]
-    pl = QQ(1) - f[2] * x + QQ(2)**(k + 9) * x**2
-    return pl * pl.subs({x: x * QQ(2)**(k - 2)})
+    pl = QQ(1) - f[2] * x + QQ(2) ** (k + 9) * x ** 2
+    return pl * pl.subs({x: x * QQ(2) ** (k - 2)})
 
 
 def _hecke_pol_krs_lift():
@@ -35,12 +35,13 @@ def _hecke_pol_krs_lift():
     x = R.gens()[0]
     f = CuspForms(1, 12).basis()[0]
     a = f[2]
-    b = QQ(2)**11
-    return ((1 - (a**3 - 3*a*b) * x + b**3 * x**2) *
-            (1 - a * b * x + b**3 * x**2))
+    b = QQ(2) ** 11
+    return ((1 - (a ** 3 - 3 * a * b) * x + b ** 3 * x ** 2) *
+            (1 - a * b * x + b ** 3 * x ** 2))
 
 
 class RamanujanConj(unittest.TestCase):
+
     def assert_ramanujan_conj_eigenform(self, f, complex_prec=300):
         '''f is a Hecke eigenform.
         Assert for all cuspidal embeddings from the Hecke field to the
@@ -57,13 +58,13 @@ class RamanujanConj(unittest.TestCase):
         else:
             embeddings = K.complex_embeddings(prec=complex_prec)
         if f.phi_operator() == {}:
-            print "Testing when k = %s"%(f.wt,)
+            print "Testing when k = %s" % (f.wt,)
             for phi in embeddings:
                 pl_cc = pl.map_coefficients(phi)
                 R = PolynomialRing(CC, names=("x",))
                 max_diff = max((a.abs() - CC(1)).abs()
                                for a, _ in R(pl_cc).roots())
-            self.assertLess(max_diff, CC(2)**(-complex_prec + 1))
+            self.assertLess(max_diff, CC(2) ** (-complex_prec + 1))
 
     def test_ramanujan_conj(self):
         '''Test Ramanujan conjectures for eigenforms of determinant weights

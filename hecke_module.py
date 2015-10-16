@@ -15,11 +15,14 @@ from degree2.basic_operation import reduced_form_with_sign, number_of_procs
 
 from degree2.modular_form_module import ModularFormModule
 
+
 class HalfIntegralMatrices2(object):
+
     '''
     An instance of this class corresponds to
     a tuple (n, r, m).
     '''
+
     def __eq__(self, other):
         if isinstance(other, tuple):
             return self._t == other
@@ -59,12 +62,13 @@ class HalfIntegralMatrices2(object):
         '''
         ((a, b), (c, d)) = matlist
         (n, r, m) = self._t
-        return HalfIntegralMatrices2((a**2 * n + a*c*r + c**2 * m,
-                                      2*a*b*n + (a*d + b*c)*r + 2*c*d*m,
-                                      b**2 * n + b*d*r + d**2 * m))
+        return HalfIntegralMatrices2((a ** 2 * n + a * c * r + c ** 2 * m,
+                                      2 * a * b * n +
+                                      (a * d + b * c) * r + 2 * c * d * m,
+                                      b ** 2 * n + b * d * r + d ** 2 * m))
 
     def is_divisible_by(self, a):
-        return all([x%a == 0 for x in self._t])
+        return all([x % a == 0 for x in self._t])
 
     def __rmul__(self, a):
         return HalfIntegralMatrices2((self._n * a, self._r * a, self._m * a))
@@ -108,7 +112,7 @@ class HeckeModuleElement(object):
         cf. Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
         '''
         n, r, m = tpl
-        return self[(p*n, p*r, p*m)] + self._hecke_tp_psum(p, tpl)
+        return self[(p * n, p * r, p * m)] + self._hecke_tp_psum(p, tpl)
 
     def _hecke_tp_psum(self, p, tpl):
         return sum([self[t] * v for t, v in self._hecke_tp_psum_alst(p, tpl)])
@@ -118,19 +122,20 @@ class HeckeModuleElement(object):
         n, r, m = tpl
         k = self.wt
         res = []
-        if n%p == 0 and m%p == 0 and r%p == 0:
-            res.append(((n/p, r/p, m/p), p**(2*k - 3)))
-        if m%p == 0:
-            res.append(((m/p, -r, p*n), p**(k - 2)))
-        l = [u for u in range(p) if (n + r*u + m*(u**2))%p == 0]
+        if n % p == 0 and m % p == 0 and r % p == 0:
+            res.append(((n / p, r / p, m / p), p ** (2 * k - 3)))
+        if m % p == 0:
+            res.append(((m / p, -r, p * n), p ** (k - 2)))
+        l = [u for u in range(p) if (n + r * u + m * (u ** 2)) % p == 0]
         for u in l:
-            res.append((((n + r*u + m*(u**2))/p, r + 2*u*m, p*m), p**(k-2)))
+            res.append(
+                (((n + r * u + m * (u ** 2)) / p, r + 2 * u * m, p * m), p ** (k - 2)))
         return res
 
     def _hecke_tp_needed_tuples(self, p, tpl):
         n, r, m = tpl
         return ([t for t, _ in self._hecke_tp_psum_alst(p, tpl)] +
-                [(p*n, p*r, p*m)])
+                [(p * n, p * r, p * m)])
 
     def _hecke_tp2(self, p, tpl):
         '''
@@ -145,11 +150,11 @@ class HeckeModuleElement(object):
             if i == 0:
                 return self[t]
             else:
-                tp = tuple([p**(i - 1)*x for x in t])
+                tp = tuple([p ** (i - 1) * x for x in t])
 
                 def idc(n, r, m):
                     e = min(valuation(reduce(gcd, (n, r, m)), p), i - 1)
-                    return (e, tuple([x//p**e for x in (n, r, m)]))
+                    return (e, tuple([x // p ** e for x in (n, r, m)]))
                 alst = []
                 for u, v in self._hecke_tp_psum_alst(p, tp):
                     b = idc(*u)
@@ -170,13 +175,13 @@ class HeckeModuleElement(object):
         k = self.wt
 
         def psum_alst(i1, i2, i3):
-            if not R.is_divisible_by(p**i3):
+            if not R.is_divisible_by(p ** i3):
                 return []
-            a = p**(i2*(k - 2) + i3*(2*k - 3))
+            a = p ** (i2 * (k - 2) + i3 * (2 * k - 3))
             tpls = []
             for tD in reprs(i2):
-                if R[tD].is_divisible_by(p**(i2 + i3)):
-                    A = R[tD] / p**(i2 + i3)
+                if R[tD].is_divisible_by(p ** (i2 + i3)):
+                    A = R[tD] / p ** (i2 + i3)
                     tpls.append(A._t)
             return [(i1, t, a) for t in tpls]
 
@@ -186,9 +191,9 @@ class HeckeModuleElement(object):
                          [0, 1]]]
             else:
                 l1 = [[[1, 0],
-                       [u, p**i2]] for u in range(p**i2)]
-                l2 = [[[p * u, p**i2],
-                       [-1, 0]] for u in range(p**(i2 - 1))]
+                       [u, p ** i2]] for u in range(p ** i2)]
+                l2 = [[[p * u, p ** i2],
+                       [-1, 0]] for u in range(p ** (i2 - 1))]
                 return l1 + l2
 
         idcs = [(i1, i2, i3) for i1 in range(3)
@@ -205,16 +210,16 @@ class HeckeModuleElement(object):
                 return reduce(
                     operator.add,
                     [[x[0] for x in
-                      self._hecke_tp_psum_alst(p, (p**a * n,
-                                                   p**a * r,
-                                                   p**a * m))]
+                      self._hecke_tp_psum_alst(p, (p ** a * n,
+                                                   p ** a * r,
+                                                   p ** a * m))]
                      for a in range(i)],
                     [])
         res = []
         for i, t, _ in self._hecke_tp2_sum_alst(p, tpl):
             res += nd_tpls(i, t)
         return [(n, r, m) for n, r, m in res
-                if not (n%p, r%p, m%p) == (0, 0, 0)]
+                if not (n % p, r % p, m % p) == (0, 0, 0)]
 
     def _hecke_eigen_needed_tuples(self, m):
         tpl = self._none_zero_tpl()
@@ -250,11 +255,11 @@ class HeckeModuleElement(object):
 
         def term(al, bt, gm, u):
             if not (al + bt + gm == i and
-                    tpl.is_divisible_by(p**gm) and
-                    tpl[u].is_divisible_by(p**(gm + bt))):
+                    tpl.is_divisible_by(p ** gm) and
+                    tpl[u].is_divisible_by(p ** (gm + bt))):
                 return zero
             else:
-                t = p**al * (tpl[u] / p**(bt + gm))
+                t = p ** al * (tpl[u] / p ** (bt + gm))
                 return (u.transpose() ** (-1)) * self[t]
 
         res = zero
@@ -264,7 +269,8 @@ class HeckeModuleElement(object):
                 for gm in range(i + 1 - al - bt):
                     for u in reprs_of_double_cosets(p, bt):
                         u = matrix(u)
-                        res += (p**(i*mu + bt - mu * al) * term(al, bt, gm, u))
+                        res += (p ** (i * mu + bt - mu * al)
+                                * term(al, bt, gm, u))
 
         return res
 
@@ -293,7 +299,7 @@ class HeckeModuleElement(object):
         K = self.base_ring
         if hasattr(K, "fraction_field"):
             K = K.fraction_field()
-        return K(self.hecke_operator(m, t)/self[t])
+        return K(self.hecke_operator(m, t) / self[t])
 
     def euler_factor_of_spinor_l(self, p, var="x"):
         '''
@@ -306,10 +312,10 @@ class HeckeModuleElement(object):
         R = PolynomialRing(K, 1, names=var, order='neglex')
         x = R.gens()[0]
         a1 = self.hecke_eigenvalue(p)
-        a2 = self.hecke_eigenvalue(p**2)
+        a2 = self.hecke_eigenvalue(p ** 2)
         mu = 2 * self.wt + self.sym_wt - 3
-        return (1 - a1 * x + (a1**2 - a2 - p**(mu - 1)) * x**2 -
-                a1 * p**mu * x**3 + p**(2 * mu) * x**4)
+        return (1 - a1 * x + (a1 ** 2 - a2 - p ** (mu - 1)) * x ** 2 -
+                a1 * p ** mu * x ** 3 + p ** (2 * mu) * x ** 4)
 
     def euler_factor_of_standard_l(self, p, var="x"):
         '''
@@ -320,15 +326,15 @@ class HeckeModuleElement(object):
         if hasattr(K, "fraction_field"):
             K = K.fraction_field()
         mu = 2 * self.wt + self.sym_wt - 3
-        b = p**mu
+        b = p ** mu
         laml = self.hecke_eigenvalue(p)
-        laml2 = self.hecke_eigenvalue(p**2)
-        a1 = laml**2/QQ(b)
-        a2 = laml2/QQ(b) + QQ(1)/QQ(p)
+        laml2 = self.hecke_eigenvalue(p ** 2)
+        a1 = laml ** 2 / QQ(b)
+        a2 = laml2 / QQ(b) + QQ(1) / QQ(p)
         R = PolynomialRing(K, 1, names=var, order='neglex')
         x = R.gens()[0]
-        return 1 + (a2 - a1 + 1) * x + a2 * x**2 - a2 * x**3 \
-            + (-a2 + a1 - 1) * x**4 - x**5
+        return 1 + (a2 - a1 + 1) * x + a2 * x ** 2 - a2 * x ** 3 \
+            + (-a2 + a1 - 1) * x ** 4 - x ** 5
 
 
 class HeckeModule(ModularFormModule):
@@ -388,9 +394,9 @@ def reprs_of_double_cosets(p, i):
                  [0, 1]]]
     else:
         l1 = [[[1, 0],
-               [u, p**i]] for u in range(p**i)]
-        l2 = [[[p * u, p**i],
-               [-1, 0]] for u in range(p**(i - 1))]
+               [u, p ** i]] for u in range(p ** i)]
+        l2 = [[[p * u, p ** i],
+               [-1, 0]] for u in range(p ** (i - 1))]
         return l1 + l2
 
 
@@ -398,9 +404,11 @@ symmetric_tensor_pol_ring = PolynomialRing(QQ, names="u1, u2")
 
 
 class SymTensorRepElt(object):
+
     r'''
     An element of Sym(j)\otimes det^{wt}.
     '''
+
     def __init__(self, vec, wt):
         '''
         vec is a returned valued of
@@ -443,7 +451,7 @@ class SymTensorRepElt(object):
     def _to_pol(self):
         u1, u2 = symmetric_tensor_pol_ring.gens()
         m = self.sym_wt
-        return sum([a * u1**(m - i) * u2**i for a, i in
+        return sum([a * u1 ** (m - i) * u2 ** i for a, i in
                     zip(self.vec, range(m + 1))])
 
     def group_action(self, mt):
@@ -455,8 +463,8 @@ class SymTensorRepElt(object):
         (a, b), (c, d) = mt
         vec_pl = self._to_pol()
         u1, u2 = vec_pl.parent().gens()
-        vec_pl = vec_pl.subs({u1: u1*a + u2*c, u2: u1*b + u2*d})
-        dt = (a*d - b*c) ** self.wt
+        vec_pl = vec_pl.subs({u1: u1 * a + u2 * c, u2: u1 * b + u2 * d})
+        dt = (a * d - b * c) ** self.wt
         vec = vector([dt * vec_pl[(self.sym_wt - i, i)]
                       for i in range(self.sym_wt + 1)])
         return SymTensorRepElt(vec, self.wt)

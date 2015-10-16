@@ -29,21 +29,22 @@ from degree2.vector_valued_smfs \
 
 class TestVectorValued(unittest.TestCase):
     # @skip("OK")
+
     def test_vector_vald_klingen_hecke_pol(self):
         es4 = eisenstein_series_degree2(4, 5)
         es6 = eisenstein_series_degree2(6, 5)
         F10 = rankin_cohen_pair_sym(2, es4, es6)
         pl = F10.euler_factor_of_spinor_l(2)
         x = pl.parent().gens()[0]
-        f = 1 + 24*x + 2048*x**2
-        self.assertTrue(f * f.subs({x: 2**8 * x}) == pl)
+        f = 1 + 24 * x + 2048 * x ** 2
+        self.assertTrue(f * f.subs({x: 2 ** 8 * x}) == pl)
 
     # @skip("OK")
     def test_t_2_action(self):
         es4 = eisenstein_series_degree2(4, 10)
         es6 = eisenstein_series_degree2(6, 10)
         F10 = rankin_cohen_pair_sym(2, es4, es6)
-        ev2 = -24 * (1+2**8)
+        ev2 = -24 * (1 + 2 ** 8)
         prec5 = PrecisionDeg2(5)
         self.assertTrue(
             all([F10.hecke_operator(2, t) == ev2 * F10[t] for t in prec5]))
@@ -87,9 +88,8 @@ class TestVectorValued(unittest.TestCase):
         f27 = rankin_cohen_triple_det_sym2(es4, x10, x12)
         fs = [f21, f23, f27]
         det_form = det([f.forms for f in fs])
-        det_form = det_form[(4, -2, 6)]**(-1) * det_form
-        self.assertEqual(det_form, es4 * x35**2)
-
+        det_form = det_form[(4, -2, 6)] ** (-1) * det_form
+        self.assertEqual(det_form, es4 * x35 ** 2)
 
     # @skip("OK")
     # def test_module_of_wt_sym_2_4(self):
@@ -108,19 +108,20 @@ class TestVectorValued(unittest.TestCase):
 
         def euler_factor_at_2(f):
             wt = f.weight()
-            return 1 - f[2] * x + 2**(wt - 1) * x**2
+            return 1 - f[2] * x + 2 ** (wt - 1) * x ** 2
 
         for k, j in lst:
             M = vvld_smfs(j, k, 4)
             S = CuspForms(1, j + k)
             f = S.basis()[0]
-            f = f * f[1]**(-1)
+            f = f * f[1] ** (-1)
             pl = euler_factor_at_2(f)
-            lam = (1 + 2**(k - 2)) * f[2]
+            lam = (1 + 2 ** (k - 2)) * f[2]
             F = M.eigenform_with_eigenvalue_t2(lam)
             self.assertEqual(R(F.euler_factor_of_spinor_l(2)),
-                             pl * pl.subs({x: 2**(k - 2) * x}))
+                             pl * pl.subs({x: 2 ** (k - 2) * x}))
     # @skip("OK")
+
     def test_vector_valued_rankin_cohen(self):
         prec = 5
         M4_10 = vvld_smfs(4, 10, prec)
@@ -135,19 +136,17 @@ class TestVectorValued(unittest.TestCase):
         f = es6
         x5 = x5__with_prec(5)
         f_even_sym2 = rankin_cohen_pair_sym(2, f, x5)
-        f_odd_sym2 = vector_valued_rankin_cohen(es4*x5, f_even_sym2)
+        f_odd_sym2 = vector_valued_rankin_cohen(es4 * x5, f_even_sym2)
         a = f_odd_sym2[(1, 0, 2)].vec[1]
         g_sym2_21 = vvld_smfs(2, 21, 4).basis()[0]
         b = g_sym2_21[(1, 0, 2)].vec[1]
         self.assertEqual(f_odd_sym2 * b, g_sym2_21 * a)
-
 
     def test_vecor_valued_misc(self):
         prec = 5
         M = vvld_smfs(2, 20, prec)
         m = matrix([M._to_vector(f).list() for f in M.basis()])
         self.assertEqual(m, identity_matrix(QQ, M.dimension()))
-
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestVectorValued)

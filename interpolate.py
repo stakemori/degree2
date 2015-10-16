@@ -12,11 +12,11 @@ def _to_polynomial(f, val1):
     R = PolynomialRing(QQ if f.base_ring == ZZ else f.base_ring,
                        names="q1, q2")
     q1, q2 = R.gens()
-    I = R.ideal([q1**(prec + 1), q2**(prec + 1)])
+    I = R.ideal([q1 ** (prec + 1), q2 ** (prec + 1)])
     S = R.quotient_ring(I)
-    res = sum([sum([f.fc_dct.get((n, r, m), 0) * QQ(val1)**r
-                    for r in range(-int(floor(2*sqrt(n*m))), int(floor(2*sqrt(n*m)))+1)])
-               * q1**n * q2**m
+    res = sum([sum([f.fc_dct.get((n, r, m), 0) * QQ(val1) ** r
+                    for r in range(-int(floor(2 * sqrt(n * m))), int(floor(2 * sqrt(n * m))) + 1)])
+               * q1 ** n * q2 ** m
                for n in range(prec + 1)
                for m in range(prec + 1)])
     return S(res)
@@ -55,30 +55,30 @@ def interpolate_deg2(dct, bd, autom=True, parity=None):
     def interpolate_pol(x, d):
         prd = mul([x - a for a in d])
         prd_dff = prd.derivative(x)
-        return sum([v * prd_dff.subs({x: k})**(-1) * prd//(x - k)
+        return sum([v * prd_dff.subs({x: k}) ** (-1) * prd // (x - k)
                     for k, v in d.items()])
 
     def t_pol_dct(n, m):
         if not autom:
-            dct_t = {a: v[(n, m)] * a**(2 * bd) for a, v in dct.items()}
+            dct_t = {a: v[(n, m)] * a ** (2 * bd) for a, v in dct.items()}
             return t_ring(interpolate_pol(t, dct_t))
         # put u = t + t^(-1)
         elif parity == 0:
-            dct_u = {a + a**(-1): v[(n, m)] for a, v in dct.items()}
+            dct_u = {a + a ** (-1): v[(n, m)] for a, v in dct.items()}
             u_pol = interpolate_pol(u, dct_u)
-            return t_ring(t**(2 * bd) * u_pol.subs({u: t + t**(-1)}))
+            return t_ring(t ** (2 * bd) * u_pol.subs({u: t + t ** (-1)}))
         else:
-            dct_u = {a + a**(-1): v[(n, m)]/(a - a**(-1))
+            dct_u = {a + a ** (-1): v[(n, m)] / (a - a ** (-1))
                      for a, v in dct.items()}
             u_pol = interpolate_pol(u, dct_u)
-            return t_ring(t**(2 * bd) * u_pol.subs({u: t + t**(-1)}) *
-                          (t - t**(-1)))
+            return t_ring(t ** (2 * bd) * u_pol.subs({u: t + t ** (-1)}) *
+                          (t - t ** (-1)))
 
     fc_dct = {}
     for n in range(bd + 1):
         for m in range(bd + 1):
             pl = t_pol_dct(n, m)
-            for r in range(-int(floor(2*sqrt(n*m))), int(floor(2*sqrt(n*m)))+1):
+            for r in range(-int(floor(2 * sqrt(n * m))), int(floor(2 * sqrt(n * m))) + 1):
                 fc_dct[(n, r, m)] = pl[r + 2 * bd]
     return fc_dct
 
@@ -90,14 +90,14 @@ def calc_forms(func, forms, prec, autom=True, wt=None,
     Calculate func(forms) by interpolation.
     '''
     bd = prec.value if isinstance(prec, PrecisionDeg2) else prec
-    parity = wt%2 if autom else None
+    parity = wt % 2 if autom else None
 
     if not autom:
-        t_vals = [QQ(a) for a in range(-2*bd, 0) + range(1, 2*bd + 2)]
+        t_vals = [QQ(a) for a in range(-2 * bd, 0) + range(1, 2 * bd + 2)]
     elif parity == 0:
-        t_vals = [QQ(a) for a in range(1, 2*bd + 2)]
+        t_vals = [QQ(a) for a in range(1, 2 * bd + 2)]
     else:
-        t_vals = [QQ(a) for a in range(2, 2*bd + 2)]
+        t_vals = [QQ(a) for a in range(2, 2 * bd + 2)]
 
     def _f(r):
         return (r, func([_to_polynomial(f, r) for f in forms]))
