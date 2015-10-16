@@ -25,6 +25,9 @@ In the following, we illustrate how we install this package in
     mkdir ~/sage_packages
     cd ~/sage_packages
     git clone https://github.com/stakemori/degree2.git
+    cd degree2
+    git submodule init
+    git submodule update
     ```
    <!-- Or -->
    <!--  [download this repository as a zip file](https://github.com/stakemori/degree2/archive/master.zip) -->
