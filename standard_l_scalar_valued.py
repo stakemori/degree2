@@ -146,8 +146,7 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
                      [ZZ(0), ZZ(1)]])
     else:
         t = f._none_zero_tpl()
-        A1 = matrix([[ZZ(t[0]), ZZ(t[1]) / ZZ(2)],
-                     [ZZ(t[1]) / ZZ(2), ZZ(t[2])]])
+        A1 = tpl_to_half_int_mat(t)
     msg = "l must be an positive even integer less than or equal to %s" % (
         f.wt, )
     try:
@@ -164,10 +163,7 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
         raise RuntimeError("Please specify the space of cusp form explicitly.")
     tpls = S.linearly_indep_tuples()
     pull_back_dct = {t: epsilon_tilde_l_k_degree2(
-        l + 2, f.wt, A1,
-        matrix([[ZZ(t[0]), ZZ(t[1]) / ZZ(2)],
-                [ZZ(t[1]) / ZZ(2), ZZ(t[2])]]))
-        for t in tpls}
+        l + 2, f.wt, A1, tpl_to_half_int_mat(t)) for t in tpls}
     pull_back_vec = S._to_vector(pull_back_dct)
     T2 = S.hecke_matrix(2)
     lam = f.hecke_eigenvalue(2)
@@ -180,7 +176,12 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
     if phi_d_lam == 0:
         raise ZeroDivisionError("Phi'(lambda) = 0")
     else:
-        num = sum(sum(ei[d - 1 - j] * chply[d - j + i]
-                      for j in range(i, d)) * lam ** i for i in range(d))
+        num = sum(sum(ei[d - 1 - j] * chply[d - j + i] for j in range(i, d))
+                  * lam ** i for i in range(d))
         return num / (phi_d_lam * f[int(A1[0, 0]), int(2 * A1[0, 1]), int(A1[1, 1])] *
                       f[t])
+
+
+def tpl_to_half_int_mat(t):
+    n, r, m = t
+    return matrix([[ZZ(n), ZZ(r) / ZZ(2)], [ZZ(r) / ZZ(2), ZZ(m)]])
