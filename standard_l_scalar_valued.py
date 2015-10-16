@@ -9,11 +9,16 @@ Experimental Mathematics (2010), 19:1, 65-77
 Original implementation was done by H. Katsurada by the wolfram language.
 '''
 from sage.all import (PolynomialRing, QQ, mul, ZZ, floor, sqrt,
-                      matrix, zeta)
+                      matrix)
 
 # from siegel_series.impl import siegel_series_dim1, siegel_series_dim2, X
 # from siegel_series.local_invariants import xi_p
 from degree2.siegel_series.pullback_of_siegel_eisen import eisenstein_pullback_coeff
+from sage.all import zeta as _zeta
+
+
+def zeta(l):
+    return _zeta(ZZ(l))
 
 
 def binomial(x, m):
