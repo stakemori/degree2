@@ -165,6 +165,12 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
                       f[t])
 
 
+def norm_of_normalized_alg_part_of_standard_l(f, l, space_of_cusp_form=None):
+    a = algebraic_part_of_standard_l(
+        f, l, space_of_cusp_form=space_of_cusp_form)
+    return a.norm() * f.gcd_of_coefficients().norm() ** 2
+
+
 def tpl_to_half_int_mat(t):
     n, r, m = t
     return matrix([[ZZ(n), ZZ(r) / ZZ(2)], [ZZ(r) / ZZ(2), ZZ(m)]])
