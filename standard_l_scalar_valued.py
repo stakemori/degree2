@@ -105,10 +105,9 @@ def epsilon_tilde_l_k_degree2(l, k, A1, A2):
     G = G_poly(l, k - l)
     y1, y2, y3 = G.parent().gens()
     G_y1_y3 = G.subs({y2: A1.det() * A2.det()})
-    br = G.parent().base_ring()
 
     def func(a, A1, A2, R, mat):
-        return br(G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()})) * a
+        return G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()}).constant_coefficient() * a
 
     res = eisenstein_pullback_coeff(l, A1, A2, func=func)
     return res * (-1) ** (l // 2 + 1) * ZZ(2) ** (-2) * (l - 2) * const_term
