@@ -89,7 +89,7 @@ def sqcap_mul(A, B, n, p, q):
 
 def bracket_power(A, p):
     if p == 0:
-        return identity_matrix(QQ, 1)
+        return identity_matrix(A.base_ring(), 1)
     l = permutations_increasing(A.ncols(), p)
     return matrix([[sub_mat(A, a, b).det() for b in l] for a in l])
 
@@ -103,7 +103,7 @@ def _ad_bracket_coeffs(A, a, b):
 
 def ad_bracket(A, p):
     if p == A.ncols():
-        return identity_matrix(QQ, 1)
+        return identity_matrix(A.base_ring(), 1)
     l = permutations_increasing(A.ncols(), p)
     return matrix([[_ad_bracket_coeffs(A, b, a) for b in l] for a in l])
 
@@ -212,7 +212,7 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
     n = 2
     p = n - alpha - beta
     z_beta = bracket_power(Z, beta)
-    m_p_beta = sqcap_mul(identity_matrix(QQ, binomial(n, p)),
+    m_p_beta = sqcap_mul(identity_matrix(_Z_dZ_ring, binomial(n, p)),
                          z_beta * bracket_power(dZ.transpose(), beta), n, p, beta)
     m_p_beta = (m_p_beta *
                 ad_del1_A_dict[p + beta] * bracket_power(dZ, p + beta))
@@ -247,6 +247,6 @@ def D_tilde(alpha, ad_del1_A_dict=None, del4_D_dict=None):
     '''
     alpha = ZZ(alpha)
     res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_p_q(
-        q, ad_del1_A_dict=ad_del1_A_dict, del4_D_dict=del4_D_dict)
+        2 - q, ad_del1_A_dict=ad_del1_A_dict, del4_D_dict=del4_D_dict)
         for q in range(3))
     return _from_z_dz_ring_to_diff_op(res)
