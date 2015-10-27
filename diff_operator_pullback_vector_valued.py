@@ -12,7 +12,7 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
-                      PolynomialRing, identity_matrix, ZZ)
+                      PolynomialRing, identity_matrix, ZZ, SR, exp, symbolic_expression)
 
 
 def is_increasing(t):
@@ -125,17 +125,16 @@ def _from_z_dz_ring_to_diff_op(pol):
     d = {tuple(t): _Z_ring(v) for t, v in pol.dict().iteritems()}
     return DiffZOperatorElement(d)
 
+sz_vars = SR.var("z11, z12, z21, z22")
 
-def _diff_z(t, pol):
-    '''Let a, b, c, d = t and pol be a polynomial of z11, z12, z21, z22.
-    Return (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d pol.
+
+def _diff_z(t, expr):
+    '''Let a, b, c, d = t and expr be an symbolic expression of z11, z12, z21, z22.
+    Return (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d expr.
     '''
-    gens = _Z_ring.gens()
-    res = _Z_ring(0)
-    for k, v in pol.dict().items():
-        res += v * mul(mul(n - i for i in range(a)) * z ** (n - a)
-                       for a, n, z in zip(t, k, gens))
-    return res
+    for v, e in zip(sz_vars, t):
+        expr = expr.derivative(v, e)
+    return expr
 
 
 class DiffZOperatorElement(object):
@@ -169,33 +168,17 @@ class DiffZOperatorElement(object):
     def pol_idc_dct(self):
         return self._pol_idc_dct
 
-    def __add__(self, other):
-        if other == 0:
-            return self
-        elif other in _Z_ring:
-            return self.__add__(_from_z_ring_to_diff_op(other))
-        elif other in _dZ_ring:
-            return self.__add__(_from_z_dz_ring_to_diff_op(other))
-        elif isinstance(other, DiffZOperatorElement):
-            res_dct = {k: v for k, v in self.pol_idc_dct.items()}
-            for k, v in other.pol_idc_dct.items():
-                res_dct[k] = res_dct.get(k, 0) + v
-            return DiffZOperatorElement(res_dct)
-        else:
-            raise NotImplementedError
-
-    def __radd__(self, other):
-        return self + other
-
-    def __neg__(self):
-        return DiffZOperatorElement({a: - b for a, b in self.pol_idc_dct.items()})
-
-    def __sub__(self, other):
-        return self.__add__(-other)
-
-    def diff(self, pol):
+    def diff(self, pol, R):
+        '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
+        Return (the derivative of pol * exp(R*Z)) / exp(R*Z) as a polynomial.
+        '''
         if pol in _Z_ring:
-            return sum(v * _diff_z(k, pol) for k, v in self.pol_idc_dct.items())
+            trrz = sum(a * b for a, b in zip(R.list(), sz_vars))
+            f = exp(trrz)
+            g = symbolic_expression(pol) * f
+            res = sum(v * _diff_z(k, g)
+                      for k, v in self.pol_idc_dct.items()) / f
+            return _Z_ring(res.canonicalize_radical())
         else:
             raise NotImplementedError
 
@@ -241,12 +224,20 @@ def _C(p, s):
     return mul(s + ZZ(i) / ZZ(2) for i in range(p))
 
 
-def D_tilde(alpha, ad_del1_A_dict=None, del4_D_dict=None):
+def D_tilde(alpha, **kwds):
     '''
     D_tilde(alpha) in [DIK], pp 1312 as an instance of DiffZOperatorElement.
     '''
     alpha = ZZ(alpha)
-    res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_p_q(
-        2 - q, ad_del1_A_dict=ad_del1_A_dict, del4_D_dict=del4_D_dict)
-        for q in range(3))
+    res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_p_q(2 - q, **kwds)
+              for q in range(3))
     return _from_z_dz_ring_to_diff_op(res)
+
+
+def D_tilde_nu_restricted(alpha, nu, a, R, **kwds):
+    '''
+    D_tilde(alpha)^nu(a * exp(RZ))|Z=0, where a is a polynomial of Z.
+    '''
+    for i in range(nu):
+        a = D_tilde(alpha + i, **kwds).diff(a, R)
+    return a.constant_coefficient()
