@@ -188,7 +188,7 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
     '''
     del4_D_dict is a dictionary alpha: => bracket_power(D, alpha).
     ad_del1_A_dict is a dictionary alpha: => ad_bracket(A, alpha).
-    Return delta(a, alpha, beta) in [Bö], p86 as an element in _Z_dZ_ring.
+    Return (2pi)^(-2) * delta(a, alpha, beta) in [Bö], p86 as an element in _Z_dZ_ring.
     '''
     n = 2
     p = n - alpha - beta
@@ -224,7 +224,7 @@ def _C(p, s):
 
 def D_tilde(alpha, **kwds):
     '''
-    D_tilde(alpha) in [DIK], pp 1312 as an instance of DiffZOperatorElement.
+    (2pi)**(-2) * D_tilde(alpha) in [DIK], pp 1312 as an instance of DiffZOperatorElement.
     '''
     alpha = ZZ(alpha)
     res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_p_q(2 - q, **kwds)
@@ -232,10 +232,14 @@ def D_tilde(alpha, **kwds):
     return _from_z_dz_ring_to_diff_op(res)
 
 
-def D_tilde_nu_restricted(alpha, nu, a, R, **kwds):
+def D_tilde_nu(alpha, nu, a, R, **kwds):
     '''
-    D_tilde(alpha)^nu(a * exp(RZ))|Z=0, where a is a polynomial of Z.
+    (2pi)**(-2 nu) * D_tilde(alpha)^nu(pol * exp(RZ)) / exp(-RZ), where pol is a polynomial of Z.
     '''
     for i in range(nu):
         a = D_tilde(alpha + i, **kwds).diff(a, R)
-    return a.constant_coefficient()
+    return a
+
+# The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
+_U_ring = PolynomialRing(QQ, names='u1, u2')
+_Z_U_ring = PolynomialRing(QQ, names='z11, z12, z21, z22, u1, u2')
