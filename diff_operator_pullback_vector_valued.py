@@ -12,7 +12,7 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
-                      PolynomialRing, identity_matrix, ZZ, SR, exp, symbolic_expression)
+                      PolynomialRing, identity_matrix, ZZ)
 
 
 def is_increasing(t):
@@ -125,16 +125,17 @@ def _from_z_dz_ring_to_diff_op(pol):
     d = {tuple(t): _Z_ring(v) for t, v in pol.dict().iteritems()}
     return DiffZOperatorElement(d)
 
-sz_vars = SR.var("z11, z12, z21, z22")
 
-
-def _diff_z(t, expr):
-    '''Let a, b, c, d = t and expr be an symbolic expression of z11, z12, z21, z22.
-    Return (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d expr.
+def _diff_z_exp(t, pol, r_ls):
+    '''Let a, b, c, d = t and r1, r2, r3, r4 = r_ls
+    Return
+    (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(a r1 z11 + .. + d r4 z22))
+     * exp(- a r1 z11 - .. - d r4 z22).
     '''
-    for v, e in zip(sz_vars, t):
-        expr = expr.derivative(v, e)
-    return expr
+    for z, r, a in zip(_Z_ring.gens(), r_ls, t):
+        pol = _Z_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
+                          for i in range(a)))
+    return pol
 
 
 class DiffZOperatorElement(object):
@@ -172,14 +173,11 @@ class DiffZOperatorElement(object):
         '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
         Return (the derivative of pol * exp(R*Z)) / exp(R*Z) as a polynomial.
         '''
-        if pol in _Z_ring:
-            trrz = sum(a * b for a, b in zip(R.list(), sz_vars))
-            f = exp(trrz)
-            g = symbolic_expression(pol) * f
-            res = sum(v * _diff_z(k, g)
-                      for k, v in self.pol_idc_dct.items()) / f
-            return _Z_ring(res.canonicalize_radical())
-        else:
+        try:
+            pol = _Z_ring(pol)
+            r_ls = R.list()
+            return sum(v * _diff_z_exp(k, pol, r_ls) for k, v in self.pol_idc_dct.items())
+        except TypeError:
             raise NotImplementedError
 
 Z = matrix(2, [_Z_dZ_ring(__a) for __a in _Z_ring.gens()])
