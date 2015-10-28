@@ -250,7 +250,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
 
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
-_Z_U_ring = PolynomialRing(_U_ring, names='z11, z12, z21, z22')
+_Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 
 
 def _D(A, D, r_ls, pol, us):
