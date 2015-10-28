@@ -12,7 +12,7 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
-                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix)
+                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix, factorial)
 
 
 def is_increasing(t):
@@ -246,7 +246,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
 
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
-_Z_U_ring = PolynomialRing(QQ, names='z11, z12, z21, z22, u1, u2')
+_Z_U_ring = PolynomialRing(_U_ring, names='z11, z12, z21, z22')
 
 
 def _D(A, D, r_ls, pol, us):
@@ -260,3 +260,32 @@ def _D(A, D, r_ls, pol, us):
                     [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
     v = vector(us)
     return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
+
+
+def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
+    '''
+    Return (k)_m * Fourier coefficient of L_tilde^{k, m}D_tilde_{k - nu}^{nu}(E_4, l)
+    at block_matrix([[A, R/2], [R^t/2, D]]) as an element of _Z_ring.
+    Here nu = k - l and fc is the Fourier coefficient of E_4 at
+    block_matrix([[A, R/2], [R^t/2, D]]).
+    '''
+    nu = k - l
+    pol = D_tilde_nu(k - nu, nu, fc, r_ls, **kwds)
+    zero = _Z_U_ring(0)
+    res = zero
+    us_up = list(us)[:2] + [zero, zero]
+    us_down = [zero, zero] + list(us)[2:]
+    for n in range(m // 2):
+        pol_tmp = pol
+        for _ in range(m - 2 * n):
+            pol_tmp = (_D(A, D, r_ls, pol_tmp, us)
+                       - _D(A, D, r_ls, pol_tmp, us_up) - _D(A, D, r_ls, pol_tmp, us_down))
+        for _ in range(n):
+            pol_tmp = _D(A, D, r_ls, pol_tmp, us_down)
+            pol_tmp = _D(A, D, r_ls, pol_tmp, us_up)
+
+        pol_tmp *= QQ(factorial(n) * factorial(m - 2 * n)
+                      * mul(2 - k - m + i for i in range(n))) ** (-1)
+
+        res += pol_tmp
+    return res
