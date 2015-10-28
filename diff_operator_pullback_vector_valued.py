@@ -12,7 +12,11 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
-                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix, factorial)
+                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix,
+                      factorial, zeta)
+
+from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
+from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 
 
 def is_increasing(t):
@@ -289,3 +293,23 @@ def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
 
         res += pol_tmp
     return res
+
+
+def _zeta(s):
+    return zeta(ZZ(s))
+
+
+def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
+    '''Return the Fourier coefficient of exp(2pi A Z1 + 2pi D Z2)
+    of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
+    '''
+    kwds = {"del4_D_dict": del4_D_dict_func(D),
+            "ad_del1_A_dict": ad_del1_A_dict_func(A)}
+    res = _U_ring(0)
+    es = sess(weight=l, degree=4)
+    us = _U_ring.gens() + [u3, u4]
+    for R, mat in r_n_m_iter(A, D):
+        res += fc_of_diff_eisen(
+            l, k, m, A, D, R.list(), es.fourier_coefficient(mat), us, **kwds)
+    res = res * QQ(mul(k + i for i in range(m))) ** (-1)
+    res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
