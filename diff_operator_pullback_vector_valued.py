@@ -136,9 +136,9 @@ def _diff_z_exp(t, pol, r_ls):
     (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(a r1 z11 + .. + d r4 z22))
      * exp(- a r1 z11 - .. - d r4 z22).
     '''
-    for z, r, a in zip(_Z_ring.gens(), r_ls, t):
-        pol = _Z_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
-                          for i in range(a)))
+    for z, r, a in zip(_Z_U_ring.gens()[2:], r_ls, t):
+        pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
+                            for i in range(a)))
     return pol
 
 
@@ -179,10 +179,11 @@ class DiffZOperatorElement(object):
         R = matrix(2, r_ls)
         '''
         try:
-            pol = _Z_ring(pol)
-            return sum(v * _diff_z_exp(k, pol, r_ls) for k, v in self.pol_idc_dct.items())
+            pol = _Z_U_ring(pol)
         except TypeError:
             raise NotImplementedError
+        return sum(v * _diff_z_exp(k, pol, r_ls) for k, v in self.pol_idc_dct.items())
+
 
 Z = matrix(2, [_Z_dZ_ring(__a) for __a in _Z_ring.gens()])
 dZ = matrix(2, [_Z_dZ_ring(__a) for __a in _dZ_ring.gens()])
@@ -260,9 +261,10 @@ def _D(A, D, r_ls, pol, us):
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
-    R1 = matrix(2, [_diff_z_exp(t, pol, r_ls) for t in
+    R1 = matrix(_Z_U_ring,
+                2, [_diff_z_exp(t, pol, r_ls) for t in
                     [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
-    v = vector(us)
+    v = vector(_Z_U_ring, us)
     return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
 
 
@@ -305,11 +307,13 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     '''
     dct = {"del4_D_dict": del4_D_dict_func(D),
            "ad_del1_A_dict": ad_del1_A_dict_func(A)}
-    res = _U_ring(0)
+    res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
-    us = _U_ring.gens() + [u3, u4]
+    us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
         res += fc_of_diff_eisen(
             l, k, m, A, D, R.list(), es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
+    sub_dct = {a: QQ(0) for a in _Z_U_ring.gens()[2:]}
+    return _U_ring(res.subs(sub_dct))
