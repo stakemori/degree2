@@ -198,7 +198,10 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
     m_p_beta = (m_p_beta *
                 ad_del1_A_dict[p + beta] * bracket_power(dZ, p + beta))
     m_alpha = bracket_power(Z, alpha) * del4_D_dict[alpha]
-    return sqcap_mul(m_alpha, m_p_beta, n, alpha, n - alpha)[0, 0]
+    res = sqcap_mul(m_alpha, m_p_beta, n, alpha, n - alpha)[0, 0]
+    # partial_2 in [Bö] is 1/2 d/dZ in our notation.
+    res *= ZZ(2) ** (- p - 2 * beta)
+    return res
 
 
 def del4_D_dict_func(D):
