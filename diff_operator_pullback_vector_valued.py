@@ -138,7 +138,7 @@ def _diff_z_exp(t, pol, r_ls):
     '''
     for z, r, a in zip(_Z_U_ring.gens()[2:], r_ls, t):
         pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
-                            for i in range(a)))
+                            for i in range(a + 1)))
     return pol
 
 
