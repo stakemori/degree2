@@ -169,13 +169,13 @@ class DiffZOperatorElement(object):
     def pol_idc_dct(self):
         return self._pol_idc_dct
 
-    def diff(self, pol, R):
+    def diff(self, pol, r_ls):
         '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
         Return (the derivative of pol * exp(R*Z)) / exp(R*Z) as a polynomial.
+        R = matrix(2, r_ls)
         '''
         try:
             pol = _Z_ring(pol)
-            r_ls = R.list()
             return sum(v * _diff_z_exp(k, pol, r_ls) for k, v in self.pol_idc_dct.items())
         except TypeError:
             raise NotImplementedError
@@ -235,13 +235,14 @@ def D_tilde(alpha, **kwds):
     return _from_z_dz_ring_to_diff_op(res)
 
 
-def D_tilde_nu(alpha, nu, a, R, **kwds):
+def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
     '''
-    (2pi)**(-2 nu) * D_tilde(alpha)^nu(pol * exp(RZ)) / exp(-RZ), where pol is a polynomial of Z.
+    (2pi)**(-2 nu) * D_tilde_{alpha}^nu(pol * exp(RZ)) / exp(-RZ), where pol is pol polynomial of Z.
+    R = matrix(2, r_ls).
     '''
     for i in range(nu):
-        a = D_tilde(alpha + i, **kwds).diff(a, R)
-    return a
+        pol = D_tilde(alpha + i, **kwds).diff(pol, r_ls)
+    return pol
 
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
