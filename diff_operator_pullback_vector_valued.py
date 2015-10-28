@@ -12,7 +12,7 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
-                      PolynomialRing, identity_matrix, ZZ)
+                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix)
 
 
 def is_increasing(t):
@@ -246,3 +246,16 @@ def D_tilde_nu(alpha, nu, a, R, **kwds):
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
 _Z_U_ring = PolynomialRing(QQ, names='z11, z12, z21, z22, u1, u2')
+
+
+def _D(A, D, r_ls, pol, us):
+    '''
+    1/2pi D_tilde(f) in [DIK], pp 1312.
+    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])),
+    R = matrix(2, r_ls) and pol is a polynomial of R.
+    us = (u1, u2, u3, u4)
+    '''
+    R1 = matrix(2, [_diff_z_exp(t, pol, r_ls) for t in
+                    [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
+    v = vector(us)
+    return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
