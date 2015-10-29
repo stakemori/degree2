@@ -112,6 +112,11 @@ _dZ_ring = PolynomialRing(QQ, names='dz11, dz12, dz21, dz22')
 _Z_dZ_ring = PolynomialRing(_Z_ring, names='dz11, dz12, dz21, dz22')
 
 
+@cached_function
+def _z_u_ring_zgens():
+    return [_Z_U_ring(a) for a in _Z_ring.gens()]
+
+
 def _from_z_dz_ring_to_diff_op(pol):
     pol = _Z_dZ_ring(pol)
     d = {tuple(t): _Z_ring(v) for t, v in pol.dict().iteritems()}
@@ -124,7 +129,7 @@ def _diff_z_exp(t, pol, r_ls):
     (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(a r1 z11 + .. + d r4 z22))
      * exp(- a r1 z11 - .. - d r4 z22).
     '''
-    for z, r, a in zip(_Z_U_ring.gens(), r_ls, t):
+    for z, r, a in zip(_z_u_ring_zgens(), r_ls, t):
         pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
                             for i in range(a + 1)))
     return pol
@@ -200,12 +205,10 @@ def delta_p_q(p, **kwds):
     '''
     Return delta(p, q) in [Bö], p86 as an element in _Z_dZ_ring.
     '''
-    return sum(delta_p_alpha_beta(2 - p - b, b, **kwds)
-               * (-1) ** b for b in range(2 - p + 1))
+    return sum(delta_p_alpha_beta(2 - p - b, b, **kwds) * (-1) ** b for b in range(2 - p + 1))
 
 
 def _C(p, s):
-    p = ZZ(p)
     return mul(s + ZZ(i) / ZZ(2) for i in range(p))
 
 
@@ -230,7 +233,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
 
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
-_Z_U_ring = PolynomialRing(_U_ring, names='z11, z12, z21, z22')
+_Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 
 
 def _D(A, D, r_ls, pol, us):
@@ -260,7 +263,7 @@ def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
     res = zero
     us_up = list(us)[:2] + [zero, zero]
     us_down = [zero, zero] + list(us)[2:]
-    for n in range(m // 2):
+    for n in range(m // 2 + 1):
         pol_tmp = pol
         for _ in range(m - 2 * n):
             pol_tmp = (_D(A, D, r_ls, pol_tmp, us)
@@ -294,5 +297,5 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
             l, k, m, A, D, R.list(), es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
-    sub_dct = {a: QQ(0) for a in _Z_U_ring.gens()}
+    sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
     return _U_ring(res.subs(sub_dct))
