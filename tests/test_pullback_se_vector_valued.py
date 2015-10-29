@@ -47,12 +47,11 @@ class TestPullBackVectorValued(unittest.TestCase):
         D = A
         fc_111 = fc_of_pullback_of_diff_eisen(12, 14, 2, A, D, 1, 1)
         a = fc_111[u1 ** 2]
-        f = f * a
         self.assertEqual(
-            sum(a * b for a, b in zip(monoms, f[(1, 1, 1)].vec)), fc_111)
+            sum(a * b for a, b in zip(monoms, f[(1, 1, 1)].vec)), fc_111 / a)
         A1 = matrix([[QQ(2), QQ(1) / QQ(2)], [QQ(1) / QQ(2), QQ(3)]])
         self.assertEqual(sum(a * b for a, b in zip(monoms, f[(2, 1, 3)].vec)),
-                         fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1))
+                         fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
