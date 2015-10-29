@@ -204,11 +204,13 @@ def ad_del1_A_dict_func(A):
     return {a: ad_bracket(A, a) for a in range(3)}
 
 
-def delta_p_q(p, **kwds):
+def delta_r_q(r, **kwds):
     '''
-    Return delta(p, q) in [Bö], p86 as an element in _Z_dZ_ring.
+    Return delta(r, q) in [DIK], pp. 1312.
     '''
-    return sum(delta_p_alpha_beta(2 - p - b, b, **kwds) * (-1) ** b for b in range(2 - p + 1))
+    q = 2 - r
+    return sum(delta_p_alpha_beta(q - b, b, **kwds) * (-1) ** b * binomial(q, b)
+               for b in range(q + 1))
 
 
 def _C(p, s):
@@ -220,7 +222,7 @@ def D_tilde(alpha, **kwds):
     (2pi)**(-2) * D_tilde(alpha) in [DIK], pp 1312 as an instance of DiffZOperatorElement.
     '''
     alpha = ZZ(alpha)
-    res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_p_q(2 - q, **kwds)
+    res = sum(binomial(2, q) * _C(q, -alpha + 1) ** (-1) * delta_r_q(2 - q, **kwds)
               for q in range(3))
     return _from_z_dz_ring_to_diff_op(res)
 
@@ -297,7 +299,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
         res += fc_of_diff_eisen(
-            l, k, m, A, D, R.tanspose().list(), es.fourier_coefficient(mat), us, **dct)
+            l, k, m, A, D, R.transpose().list(), es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
