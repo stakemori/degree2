@@ -126,10 +126,11 @@ def _from_z_dz_ring_to_diff_op(pol):
 
 
 def _diff_z_exp(t, pol, r_ls):
-    '''Let a, b, c, d = t and r1, r2, r3, r4 = r_ls
+    '''Let a, b, c, d = t.
     Return
-    (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(a r1 z11 + .. + d r4 z22))
-     * exp(- a r1 z11 - .. - d r4 z22).
+    (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(2pi R Z))
+     * exp(- 2pi R Z).
+    Here Z = matrix([[z11, z12], [z21, z22]]) and R = matrix(2, r_ls).
     '''
     for z, r, a in zip(_z_u_ring_zgens(), r_ls, t):
         pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
@@ -161,7 +162,7 @@ class DiffZOperatorElement(object):
 
     def diff(self, pol, r_ls):
         '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
-        Return (the derivative of pol * exp(R*Z)) / exp(R*Z) as a polynomial.
+        Return (the derivative of pol * exp(2pi R Z)) / exp(R Z) as a polynomial.
         R = matrix(2, r_ls)
         '''
         try:
@@ -190,7 +191,7 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
                 ad_del1_A_dict[p + beta] * bracket_power(dZ, p + beta))
     m_alpha = bracket_power(Z, alpha) * del4_D_dict[alpha]
     res = sqcap_mul(m_alpha, m_p_beta, n, alpha, n - alpha)[0, 0]
-    # partial_2 in [Bö] is 1/2 d/dZ in our notation.
+    # Change normalization.
     res *= ZZ(2) ** (- p - 2 * beta)
     return res
 
@@ -226,8 +227,8 @@ def D_tilde(alpha, **kwds):
 
 def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
     '''
-    (2pi)**(-2 nu) * D_tilde_{alpha}^nu(pol * exp(RZ)) / exp(-RZ), where pol is pol polynomial of Z.
-    R = matrix(2, r_ls).
+    (2pi)**(-2 nu) * D_tilde_{alpha}^nu(pol * exp(2pi R Z)) / exp(- 2pi R Z),
+    where pol is pol polynomial of Z and R = matrix(2, r_ls).
     '''
     for i in range(nu):
         pol = D_tilde(alpha + i, **kwds).diff(pol, r_ls)
@@ -241,7 +242,7 @@ _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 def _D(A, D, r_ls, pol, us):
     '''
     1/2pi D_tilde(f) in [DIK], pp 1312.
-    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])),
+    where f = pol * exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z),
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
@@ -255,9 +256,9 @@ def _D(A, D, r_ls, pol, us):
 def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
     '''
     Return (k)_m * Fourier coefficient of L_tilde^{k, m}D_tilde_{k - nu}^{nu}(E_4, l)
-    at block_matrix([[A, R/2], [R^t/2, D]]) as an element of _Z_ring.
+    at block_matrix([[A, R^t/2], [R/2, D]]) as an element of _Z_ring.
     Here nu = k - l and fc is the Fourier coefficient of E_4 at
-    block_matrix([[A, R/2], [R^t/2, D]]).
+    block_matrix([[A, R^t/2], [R/2, D]]).
     '''
     nu = k - l
     pol = D_tilde_nu(k - nu, nu, fc, r_ls, **kwds)
@@ -296,7 +297,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
         res += fc_of_diff_eisen(
-            l, k, m, A, D, R.list(), es.fourier_coefficient(mat), us, **dct)
+            l, k, m, A, D, R.tanspose().list(), es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
