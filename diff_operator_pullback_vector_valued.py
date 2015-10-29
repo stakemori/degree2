@@ -105,8 +105,10 @@ def ad_bracket(A, p):
     return matrix([[_ad_bracket_coeffs(A, b, a) for b in l] for a in l])
 
 
+# matrix([[z11, z12], [z21, z22]]) is (2 pi i)Z_{2} in [Bö].
 _Z_ring = PolynomialRing(QQ, names='z11, z12, z21, z22')
 
+# matrix([[dz11, dz12], [dz21, dz22]]) is 2 / (2 pi i)partial_2 in [Bö].
 _dZ_ring = PolynomialRing(QQ, names='dz11, dz12, dz21, dz22')
 
 _Z_dZ_ring = PolynomialRing(_Z_ring, names='dz11, dz12, dz21, dz22')
