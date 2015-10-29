@@ -11,27 +11,20 @@ Comment. Math. Univ. St. Pauli 42 (1992) 1 - 22.
 and Shafarevich-Tate groups.
 '''
 
-from sage.all import (Permutations, cached_function, matrix, mul, QQ, binomial,
+from sage.all import (cached_function, matrix, mul, QQ, binomial,
                       PolynomialRing, identity_matrix, ZZ, vector, block_matrix,
                       factorial, zeta)
+from itertools import combinations
 
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
-
-
-def is_increasing(t):
-    '''
-    Return true only when the sequence of non-decreasing.
-    '''
-    n = len(t)
-    return all(t[i] <= t[i + 1] for i in range(n - 1))
 
 
 def _permutations_increasing(n, r):
     '''
     A generator of permutations of n of length r which are non-decreasing.
     '''
-    return (tuple([a - 1 for a in t]) for t in Permutations(n, r) if is_increasing(t))
+    return combinations(range(n), r)
 
 
 @cached_function
