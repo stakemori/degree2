@@ -136,7 +136,7 @@ def _diff_z_exp(t, pol, r_ls):
     (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(a r1 z11 + .. + d r4 z22))
      * exp(- a r1 z11 - .. - d r4 z22).
     '''
-    for z, r, a in zip(_Z_U_ring.gens()[2:], r_ls, t):
+    for z, r, a in zip(_Z_U_ring.gens(), r_ls, t):
         pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
                             for i in range(a + 1)))
     return pol
@@ -251,7 +251,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
 
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
-_Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
+_Z_U_ring = PolynomialRing(_U_ring, names='z11, z12, z21, z22')
 
 
 def _D(A, D, r_ls, pol, us):
@@ -315,5 +315,5 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
             l, k, m, A, D, R.list(), es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
-    sub_dct = {a: QQ(0) for a in _Z_U_ring.gens()[2:]}
+    sub_dct = {a: QQ(0) for a in _Z_U_ring.gens()}
     return _U_ring(res.subs(sub_dct))
