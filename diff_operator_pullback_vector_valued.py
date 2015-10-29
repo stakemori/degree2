@@ -112,11 +112,6 @@ _dZ_ring = PolynomialRing(QQ, names='dz11, dz12, dz21, dz22')
 _Z_dZ_ring = PolynomialRing(_Z_ring, names='dz11, dz12, dz21, dz22')
 
 
-def _from_z_ring_to_diff_op(pol):
-    pol = _Z_ring(pol)
-    return DiffZOperatorElement([(pol, (0, 0, 0, 0))])
-
-
 def _from_z_dz_ring_to_diff_op(pol):
     pol = _Z_dZ_ring(pol)
     d = {tuple(t): _Z_ring(v) for t, v in pol.dict().iteritems()}
@@ -152,15 +147,6 @@ class DiffZOperatorElement(object):
         elif isinstance(pol_idcs, dict):
             self._pol_idc_dct = {
                 k: v for k, v in pol_idcs.items() if v != 0}
-
-    def __repr__(self):
-        if self.pol_idc_dct == {}:
-            return '0'
-        else:
-            def _term(k):
-                return '*'.join(['%s^%s' % (b, a)
-                                 for a, b in zip(k, ['dz11', 'dz12', 'dz21', 'dz22']) if a != 0])
-            return " + ".join([str(v) + _term(k) for k, v in self.pol_idc_dct.items()])
 
     @property
     def pol_idc_dct(self):
