@@ -1,8 +1,10 @@
 import unittest
 from degree2.diff_operator_pullback_vector_valued import (
-    bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp, fc_of_pullback_of_diff_eisen, _U_ring)
+    bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp,
+    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul, Z, dZ, _Z_dZ_ring,
+    delta_p_alpha_beta)
 from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
-                      random_vector, symbolic_expression, ZZ, derivative, matrix)
+                      random_vector, symbolic_expression, ZZ, derivative)
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
@@ -57,6 +59,7 @@ class TestPullBackVectorValued(unittest.TestCase):
         self.assertEqual(sum(a * b for a, b in zip(monoms, f[t2].vec)),
                          fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a)
 
+    @skip("not ok")
     def test_pullback_diff_eisen_scalar_wt12(self):
         x12 = x12_with_prec(5)
         self.assert_pullback_scalar_valued(x12, (1, 1, 1),
@@ -77,6 +80,33 @@ class TestPullBackVectorValued(unittest.TestCase):
             A = tpl_to_half_int_mat(t)
             self.assertEqual(fc_of_pullback_of_diff_eisen(l, f.wt, 0, A, D, 1, 1),
                              a * f[t])
+
+    def test_14_diff(self):
+        A = tpl_to_half_int_mat((2, 1, 3))
+        D = tpl_to_half_int_mat((1, 1, 1))
+        dct1 = {"del4_D_dict": {a: bracket_power(D, a) for a in range(3)},
+                "del1_A_dict": {a: bracket_power(A, a) for a in range(3)}}
+        dct = {"del4_D_dict": {a: bracket_power(D, a) for a in range(3)},
+               "ad_del1_A_dict": {a: ad_bracket(A, a) for a in range(3)}}
+        for alpha in range(3):
+            for beta in range(3):
+                if alpha + beta <= 2:
+                    self.assertEqual(delta_p_alpha_beta_another_impl(alpha, beta, **dct1),
+                                     delta_p_alpha_beta(alpha, beta, **dct))
+
+
+def delta_p_alpha_beta_another_impl(alpha, beta, del4_D_dict=None,
+                                    del1_A_dict=None):
+    n = 2
+    p = n - alpha - beta
+    mt = del1_A_dict[alpha + beta] * bracket_power(Z, alpha + beta)
+    mt = mt * sqcap_mul(del4_D_dict[alpha].change_ring(_Z_dZ_ring),
+                        bracket_power(dZ.transpose(), beta) *
+                        del1_A_dict[beta] ** (-1) * bracket_power(dZ, beta),
+                        n, alpha, beta)
+    res = sqcap_mul(mt, bracket_power(dZ, p), n, alpha + beta, p)[0, 0]
+    res *= ZZ(2) ** (- p - 2 * beta)
+    return res
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
