@@ -194,14 +194,6 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, del1_A_dict=None):
     return res
 
 
-def del4_D_dict_func(D):
-    return {a: bracket_power(D, a) for a in range(3)}
-
-
-def del1_A_dict_func(A):
-    return {a: bracket_power(A, a) for a in range(3)}
-
-
 def delta_r_q(q, **kwds):
     '''
     Return delta(r, q) in [DIK], pp. 1312.
@@ -289,8 +281,8 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     '''Return the Fourier coefficient of exp(2pi A Z1 + 2pi D Z2)
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
     '''
-    dct = {"del4_D_dict": del4_D_dict_func(D),
-           "del1_A_dict": del1_A_dict_func(A)}
+    dct = {"del4_D_dict": {a: bracket_power(D, a) for a in range(3)},
+           "del1_A_dict": {a: bracket_power(A, a) for a in range(3)}}
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
     us = list(_U_ring.gens()) + [u3, u4]
