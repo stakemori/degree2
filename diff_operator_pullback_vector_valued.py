@@ -190,9 +190,9 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, del1_A_dict=None):
     mt = del1_A_dict[alpha + beta] * bracket_power(Z, alpha + beta)
     mt = mt * sqcap_mul(del4_D_dict[alpha].change_ring(_Z_dZ_ring),
                         bracket_power(dZ.transpose(), beta) *
-                        del1_A_dict[beta] ** (-1) * bracket_power(Z, beta),
+                        del1_A_dict[beta] ** (-1) * bracket_power(dZ, beta),
                         n, alpha, beta)
-    res = sqcap_mul(mt, bracket_power(Z, p), n, alpha + beta, p)[0, 0]
+    res = sqcap_mul(mt, bracket_power(dZ, p), n, alpha + beta, p)[0, 0]
     res *= ZZ(2) ** (- p - 2 * beta)
     return res
 
