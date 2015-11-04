@@ -247,15 +247,13 @@ def _D(A, D, r_ls, pol, us):
     return v * block_matrix([[A, R1.transpose() / QQ(2)], [R1 / QQ(2), D]]) * v
 
 
-def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
+def L_operator(k, m, A, D, r_ls, pol, us, **kwds):
     '''
-    Return (k)_m * Fourier coefficient of L_tilde^{k, m}D_tilde_{k - nu}^{nu}(E_4, l)
-    at block_matrix([[A, R^t/2], [R/2, D]]) as an element of _Z_ring.
-    Here nu = k - l and fc is the Fourier coefficient of E_4 at
-    block_matrix([[A, R^t/2], [R/2, D]]).
+    Return (k)_m * Fourier coefficient of
+    L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
+    exp(-2pi block_matrix([[A, R/2], [R^t/2, D]])Z).
+    as an element of _Z_R_ring.
     '''
-    nu = k - l
-    pol = D_tilde_nu(k - nu, nu, fc, r_ls, **kwds)
     zero = _Z_U_ring(0)
     res = zero
     us_up = list(us)[:2] + [zero, zero]
@@ -288,10 +286,14 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
            "del1_A_dict": {a: bracket_power(A, a) for a in range(3)}}
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
+    r_ls_var = _Z_R_ring.gens()[:4]
+    zr_pol = D_tilde_nu(k, k - l, QQ(1), r_ls_var, **dct)
     us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
-        res += fc_of_diff_eisen(
-            l, k, m, A, D, R.transpose().list(), es.fourier_coefficient(mat), us, **dct)
+        r_ls = R.transpose().list()
+        pol = _Z_ring(zr_pol.subs({a: b for a, b in zip(r_ls_var, r_ls)}))
+        res += L_operator(k, m, A, D, r_ls, pol *
+                          es.fourier_coefficient(mat), us, **dct)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
