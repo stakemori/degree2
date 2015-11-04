@@ -187,12 +187,12 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
     '''
     n = 2
     p = n - alpha - beta
+    m_alpha = bracket_power(Z, alpha) * del4_D_dict[alpha]
     z_beta = bracket_power(Z, beta)
     m_p_beta = sqcap_mul(identity_matrix(_Z_dZ_ring, binomial(n, p)),
                          z_beta * bracket_power(dZ.transpose(), beta), n, p, beta)
     m_p_beta = (m_p_beta *
                 ad_del1_A_dict[p + beta] * bracket_power(dZ, p + beta))
-    m_alpha = bracket_power(Z, alpha) * del4_D_dict[alpha]
     res = sqcap_mul(m_alpha, m_p_beta, n, alpha, n - alpha)[0, 0]
     # Change normalization.
     res *= ZZ(2) ** (- p - 2 * beta)
