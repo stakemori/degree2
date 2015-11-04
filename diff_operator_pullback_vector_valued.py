@@ -241,7 +241,7 @@ def _D(A, D, r_ls, pol, us):
                 2, [_diff_z_exp(t, pol, r_ls) for t in
                     [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
     v = vector(_Z_U_ring, us)
-    return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
+    return v * block_matrix([[A, R1.transpose() / QQ(2)], [R1 / QQ(2), D]]) * v
 
 
 def fc_of_diff_eisen(l, k, m, A, D, r_ls, fc, us, **kwds):
