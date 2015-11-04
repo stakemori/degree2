@@ -233,7 +233,7 @@ _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 def _D(A, D, r_ls, pol, us):
     '''
     1/2pi D_tilde(f) in [DIK], pp 1312.
-    where f = pol * exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z),
+    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z),
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
