@@ -4,8 +4,10 @@ from degree2.diff_operator_pullback_vector_valued import (
 from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
                       random_vector, symbolic_expression, ZZ, derivative, matrix)
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
-
+from degree2.scalar_valued_smfs import x12_with_prec
 from unittest import skip
+
+from degree2.standard_l_scalar_valued import tpl_to_half_int_mat
 
 
 class TestPullBackVectorValued(unittest.TestCase):
@@ -52,6 +54,21 @@ class TestPullBackVectorValued(unittest.TestCase):
         A1 = matrix([[QQ(2), QQ(1) / QQ(2)], [QQ(1) / QQ(2), QQ(3)]])
         self.assertEqual(sum(a * b for a, b in zip(monoms, f[(2, 1, 3)].vec)),
                          fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a)
+
+    def test_pullback_diff_eisen_scalar_wt12(self):
+        x12 = x12_with_prec(5)
+        A = tpl_to_half_int_mat((1, 1, 1))
+        D = A
+        fc_111 = QQ(fc_of_pullback_of_diff_eisen(10, 12, 0, A, D, 1, 1))
+        A1 = tpl_to_half_int_mat((2, 1, 3))
+        self.assertEqual(fc_of_pullback_of_diff_eisen(10, 12, 0, A1, D, 1, 1),
+                         fc_111 * x12[(2, 1, 3)])
+        A2 = tpl_to_half_int_mat((2, 0, 2))
+        self.assertEqual(fc_of_pullback_of_diff_eisen(10, 12, 0, A2, D, 1, 1),
+                         fc_111 * x12[(2, 0, 2)])
+        A3 = tpl_to_half_int_mat((2, 2, 3))
+        self.assertEqual(fc_of_pullback_of_diff_eisen(10, 12, 0, A3, D, 1, 1),
+                         fc_111 * x12[(2, 2, 3)])
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
