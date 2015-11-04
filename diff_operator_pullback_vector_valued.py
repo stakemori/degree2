@@ -113,6 +113,8 @@ _dZ_ring = PolynomialRing(QQ, names='dz11, dz12, dz21, dz22')
 
 _Z_dZ_ring = PolynomialRing(_Z_ring, names='dz11, dz12, dz21, dz22')
 
+_Z_R_ring = PolynomialRing(QQ, names="r11, r12, r21, r22, z11, z12, z21, z22")
+
 
 @cached_function
 def _z_u_ring_zgens():
@@ -125,15 +127,15 @@ def _from_z_dz_ring_to_diff_op(pol):
     return DiffZOperatorElement(d)
 
 
-def _diff_z_exp(t, pol, r_ls):
+def _diff_z_exp(t, pol, r_ls, base_ring=None):
     '''Let a, b, c, d = t.
     Return
     (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(2pi R Z))
      * exp(- 2pi R Z).
     Here Z = matrix([[z11, z12], [z21, z22]]) and R = matrix(2, r_ls).
     '''
-    for z, r, a in zip(_z_u_ring_zgens(), r_ls, t):
-        pol = _Z_U_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
+    for z, r, a in zip((base_ring(_z) for _z in _Z_ring.gens()), r_ls, t):
+        pol = base_ring(sum(binomial(a, i) * pol.derivative(z, i) * r ** (a - i)
                             for i in range(a + 1)))
     return pol
 
@@ -161,15 +163,16 @@ class DiffZOperatorElement(object):
         return self._pol_idc_dct
 
     def diff(self, pol, r_ls):
-        '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
+        '''pol is a polynomial in _Z_R_ring and R is a 2 by 2 marix.
         Return (the derivative of pol * exp(2pi R Z)) / exp(R Z) as a polynomial.
         R = matrix(2, r_ls)
         '''
         try:
-            pol = _Z_U_ring(pol)
+            pol = _Z_R_ring(pol)
         except TypeError:
             raise NotImplementedError
-        return sum(v * _diff_z_exp(k, pol, r_ls) for k, v in self.pol_idc_dct.items())
+        return sum(v * _diff_z_exp(k, pol, r_ls, base_ring=_Z_R_ring)
+                   for k, v in self.pol_idc_dct.items())
 
 
 Z = matrix(2, [_Z_dZ_ring(__a) for __a in _Z_ring.gens()])
@@ -237,8 +240,8 @@ def _D(A, D, r_ls, pol, us):
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
-    R1 = matrix(_Z_U_ring,
-                2, [_diff_z_exp(t, pol, r_ls) for t in
+    R1 = matrix(_Z_U_ring, 2,
+                [_diff_z_exp(t, pol, r_ls, base_ring=_Z_U_ring) for t in
                     [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
     v = vector(_Z_U_ring, us)
     return v * block_matrix([[A, R1.transpose() / QQ(2)], [R1 / QQ(2), D]]) * v
