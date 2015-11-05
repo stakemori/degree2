@@ -2,8 +2,7 @@
 import unittest
 from degree2.diff_operator_pullback_vector_valued import (
     bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp,
-    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul, Z, dZ, _Z_dZ_ring,
-    delta_p_alpha_beta)
+    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul)
 from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
                       random_vector, symbolic_expression, ZZ, derivative)
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
@@ -126,11 +125,10 @@ def delta_al_be(t1, t2, t4, z2, al, be):
     n = z2.ncols()
     p = n - al - be
     t3 = t2.transpose()
-    m1 = bracket_power(t1 * z2, al + be)
-    m2 = sqcap_mul(bracket_power(t4, al),
-                   bracket_power(
-        t3 * t1 ** (-1) * t2, be), n, al, be)
-    res = sqcap_mul(m1 * m2, bracket_power(t2, p), n, al + be, p)
+    res = sqcap_mul(bracket_power(t1 * z2, al + be) *
+                    sqcap_mul(bracket_power(t4, al),
+                              bracket_power(t3 * t1 ** (-1) * t2, be), n, al, be),
+                    bracket_power(t2, p), n, al + be, p)
     res = res[0, 0] * (QQ(2) ** (- p - 2 * be))
     return res
 
