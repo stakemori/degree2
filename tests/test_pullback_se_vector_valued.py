@@ -89,10 +89,7 @@ class TestPullBackVectorValued(unittest.TestCase):
         '''
         n = 2
         for _ in range(50):
-            t2 = random_matrix(QQ, n)
-            t3 = t2.transpose()
-            t1 = random_even_symm_mat(n).change_ring(QQ)
-            t4 = random_even_symm_mat(n).change_ring(QQ)
+            t1, t2, t3, t4 = random_t1234(n)
             z2 = random_matrix(QQ, n)
             for al in range(n + 1):
                 for be in range(n + 1):
@@ -104,12 +101,46 @@ class TestPullBackVectorValued(unittest.TestCase):
                                         ad_bracket(t1, p + be) *
                                         bracket_power(t2, p + be),
                                         n, al, p + be)
-                        rhs = sqcap_mul(bracket_power(t1 * z2, al + be) *
-                                        sqcap_mul(bracket_power(t4, al),
-                                                  bracket_power(
-                                                      t3 * t1 ** (-1) * t2, be), n, al, be),
-                                        bracket_power(t2, p), n, al + be, p)
+                        lhs = lhs[0, 0] * QQ(2) ** (-p - 2 * be)
+                        rhs = delta_al_be(t1, t2, t4, z2, al, be)
                         self.assertEqual(lhs, rhs)
+
+    def test_delta_p_q_expand(self):
+        n = 3
+        for _ in range(50):
+            t1, t2, t3, t4 = random_t1234(n)
+            z2 = random_matrix(QQ, n)
+            for q in range(n + 1):
+                p = n - q
+                lhs = sum(delta_al_be(t1, t2, t4, z2, q - be, be) *
+                          (-1) ** be * binomial(q, be) for be in range(q + 1))
+                rhs = sqcap_mul(bracket_power(t1 * z2, q) *
+                                bracket_power(
+                                    t4 - QQ(1) / QQ(4) * t3 * t1 ** (-1) * t2, q),
+                                bracket_power(t2, p), n, q, p)
+                rhs = rhs[0, 0] * QQ(2) ** (-p)
+                self.assertEqual(lhs, rhs)
+
+
+def delta_al_be(t1, t2, t4, z2, al, be):
+    n = z2.ncols()
+    p = n - al - be
+    t3 = t2.transpose()
+    m1 = bracket_power(t1 * z2, al + be)
+    m2 = sqcap_mul(bracket_power(t4, al),
+                   bracket_power(
+        t3 * t1 ** (-1) * t2, be), n, al, be)
+    res = sqcap_mul(m1 * m2, bracket_power(t2, p), n, al + be, p)
+    res = res[0, 0] * (QQ(2) ** (- p - 2 * be))
+    return res
+
+
+def random_t1234(n):
+    t2 = random_matrix(QQ, n)
+    t3 = t2.transpose()
+    t1 = random_even_symm_mat(n).change_ring(QQ)
+    t4 = random_even_symm_mat(n).change_ring(QQ)
+    return [t1, t2, t3, t4]
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
