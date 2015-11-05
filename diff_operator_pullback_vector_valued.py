@@ -179,7 +179,7 @@ Z = matrix(2, [_Z_dZ_ring(__a) for __a in _Z_ring.gens()])
 dZ = matrix(2, [_Z_dZ_ring(__a) for __a in _dZ_ring.gens()])
 
 
-def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
+def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, del1_A_dict=None):
     '''
     del4_D_dict is a dictionary alpha: => bracket_power(D, alpha).
     ad_del1_A_dict is a dictionary alpha: => ad_bracket(A, alpha).
@@ -187,13 +187,13 @@ def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, ad_del1_A_dict=None):
     '''
     n = 2
     p = n - alpha - beta
-    m_alpha = bracket_power(Z, alpha) * del4_D_dict[alpha]
-    z_beta = bracket_power(Z, beta)
-    m_p_beta = sqcap_mul(identity_matrix(_Z_dZ_ring, binomial(n, p)),
-                         z_beta * bracket_power(dZ.transpose(), beta), n, p, beta)
-    m_p_beta = (m_p_beta *
-                ad_del1_A_dict[p + beta] * bracket_power(dZ, p + beta))
-    res = sqcap_mul(m_alpha, m_p_beta, n, alpha, n - alpha)[0, 0]
+    res = sqcap_mul(del1_A_dict[alpha + beta] * bracket_power(Z, alpha + beta) *
+                    sqcap_mul(del4_D_dict[alpha].change_ring(_Z_dZ_ring),
+                              bracket_power(dZ, beta) *
+                              del1_A_dict[beta] ** (-1) *
+                              bracket_power(Z, beta), n, alpha, beta),
+                    bracket_power(dZ, p), n, alpha + beta, p)
+    res = res[0, 0]
     # Change normalization.
     res *= ZZ(2) ** (- p - 2 * beta)
     return res
@@ -285,7 +285,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
     '''
     dct = {"del4_D_dict": {a: bracket_power(D, a) for a in range(3)},
-           "ad_del1_A_dict": {a: ad_bracket(A, a) for a in range(3)}}
+           "del1_A_dict": {a: bracket_power(A, a) for a in range(3)}}
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
     r_ls_var = _Z_R_ring.gens()[:4]
