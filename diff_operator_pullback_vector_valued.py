@@ -11,13 +11,18 @@ Comment. Math. Univ. St. Pauli 42 (1992) 1 - 22.
 and Shafarevich-Tate groups.
 '''
 
-from sage.all import (cached_function, matrix, mul, QQ, binomial,
+from sage.all import (cached_function, matrix, mul, QQ,
                       PolynomialRing, identity_matrix, ZZ, vector, block_matrix,
                       factorial, zeta)
+from sage.all import binomial as _binomial
 from itertools import combinations
 
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
+
+
+def binomial(x, m):
+    return ZZ(_binomial(x, m))
 
 
 def _permutations_increasing(n, r):
