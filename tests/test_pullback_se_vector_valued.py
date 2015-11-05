@@ -10,7 +10,7 @@ from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
 from siegel_series.tests.utils import random_even_symm_mat
 
-from degree2.standard_l_scalar_valued import tpl_to_half_int_mat
+from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, G_poly
 
 
 class TestPullBackVectorValued(unittest.TestCase):
@@ -139,6 +139,13 @@ def random_t1234(n):
     t1 = random_even_symm_mat(n).change_ring(QQ)
     t4 = random_even_symm_mat(n).change_ring(QQ)
     return [t1, t2, t3, t4]
+
+
+def scalar_valued_diff_pol(k, l, A, D, R, mat):
+    G = G_poly(l, k - l)
+    y1, y2, y3 = G.parent().gens()
+    G_y1_y3 = G.subs({y2: A.det() * D.det()})
+    return G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()}).constant_coefficient()
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
