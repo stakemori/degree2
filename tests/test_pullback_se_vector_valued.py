@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 from degree2.diff_operator_pullback_vector_valued import (
     bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp,
@@ -8,6 +9,7 @@ from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
+from siegel_series.tests.utils import random_even_symm_mat
 
 from degree2.standard_l_scalar_valued import tpl_to_half_int_mat
 
@@ -81,6 +83,7 @@ class TestPullBackVectorValued(unittest.TestCase):
             self.assertEqual(fc_of_pullback_of_diff_eisen(l, f.wt, 0, A, D, 1, 1),
                              a * f[t])
 
+    @skip("not ok")
     def test_14_diff(self):
         A = tpl_to_half_int_mat((2, 1, 3))
         D = tpl_to_half_int_mat((1, 1, 1))
@@ -93,6 +96,33 @@ class TestPullBackVectorValued(unittest.TestCase):
                 if alpha + beta <= 2:
                     self.assertEqual(delta_p_alpha_beta_another_impl(alpha, beta, **dct1),
                                      delta_p_alpha_beta(alpha, beta, **dct))
+
+    def test_14_identity(self):
+        '''Test idenitity (14) in [Bö].
+        '''
+        n = 2
+        for _ in range(50):
+            t2 = random_matrix(QQ, n)
+            t3 = t2.transpose()
+            t1 = random_even_symm_mat(n).change_ring(QQ)
+            t4 = random_even_symm_mat(n).change_ring(QQ)
+            z2 = random_matrix(QQ, n)
+            for al in range(n + 1):
+                for be in range(n + 1):
+                    if al + be <= n:
+                        p = n - al - be
+                        lhs = sqcap_mul(bracket_power(z2 * t4, al),
+                                        sqcap_mul(identity_matrix(QQ, binomial(n, p)),
+                                                  bracket_power(z2 * t3, be), n, p, be) *
+                                        ad_bracket(t1, p + be) *
+                                        bracket_power(t2, p + be),
+                                        n, al, p + be)
+                        rhs = sqcap_mul(bracket_power(t1 * z2, al + be) *
+                                        sqcap_mul(bracket_power(t4, al),
+                                                  bracket_power(
+                                                      t3 * t1 ** (-1) * t2, be), n, al, be),
+                                        bracket_power(t2, p), n, al + be, p)
+                        self.assertEqual(lhs, rhs)
 
 
 def delta_p_alpha_beta_another_impl(alpha, beta, del4_D_dict=None,
