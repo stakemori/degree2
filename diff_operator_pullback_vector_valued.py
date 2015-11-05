@@ -184,32 +184,17 @@ Z = matrix(2, [_Z_dZ_ring(__a) for __a in _Z_ring.gens()])
 dZ = matrix(2, [_Z_dZ_ring(__a) for __a in _dZ_ring.gens()])
 
 
-def delta_p_alpha_beta(alpha, beta, del4_D_dict=None, del1_A_dict=None):
-    '''
-    del4_D_dict is a dictionary alpha: => bracket_power(D, alpha).
-    ad_del1_A_dict is a dictionary alpha: => ad_bracket(A, alpha).
-    Return (2pi)^(-2) * delta(a, alpha, beta) in [Bö], p86 as an element in _Z_dZ_ring.
-    '''
-    n = 2
-    p = n - alpha - beta
-    res = sqcap_mul(del1_A_dict[alpha + beta] * bracket_power(Z, alpha + beta) *
-                    sqcap_mul(del4_D_dict[alpha].change_ring(_Z_dZ_ring),
-                              bracket_power(dZ, beta) *
-                              del1_A_dict[beta] ** (-1) *
-                              bracket_power(Z, beta), n, alpha, beta),
-                    bracket_power(dZ, p), n, alpha + beta, p)
-    res = res[0, 0]
-    # Change normalization.
-    res *= ZZ(2) ** (- p - 2 * beta)
-    return res
-
-
-def delta_r_q(q, **kwds):
+def delta_r_q(q, A=None, D=None):
     '''
     Return delta(r, q) in [DIK], pp. 1312.
     '''
-    return sum(delta_p_alpha_beta(q - b, b, **kwds) * (-1) ** b * binomial(q, b)
-               for b in range(q + 1))
+    n = 2
+    p = n - q
+    res = sqcap_mul(bracket_power(A * Z, q) *
+                    bracket_power(
+                        D - ZZ(1) / ZZ(4) * dZ.transpose() * A ** (-1) * dZ, q),
+                    bracket_power(dZ, p), n, q, p)
+    return res[0, 0] * ZZ(2) ** (-p)
 
 
 def _C(p, s):
@@ -254,7 +239,7 @@ def _D(A, D, r_ls, pol, us):
     return v * block_matrix([[A, R1.transpose() / QQ(2)], [R1 / QQ(2), D]]) * v
 
 
-def L_operator(k, m, A, D, r_ls, pol, us, **kwds):
+def L_operator(k, m, A, D, r_ls, pol, us):
     '''
     Return (k)_m * Fourier coefficient of
     L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
@@ -289,8 +274,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     '''Return the Fourier coefficient of exp(2pi A Z1 + 2pi D Z2)
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
     '''
-    dct = {"del4_D_dict": {a: bracket_power(D, a) for a in range(3)},
-           "del1_A_dict": {a: bracket_power(A, a) for a in range(3)}}
+    dct = {"A": A, "D": D}
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
     r_ls_var = _Z_R_ring.gens()[:4]
@@ -300,7 +284,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
         r_ls = R.transpose().list()
         pol = _Z_ring(zr_pol.subs({a: b for a, b in zip(r_ls_var, r_ls)}))
         res += L_operator(k, m, A, D, r_ls, pol *
-                          es.fourier_coefficient(mat), us, **dct)
+                          es.fourier_coefficient(mat), us)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
