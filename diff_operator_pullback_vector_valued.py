@@ -246,6 +246,8 @@ def L_operator(k, m, A, D, r_ls, pol, us):
     exp(-2pi block_matrix([[A, R/2], [R^t/2, D]])Z).
     as an element of _Z_R_ring.
     '''
+    if m == 0:
+        return pol
     zero = _Z_U_ring(0)
     res = zero
     us_up = list(us)[:2] + [zero, zero]
