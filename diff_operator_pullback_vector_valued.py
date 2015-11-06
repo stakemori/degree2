@@ -228,7 +228,7 @@ _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 def _D(A, D, r_ls, pol, us):
     '''
     1/2pi D_tilde(f) in [DIK], pp 1312.
-    where f = pol * exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z),
+    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z),
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
@@ -236,14 +236,14 @@ def _D(A, D, r_ls, pol, us):
                 [_diff_z_exp(t, pol, r_ls, base_ring=_Z_U_ring) for t in
                     [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
     v = vector(_Z_U_ring, us)
-    return v * block_matrix([[A, R1.transpose() / QQ(2)], [R1 / QQ(2), D]]) * v
+    return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
 
 
 def L_operator(k, m, A, D, r_ls, pol, us):
     '''
     Return (k)_m * Fourier coefficient of
-    L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z))/
-    exp(-2pi block_matrix([[A, R^t/2], [R/2, D]])Z).
+    L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
+    exp(-2pi block_matrix([[A, R/2], [R^t/2, D]])Z).
     as an element of _Z_ring or _Z_U_ring.
     '''
     if m == 0:
