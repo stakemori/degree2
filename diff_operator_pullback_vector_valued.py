@@ -135,8 +135,8 @@ def _from_z_dz_ring_to_diff_op(pol):
 def _diff_z_exp(t, pol, r_ls, base_ring=None):
     '''Let a, b, c, d = t.
     Return
-    (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(2pi R Z))
-     * exp(- 2pi R Z).
+    (d/dz11)^a (d/dz12)^b (d/dz21)^c (d/dz22)^d (pol exp(2pi R^t Z))
+     * exp(- 2pi R^t Z).
     Here Z = matrix([[z11, z12], [z21, z22]]) and R = matrix(2, r_ls).
     '''
     for z, r, a in zip((base_ring(_z) for _z in _Z_ring.gens()), r_ls, t):
@@ -169,7 +169,7 @@ class DiffZOperatorElement(object):
 
     def diff(self, pol, r_ls):
         '''pol is a polynomial in _Z_R_ring and R is a 2 by 2 marix.
-        Return (the derivative of pol * exp(2pi R Z)) / exp(R Z) as a polynomial.
+        Return (the derivative of pol * exp(2pi R^t Z)) / exp(R^t Z) as a polynomial.
         R = matrix(2, r_ls)
         '''
         try:
@@ -213,7 +213,7 @@ def D_tilde(alpha, **kwds):
 
 def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
     '''
-    (2pi)**(-2 nu) * D_tilde_{alpha}^nu(pol * exp(2pi R Z)) / exp(- 2pi R Z),
+    (2pi)**(-2 nu) * D_tilde_{alpha}^nu(pol * exp(2pi R^t Z)) / exp(- 2pi R^t Z),
     where pol is pol polynomial of Z and R = matrix(2, r_ls).
     '''
     for i in range(nu):
@@ -228,7 +228,7 @@ _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 def _D(A, D, r_ls, pol, us):
     '''
     1/2pi D_tilde(f) in [DIK], pp 1312.
-    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z),
+    where f = pol * exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z),
     R = matrix(2, r_ls) and pol is a polynomial of R.
     us = (u1, u2, u3, u4)
     '''
@@ -242,9 +242,9 @@ def _D(A, D, r_ls, pol, us):
 def L_operator(k, m, A, D, r_ls, pol, us):
     '''
     Return (k)_m * Fourier coefficient of
-    L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
-    exp(-2pi block_matrix([[A, R/2], [R^t/2, D]])Z).
-    as an element of _Z_R_ring.
+    L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R^t/2], [R/2, D]])Z))/
+    exp(-2pi block_matrix([[A, R^t/2], [R/2, D]])Z).
+    as an element of _Z_ring or _Z_U_ring.
     '''
     if m == 0:
         return pol
