@@ -280,10 +280,10 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
     r_ls_var = _Z_R_ring.gens()[:4]
-    zr_pol = D_tilde_nu(k, k - l, QQ(1), r_ls_var, **dct)
+    zr_pol = D_tilde_nu(l, k - l, QQ(1), r_ls_var, **dct)
     us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
-        r_ls = R.transpose().list()
+        r_ls = R.list()
         pol = _Z_ring(zr_pol.subs({a: b for a, b in zip(r_ls_var, r_ls)}))
         res += L_operator(k, m, A, D, r_ls, pol *
                           es.fourier_coefficient(mat), us)
