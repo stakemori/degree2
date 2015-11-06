@@ -61,26 +61,33 @@ class TestPullBackVectorValued(unittest.TestCase):
         self.assertEqual(sum(a * b for a, b in zip(monoms, f[t2].vec)),
                          fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a)
 
-    @skip("not ok")
+    @skip("ok")
     def test_pullback_diff_eisen_scalar_wt12(self):
         x12 = x12_with_prec(5)
         self.assert_pullback_scalar_valued(x12, (1, 1, 1),
                                            [(2, 1, 3), (2, 0, 2), (2, 2, 3)], 10)
 
-    @skip("not ok")
+    @skip("ok")
     def test_pullback_diff_eisen_scalar_wt35(self):
         x35 = x35_with_prec(10)
         self.assert_pullback_scalar_valued(x35, (2, 1, 3),
-                                           [(2, -1, 4), (3, -1, 4), (3, -2, 4)], 32)
+                                           [(2, -1, 4), (3, -1, 4),
+                                            (3, -2, 4)], 34,
+                                           verbose=True)
 
-    def assert_pullback_scalar_valued(self, f, t0, ts, l):
+    def assert_pullback_scalar_valued(self, f, t0, ts, l, verbose=False):
         D = tpl_to_half_int_mat(t0)
         f = f * f[t0] ** (-1)
-        a = fc_of_pullback_of_diff_eisen(l, f.wt, 0, D, D, 1, 1)
+        if verbose:
+            print "Compute for %s" % (t0,)
+        a = fc_of_pullback_of_diff_eisen(
+            l, f.wt, 0, D, D, 1, 1, verbose=verbose)
         self.assertNotEqual(a, 0)
         for t in ts:
+            if verbose:
+                print "Checking for %s" % (t, )
             A = tpl_to_half_int_mat(t)
-            self.assertEqual(fc_of_pullback_of_diff_eisen(l, f.wt, 0, A, D, 1, 1),
+            self.assertEqual(fc_of_pullback_of_diff_eisen(l, f.wt, 0, A, D, 1, 1, verbose=verbose),
                              a * f[t])
 
     @skip("Not ok")

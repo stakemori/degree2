@@ -272,7 +272,7 @@ def _zeta(s):
     return zeta(ZZ(s))
 
 
-def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
+def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     '''Return the Fourier coefficient of exp(2pi A Z1 + 2pi D Z2)
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
     '''
@@ -281,6 +281,8 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4):
     es = sess(weight=l, degree=4)
     r_ls_var = _Z_R_ring.gens()[:4]
     zr_pol = D_tilde_nu(l, k - l, QQ(1), r_ls_var, **dct)
+    if verbose:
+        print "Done computation of zr_pol."
     us = list(_U_ring.gens()) + [u3, u4]
     for R, mat in r_n_m_iter(A, D):
         r_ls = R.list()
