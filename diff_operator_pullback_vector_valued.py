@@ -253,7 +253,7 @@ def L_operator(k, m, A, D, r_ls, pol, us):
     us_up = list(us)[:2] + [zero, zero]
     us_down = [zero, zero] + list(us)[2:]
     for n in range(m // 2 + 1):
-        pol_tmp = pol
+        pol_tmp = _Z_U_ring(pol)
         for _ in range(m - 2 * n):
             pol_tmp = (_D(A, D, r_ls, pol_tmp, us)
                        - _D(A, D, r_ls, pol_tmp, us_up) - _D(A, D, r_ls, pol_tmp, us_down))
