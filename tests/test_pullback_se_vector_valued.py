@@ -125,7 +125,6 @@ class TestPullBackVectorValued(unittest.TestCase):
     def test_diff_pol_value(self):
         for _ in range(50):
             t1, t2, _, t4 = random_t1234(2)
-            t2 = t2 + t2.transpose()
             for k, nu in [(10, 2)]:
                 self.assertEqual(scalar_valued_diff_pol_1(k, nu, t1, t4, t2),
                                  scalar_valued_diff_pol_2(k, nu, t1, t4, t2))
@@ -164,7 +163,7 @@ def scalar_valued_diff_pol_2(k, nu, A, D, R):
     a0 = QQ(
         D_tilde_nu(k, nu, QQ(1), [ZZ(0)] * 4, A=A0, D=D0).constant_coefficient())
     a = QQ(9) / (QQ(16) * a0)
-    return QQ(D_tilde_nu(k, nu, QQ(1), R.transpose().list(), A=A, D=D).constant_coefficient()) * a
+    return QQ(D_tilde_nu(k, nu, QQ(1), R.list(), A=A, D=D).constant_coefficient()) * a
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
 unittest.TextTestRunner(verbosity=2).run(suite)
