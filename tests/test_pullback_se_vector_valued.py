@@ -68,6 +68,12 @@ class TestPullBackVectorValued(unittest.TestCase):
                                            [(2, 1, 3), (2, 0, 2), (2, 2, 3)], 10)
 
     @skip("ok")
+    def test_pullback_diff_eisen_scalar_wt12_diff4(self):
+        x12 = x12_with_prec(5)
+        self.assert_pullback_scalar_valued(x12, (1, 1, 1),
+                                           [(2, 1, 3), (2, 0, 2), (2, 2, 3)], 8, verbose=True)
+
+    @skip("ok")
     def test_pullback_diff_eisen_scalar_wt35(self):
         x35 = x35_with_prec(10)
         self.assert_pullback_scalar_valued(x35, (2, 1, 3),
