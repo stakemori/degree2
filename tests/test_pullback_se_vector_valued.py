@@ -2,9 +2,10 @@
 import unittest
 from degree2.diff_operator_pullback_vector_valued import (
     bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp,
-    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul)
+    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul, D_tilde_nu)
 from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
-                      random_vector, symbolic_expression, ZZ, derivative)
+                      random_vector, symbolic_expression, ZZ, derivative,
+                      block_matrix)
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
@@ -104,6 +105,7 @@ class TestPullBackVectorValued(unittest.TestCase):
                         rhs = delta_al_be(t1, t2, t4, z2, al, be)
                         self.assertEqual(lhs, rhs)
 
+    @skip("OK")
     def test_delta_p_q_expand(self):
         n = 3
         for _ in range(50):
@@ -119,6 +121,14 @@ class TestPullBackVectorValued(unittest.TestCase):
                                 bracket_power(t2, p), n, q, p)
                 rhs = rhs[0, 0] * QQ(2) ** (-p)
                 self.assertEqual(lhs, rhs)
+
+    def test_diff_pol_value(self):
+        for _ in range(50):
+            t1, t2, _, t4 = random_t1234(2)
+            t2 = t2 + t2.transpose()
+            for k, nu in [(10, 2)]:
+                self.assertEqual(scalar_valued_diff_pol_1(k, nu, t1, t4, t2),
+                                 scalar_valued_diff_pol_2(k, nu, t1, t4, t2))
 
 
 def delta_al_be(t1, t2, t4, z2, al, be):
@@ -141,12 +151,20 @@ def random_t1234(n):
     return [t1, t2, t3, t4]
 
 
-def scalar_valued_diff_pol(k, l, A, D, R, mat):
-    G = G_poly(l, k - l)
+def scalar_valued_diff_pol_1(k, nu, A, D, R):
+    mat = block_matrix([[A, R / ZZ(2)], [R.transpose() / ZZ(2), D]])
+    G = G_poly(k, nu)
     y1, y2, y3 = G.parent().gens()
     G_y1_y3 = G.subs({y2: A.det() * D.det()})
     return G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()}).constant_coefficient()
 
+
+def scalar_valued_diff_pol_2(k, nu, A, D, R):
+    A0 = D0 = tpl_to_half_int_mat((1, 1, 1))
+    a0 = QQ(
+        D_tilde_nu(k, nu, QQ(1), [ZZ(0)] * 4, A=A0, D=D0).constant_coefficient())
+    a = QQ(9) / (QQ(16) * a0)
+    return QQ(D_tilde_nu(k, nu, QQ(1), R.transpose().list(), A=A, D=D).constant_coefficient()) * a
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPullBackVectorValued)
 unittest.TextTestRunner(verbosity=2).run(suite)
