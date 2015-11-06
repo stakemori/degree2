@@ -53,13 +53,13 @@ class TestPullBackVectorValued(unittest.TestCase):
         A = tpl_to_half_int_mat((1, 1, 1))
         D = A
         fc_111 = fc_of_pullback_of_diff_eisen(12, 14, 2, A, D, 1, 1)
-        a = fc_111[u1 ** 2]
+        a0 = fc_111[u1 ** 2]
         self.assertEqual(
-            sum(a * b for a, b in zip(monoms, f[(1, 1, 1)].vec)), fc_111 / a)
+            sum(a * b for a, b in zip(monoms, f[(1, 1, 1)].vec)), fc_111 / a0)
         t2 = (2, 1, 3)
         A1 = tpl_to_half_int_mat(t2)
         self.assertEqual(sum(a * b for a, b in zip(monoms, f[t2].vec)),
-                         fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a)
+                         fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a0)
 
     @skip("ok")
     def test_pullback_diff_eisen_scalar_wt12(self):
