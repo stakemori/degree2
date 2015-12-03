@@ -12,11 +12,10 @@ and Shafarevich-Tate groups.
 '''
 
 from sage.all import (cached_function, matrix, mul, QQ,
-                      PolynomialRing, identity_matrix, ZZ, vector, block_matrix,
+                      PolynomialRing, identity_matrix, ZZ, vector,
                       factorial, zeta)
 from sage.all import binomial as _binomial
 from itertools import combinations
-
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 
@@ -225,21 +224,15 @@ _U_ring = PolynomialRing(QQ, names='u1, u2')
 _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 
 
-def _D(A, D, r_ls, pol, us):
+def _D_D_up_D_down(u1, u2, v1, v2, r_ls, pol):
+    '''D - D_up - D_down
     '''
-    1/2pi D_tilde(f) in [DIK], pp 1312.
-    where f = pol * exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z),
-    R = matrix(2, r_ls) and pol is a polynomial of R.
-    us = (u1, u2, u3, u4)
-    '''
-    R1 = matrix(_Z_U_ring, 2,
-                [_diff_z_exp(t, pol, r_ls, base_ring=_Z_U_ring) for t in
-                    [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]])
-    v = vector(_Z_U_ring, us)
-    return v * block_matrix([[A, R1 / QQ(2)], [R1.transpose() / QQ(2), D]]) * v
+    r11, r12, r21, r22 = [_diff_z_exp(t, pol, r_ls, base_ring=_Z_U_ring) for t in
+                          [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)]]
+    return u1 * v1 * r11 + u1 * v2 * r12 + u2 * v1 * r21 + u2 * v2 * r22
 
 
-def L_operator(k, m, A, D, r_ls, pol, us):
+def L_operator(k, m, A, D, r_ls, pol, us, d_up_down_mlt):
     '''
     Return (k)_m * Fourier coefficient of
     L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
@@ -250,16 +243,13 @@ def L_operator(k, m, A, D, r_ls, pol, us):
         return pol
     zero = _Z_U_ring(0)
     res = zero
-    us_up = list(us)[:2] + [zero, zero]
-    us_down = [zero, zero] + list(us)[2:]
+    u1, u2, u3, u4 = us
     for n in range(m // 2 + 1):
         pol_tmp = _Z_U_ring(pol)
         for _ in range(m - 2 * n):
-            pol_tmp = (_D(A, D, r_ls, pol_tmp, us)
-                       - _D(A, D, r_ls, pol_tmp, us_up) - _D(A, D, r_ls, pol_tmp, us_down))
+            pol_tmp = _D_D_up_D_down(u1, u2, u3, u4, r_ls, pol_tmp)
         for _ in range(n):
-            pol_tmp = _D(A, D, r_ls, pol_tmp, us_down)
-            pol_tmp = _D(A, D, r_ls, pol_tmp, us_up)
+            pol_tmp *= d_up_down_mlt
 
         pol_tmp *= QQ(factorial(n) * factorial(m - 2 * n)
                       * mul(2 - k - m + i for i in range(n))) ** (-1)
@@ -284,11 +274,18 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     if verbose:
         print "Done computation of zr_pol."
     us = list(_U_ring.gens()) + [u3, u4]
+    # D_up is multiplication by d_up_mlt on p(z2)e(A Z1 + R^t Z12 + D Z2)
+    v_up = vector(_U_ring, us[:2])
+    d_up_mlt = v_up * A * v_up
+    v_down = vector(us[2:])
+    d_down_mlt = v_down * D * v_down
+    d_up_down_mlt = d_up_mlt * d_down_mlt
+
     for R, mat in r_n_m_iter(A, D):
         r_ls = R.list()
         pol = _Z_ring(zr_pol.subs({a: b for a, b in zip(r_ls_var, r_ls)}))
         res += L_operator(k, m, A, D, r_ls, pol *
-                          es.fourier_coefficient(mat), us)
+                          es.fourier_coefficient(mat), us, d_up_down_mlt)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
