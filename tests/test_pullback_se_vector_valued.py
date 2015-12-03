@@ -42,24 +42,29 @@ class TestPullBackVectorValued(unittest.TestCase):
                 (m, 0, 0, 0), _Z_U_ring(r_pol), [n, 0, 0, 0], base_ring=_Z_U_ring)
             self.assertEqual(r_pol_diff, r_pol_diff_se)
 
-    @skip("not ok")
+    # @skip("ok")
     def test_pullback_diff_eisen_sym2_wt14(self):
         M = vvsmf(2, 14, 5)
-        u1, u2 = _U_ring.gens()
-        monoms = [u1 ** 2, u1 * u2, u2 ** 2]
+        u1, _ = _U_ring.gens()
         # cusp form
         f = M.eigenform_with_eigenvalue_t2(QQ(-19200))
         f = f * f[(1, 1, 1), 0] ** (-1)
         A = tpl_to_half_int_mat((1, 1, 1))
         D = A
-        fc_111 = fc_of_pullback_of_diff_eisen(12, 14, 2, A, D, 1, 1)
+
+        def fc_pb(a):
+            return fc_of_pullback_of_diff_eisen(12, 14, 2, a, D, 1, 1)
+
+        fc_111 = fc_pb(A)
         a0 = fc_111[u1 ** 2]
-        self.assertEqual(
-            sum(a * b for a, b in zip(monoms, f[(1, 1, 1)].vec)), fc_111 / a0)
-        t2 = (2, 1, 3)
-        A1 = tpl_to_half_int_mat(t2)
-        self.assertEqual(sum(a * b for a, b in zip(monoms, f[t2].vec)),
-                         fc_of_pullback_of_diff_eisen(12, 14, 2, A1, D, 1, 1) / a0)
+
+        def assert_eq(t):
+            a = tpl_to_half_int_mat(t)
+            self.assertEqual(f[t]._to_pol(), fc_pb(a) / a0)
+
+        assert_eq((1, 1, 1))
+        assert_eq((2, 1, 3))
+        assert_eq((2, 0, 3))
 
     @skip("ok")
     def test_pullback_diff_eisen_scalar_wt12(self):
