@@ -153,15 +153,24 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
     vecs = [(T2 ** i) * pull_back_vec for i in range(d)]
     ei = [sum(f[t] * a for f, a in zip(S.basis(), v)) for v in vecs]
     chply = T2.charpoly()
+    nume = first_elt_of_kern_of_vadermond(chply, lam, ei)
+    denom = f[int(A1[0, 0]), int(2 * A1[0, 1]), int(A1[1, 1])] * f[t]
+    return nume / denom
+
+
+def first_elt_of_kern_of_vadermond(chply, lam, beta_vec):
+    '''
+    Cf. Goto lemma 2.2, a twisted adjoint L-value of an elliptic modular form.
+    '''
     x = chply.parent().gens()[0]
+    d = chply.degree()
     phi_d_lam = chply.diff(x).subs({x: lam})
     if phi_d_lam == 0:
         raise ZeroDivisionError("Phi'(lambda) = 0")
     else:
-        num = sum(sum(ei[d - 1 - j] * chply[d - j + i] for j in range(i, d))
+        num = sum(sum(beta_vec[d - 1 - j] * chply[d - j + i] for j in range(i, d))
                   * lam ** i for i in range(d))
-        return num / (phi_d_lam * f[int(A1[0, 0]), int(2 * A1[0, 1]), int(A1[1, 1])] *
-                      f[t])
+        return num / phi_d_lam
 
 
 def norm_of_normalized_alg_part_of_standard_l(f, l, space_of_cusp_form=None):
