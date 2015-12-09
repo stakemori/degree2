@@ -16,6 +16,7 @@ from sage.all import (cached_function, matrix, mul, QQ,
                       factorial, zeta)
 from sage.all import binomial as _binomial
 from itertools import combinations
+from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, first_elt_of_kern_of_vadermond
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 
@@ -290,3 +291,57 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
     return _U_ring(res.subs(sub_dct))
+
+
+def algebraic_part_of_standard_l(f, l, space_of_cuspforms):
+    r'''f: (vector valued) cuspidal eigenform of degree 2 of weight det^k Sym(j).
+    l: positive even integer such that 2 le l < k - 2.
+    space_of_cuspforms: space of cusp form that f belongs to.
+    Return the algebriac part of the standard L of f at l
+    cf. Katsurada, Takemori Congruence primes of the Kim-Ramakrishnan-Shahidi lift. Theorem 4.1.
+    '''
+    k = f.wt
+    j = f.sym_wt
+    t0 = f._none_zero_tpl()
+    D = tpl_to_half_int_mat(t0)
+    if not (l % 2 == 0 and 2 <= l < k - 2):
+        raise ValueError
+    if j > 0:
+        f_t0_pol = f[t0]._to_pol()
+        for u3 in xrange(1, 100):
+            for u4 in xrange(1, 100):
+                x, y = f_t0_pol.parent().gens()
+                f_t0_pol_val = f_t0_pol.subs({x: u3, y: u4})
+                u3_val = u3
+                u4_val = u4
+                if f_t0_pol != 0:
+                    break
+    else:
+        f_t0_pol_val = f[t0]
+        u3_val = u4_val = QQ(1)
+    tpls = space_of_cuspforms.linearly_indep_tuples()
+    u1, u2 = _U_ring.gens()
+    if j > 0:
+        pull_back_dct = {(t, i): fc_of_pullback_of_diff_eisen(
+            l + ZZ(2), k, f.sym_wt,
+            tpl_to_half_int_mat(t), D, u3_val, u4_val)[u1 ** (j - i) * u2 ** i]
+            for t, i in tpls}
+    else:
+        pull_back_dct = {t: fc_of_pullback_of_diff_eisen(
+            l + ZZ(2), k, f.sym_wt, tpl_to_half_int_mat(t), D, u3_val, u4_val) for t in tpls}
+        pull_back_dct = {k: v.constant_coefficient()
+                         for k, v in pull_back_dct.iteritems()}
+    pull_back_vec = space_of_cuspforms._to_vector(pull_back_dct)
+    T2 = space_of_cuspforms.hecke_matrix(2)
+    d = space_of_cuspforms.dimension()
+    vecs = [(T2 ** i) * pull_back_vec for i in range(d)]
+    ei = [sum(f[t0] * a for f, a in zip(space_of_cuspforms.basis(), v))
+          for v in vecs]
+    if j > 0:
+        ei = [a._to_pol() for a in ei]
+    chply = T2.charpoly()
+    nume = first_elt_of_kern_of_vadermond(chply, f.hecke_eigenvalue(2), ei)
+    denom = f[t0] * f_t0_pol_val
+    if j > 0:
+        denom = denom._to_pol()
+    return f.base_ring(nume / denom)
