@@ -293,7 +293,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     return _U_ring(res.subs(sub_dct))
 
 
-def algebraic_part_of_standard_l(f, l, space_of_cuspforms):
+def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
     r'''f: (vector valued) cuspidal eigenform of degree 2 of weight det^k Sym(j).
     l: positive even integer such that 2 le l < k - 2.
     space_of_cuspforms: space of cusp form that f belongs to.
@@ -324,11 +324,12 @@ def algebraic_part_of_standard_l(f, l, space_of_cuspforms):
     if j > 0:
         pull_back_dct = {(t, i): fc_of_pullback_of_diff_eisen(
             l + ZZ(2), k, f.sym_wt,
-            tpl_to_half_int_mat(t), D, u3_val, u4_val)[u1 ** (j - i) * u2 ** i]
+            tpl_to_half_int_mat(t), D, u3_val, u4_val, verbose=verbose)[u1 ** (j - i) * u2 ** i]
             for t, i in tpls}
     else:
         pull_back_dct = {t: fc_of_pullback_of_diff_eisen(
-            l + ZZ(2), k, f.sym_wt, tpl_to_half_int_mat(t), D, u3_val, u4_val) for t in tpls}
+            l + ZZ(2), k, f.sym_wt, tpl_to_half_int_mat(t), D, u3_val, u4_val,
+            verbose=verbose) for t in tpls}
         pull_back_dct = {k: v.constant_coefficient()
                          for k, v in pull_back_dct.iteritems()}
     pull_back_vec = space_of_cuspforms._to_vector(pull_back_dct)
