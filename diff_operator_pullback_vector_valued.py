@@ -272,6 +272,10 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     es = sess(weight=l, degree=4)
     r_ls_var = _Z_R_ring.gens()[:4]
     zr_pol = D_tilde_nu(l, k - l, QQ(1), r_ls_var, **dct)
+    # We differentiate zr_pol by Z m//2 times and substitue Z by 0. So we
+    # trancate it.
+    zr_pol = _Z_R_ring(
+        {t: v for t, v in zr_pol.dict().iteritems() if sum(list(t)[4:]) <= m // 2})
     if verbose:
         print "Done computation of zr_pol."
     us = list(_U_ring.gens()) + [u3, u4]
