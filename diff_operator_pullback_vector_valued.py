@@ -340,10 +340,12 @@ def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
     tpls = space_of_cuspforms.linearly_indep_tuples()
     u1, u2 = _U_ring.gens()
     if j > 0:
-        pull_back_dct = {(t, i): fc_of_pullback_of_diff_eisen(
+        pull_back_fc_dct = {t: fc_of_pullback_of_diff_eisen(
             l + ZZ(2), k, f.sym_wt,
-            tpl_to_half_int_mat(t), D, u3_val, u4_val, verbose=verbose)[u1 ** (j - i) * u2 ** i]
-            for t, i in tpls}
+            tpl_to_half_int_mat(t), D, u3_val, u4_val, verbose=verbose) for t
+            in set(t for t, i in tpls)}
+        pull_back_dct = {(t, i): pull_back_fc_dct[t][u1 ** (j - i) * u2 ** i]
+                         for t, i in tpls}
     else:
         pull_back_dct = {t: fc_of_pullback_of_diff_eisen(
             l + ZZ(2), k, f.sym_wt, tpl_to_half_int_mat(t), D, u3_val, u4_val,
