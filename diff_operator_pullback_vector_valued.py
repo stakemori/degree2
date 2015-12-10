@@ -263,6 +263,20 @@ def _zeta(s):
     return zeta(ZZ(s))
 
 
+def r_n_m_iter_slash_sgn(A, D):
+    '''R != 0, R/{+1, -1}
+    '''
+    for R, mat in r_n_m_iter(A, D):
+        if R[0, 0] > 0:
+            yield (R, mat)
+        elif R[0, 0] == 0 and R[0, 1] > 0:
+            yield (R, mat)
+        elif R[0, 0] == 0 and R[0, 1] == 0 and R[1, 0] > 0:
+            yield (R, mat)
+        elif R[0, 0] == 0 and R[0, 1] == 0 and R[1, 0] == 0 and R[1, 1] > 0:
+            yield (R, mat)
+
+
 def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     '''Return the Fourier coefficient of exp(2pi A Z1 + 2pi D Z2)
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
