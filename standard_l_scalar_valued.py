@@ -11,8 +11,6 @@ Original implementation was done by H. Katsurada by the wolfram language.
 from sage.all import (PolynomialRing, QQ, mul, ZZ, floor, sqrt,
                       matrix)
 
-# from siegel_series.impl import siegel_series_dim1, siegel_series_dim2, X
-# from siegel_series.local_invariants import xi_p
 from degree2.siegel_series.pullback_of_siegel_eisen import eisenstein_pullback_coeff
 from sage.all import zeta as _zeta
 
@@ -45,54 +43,6 @@ def _r_iter(n, m):
     sq = int(floor(2 * sqrt(n * m)))
     for r in range(-sq, sq + 1):
         yield r
-
-
-# def fourier_coefficient_of_siegel_eisen_deg4(k, A1, A2, R, mat):
-#     '''mat = block_matrix([[A1, R/2], [R.transpose()/2, A2]]).
-#     Return mat th Fourier coefficient of Siegel Eisenstein series of
-#     degree 4, of weight k
-#     Normalization is same as [Kat].
-#     '''
-#     const_term = zeta(3 - 2 * k) * zeta(5 - 2 * k) * zeta(1 - k)
-
-#     q1 = QuadraticForm(ZZ, 2 * A1)
-#     q2 = QuadraticForm(ZZ, 2 * A2)
-
-#     # Try to use Corollary 3.4, [Kat].
-#     p0 = 2
-#     a1_prm_facs = ZZ((2 * A1).det()).prime_factors()
-#     if set(a1_prm_facs).issubset(set([p0])) and ZZ((2 * A2).det()) % p0 != 0:
-#         bp0 = A1 - (R * A2 ** (-1) * R.transpose()) / ZZ(4)
-#         bnp0 = A2 - (R.transpose() * A1 ** (-1) * R) / ZZ(4)
-#         m = mat.rank()
-#         if m in [3, 4]:
-#             qbnp0 = QuadraticForm(ZZ, 2 * bnp0)
-#             qbp0 = QuadraticForm(ZZ, 2 * bp0)
-#             if m == 3:
-#                 _expnt = k - 1
-#                 siegel_series_poly = siegel_series_dim1
-#                 _es = sess(weight=k, degree=3)
-#                 u = non_deg_submatrix(mat)
-#                 l_part = _es._product_of_l_part(
-#                     (u * mat * u.transpose()).submatrix(nrows=3, ncols=3))
-#             else:
-#                 _es = sess(weight=k, degree=4)
-#                 l_part = _es._product_of_l_part(mat)
-#                 _expnt = k - 2
-#                 siegel_series_poly = siegel_series_dim2
-#             unram_fac = mul(siegel_series_poly(qbnp0, p).subs({X: xi_p(q1, p) * p ** _expnt})
-#                             for p in ZZ((2 * bnp0).det()).prime_factors() if p != p0)
-#             unram_fac = unram_fac * siegel_series_dim2(
-#                 qbp0, p0).subs({X: xi_p(q2, p0) * p0 ** _expnt})
-#         else:
-#             raise NotImplementedError
-
-#         fc_unnorm = l_part * unram_fac
-
-#     else:
-#         es = sess(weight=k, degree=4)
-#         fc_unnorm = es.fourier_coefficient(mat)
-#     return fc_unnorm * const_term
 
 
 def epsilon_tilde_l_k_degree2(l, k, A1, A2):
