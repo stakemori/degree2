@@ -16,7 +16,7 @@ from sage.all import (cached_function, matrix, mul, QQ,
                       factorial, zeta)
 from sage.all import binomial as _binomial
 from itertools import combinations
-from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, first_elt_of_kern_of_vadermond
+from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, first_elt_of_kern_of_vandermonde
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 
@@ -358,7 +358,7 @@ def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
     if j > 0:
         ei = [a._to_pol() for a in ei]
     chply = T2.charpoly()
-    nume = first_elt_of_kern_of_vadermond(chply, f.hecke_eigenvalue(2), ei)
+    nume = first_elt_of_kern_of_vandermonde(chply, f.hecke_eigenvalue(2), ei)
     denom = f[t0] * f_t0_pol_val
     if j > 0:
         denom = denom._to_pol()
