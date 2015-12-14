@@ -326,13 +326,15 @@ def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
         raise ValueError
     if j > 0:
         f_t0_pol = f[t0]._to_pol()
+        f_t0_pol_val = 0
         for u3 in xrange(1, 100):
             for u4 in xrange(1, 100):
-                x, y = f_t0_pol.parent().gens()
-                f_t0_pol_val = f_t0_pol.subs({x: u3, y: u4})
-                u3_val = u3
-                u4_val = u4
-                if f_t0_pol != 0:
+                if f_t0_pol_val == 0:
+                    x, y = f_t0_pol.parent().gens()
+                    f_t0_pol_val = f_t0_pol.subs({x: u3, y: u4})
+                    u3_val = u3
+                    u4_val = u4
+                else:
                     break
     else:
         f_t0_pol_val = f[t0]
