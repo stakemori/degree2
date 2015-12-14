@@ -60,9 +60,8 @@ def vector_valued_siegel_modular_forms(sym_wt, wt, prec,
 
     parity = wt % 2
     gen_consts, ignored_dct = consts_i_dct[(sym_wt, parity)]
-    _symj_cls = sym_j_give_wt_class(sym_wt, parity, gen_consts, ignored_dct,
-                                    data_directory=data_directory)
-    return _symj_cls(wt, prec)
+    return _Symj(wt, prec, data_directory=data_directory,
+                 j=sym_wt, gen_consts=gen_consts, ignored_dct=ignored_dct)
 
 
 class VectorValuedSiegelModularForms(HeckeModule):
@@ -179,23 +178,17 @@ class GivenWtBase(VectorValuedSiegelModularForms):
         return res
 
 
-def sym_j_give_wt_class(j, parity, gen_consts, ignored_dct,
-                        data_directory=data_dir):
-    '''Return a class for the module M_{det^wt Sym(j)}.
-    Here wt equiv parity mod 2.
-    '''
+class _Symj(GivenWtBase):
 
-    class _Symj(GivenWtBase):
+    def __init__(self, wt, prec, data_directory=data_dir, j=None, gen_consts=None,
+                 ignored_dct=None):
+        calculator = CalculatorVectValued(gen_consts, data_directory)
+        super(_Symj, self).__init__(j, wt, prec, calculator=calculator,
+                                    gen_consts=gen_consts)
+        self._ignored_dct = ignored_dct
 
-        def __init__(self, wt, prec, data_directory=data_dir):
-            calculator = CalculatorVectValued(gen_consts, data_directory)
-            super(_Symj, self).__init__(j, wt, prec, calculator=calculator,
-                                        gen_consts=gen_consts)
-
-        def _basis_const(self):
-            return self._basis_const_base(ignored_dct)
-
-    return _Symj
+    def _basis_const(self):
+        return self._basis_const_base(self._ignored_dct)
 
 
 def calculator_symj(j, parity, data_directory=data_dir):
