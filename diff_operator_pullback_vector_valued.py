@@ -118,8 +118,6 @@ _dZ_ring = PolynomialRing(QQ, names='dz11, dz12, dz21, dz22')
 
 _Z_dZ_ring = PolynomialRing(_Z_ring, names='dz11, dz12, dz21, dz22')
 
-_Z_R_ring = PolynomialRing(QQ, names="r11, r12, r21, r22, z11, z12, z21, z22")
-
 
 @cached_function
 def _z_u_ring_zgens():
@@ -168,15 +166,15 @@ class DiffZOperatorElement(object):
         return self._pol_idc_dct
 
     def diff(self, pol, r_ls):
-        '''pol is a polynomial in _Z_R_ring and R is a 2 by 2 marix.
+        '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
         Return (the derivative of pol * exp(2pi R^t Z)) / exp(R^t Z) as a polynomial.
         R = matrix(2, r_ls)
         '''
         try:
-            pol = _Z_R_ring(pol)
+            pol = _Z_ring(pol)
         except TypeError:
             raise NotImplementedError
-        return sum(v * _diff_z_exp(k, pol, r_ls, base_ring=_Z_R_ring)
+        return sum(v * _diff_z_exp(k, pol, r_ls, base_ring=_Z_ring)
                    for k, v in self.pol_idc_dct.items())
 
 
@@ -284,14 +282,6 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     dct = {"A": A, "D": D}
     res = _Z_U_ring(0)
     es = sess(weight=l, degree=4)
-    r_ls_var = _Z_R_ring.gens()[:4]
-    zr_pol = D_tilde_nu(l, k - l, QQ(1), r_ls_var, **dct)
-    # We differentiate zr_pol by Z m//2 times and substitue Z by 0. So we
-    # trancate it.
-    zr_pol = _Z_R_ring(
-        {t: v for t, v in zr_pol.dict().iteritems() if sum(list(t)[4:]) <= m // 2})
-    if verbose:
-        print "Done computation of zr_pol."
     us = list(_U_ring.gens()) + [u3, u4]
     # D_up is multiplication by d_up_mlt on p(z2)e(A Z1 + R^t Z12 + D Z2)
     v_up = vector(_U_ring, us[:2])
@@ -302,13 +292,18 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
 
     for R, mat in r_n_m_iter(A, D):
         r_ls = R.list()
-        pol = _Z_ring(zr_pol.subs({a: b for a, b in zip(r_ls_var, r_ls)}))
+        pol = D_tilde_nu(l, k - l, QQ(1), r_ls, **dct)
+        pol = _Z_ring(
+            {t: v for t, v in pol.dict().iteritems() if sum(list(t)) <= m // 2})
         res += L_operator(k, m, A, D, r_ls, pol *
                           es.fourier_coefficient(mat), us, d_up_down_mlt)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
-    return _U_ring(res.subs(sub_dct))
+    res = _U_ring(res.subs(sub_dct))
+    if verbose:
+        print "Done computation of Fourier coefficient of pullback."
+    return res
 
 
 def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
