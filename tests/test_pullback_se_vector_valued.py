@@ -170,12 +170,13 @@ class TestPullBackVectorValued(unittest.TestCase):
         m = (matrix([f_vec, g_vec]).transpose()) ** (-1)
         self.assertEqual((m * vec)[0], a)
 
-    # @skip("Not ok")
+    # @skip("ok")
     def test_pullback_lin_comb1(self):
         M, f, _ = _wt10_13_space_forms()
-        self.assert_pullback_lin_comb(M, f, 6, [(1, 1, 2), (2, 1, 2)])
+        self.assert_pullback_lin_comb(
+            M, f, 6, [(1, 1, 2), (2, 1, 2)], verbose=True)
 
-    def assert_pullback_lin_comb(self, M, f, l, ts):
+    def assert_pullback_lin_comb(self, M, f, l, ts, verbose=False):
         j = f.sym_wt
         k = f.wt
         t0 = f._none_zero_tpl()
@@ -187,6 +188,8 @@ class TestPullBackVectorValued(unittest.TestCase):
         for t in ts:
             A = tpl_to_half_int_mat(t)
             fc = fc_of_pullback_of_diff_eisen(l, k, j, A, D, u3_val, u4_val)
+            if verbose:
+                print "Checking for t = %s" % (t, )
             if j > 0:
                 self.assertEqual(fc, f_vec[t]._to_pol())
             else:
