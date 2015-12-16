@@ -293,8 +293,10 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     for R, mat in r_n_m_iter(A, D):
         r_ls = R.list()
         pol = D_tilde_nu(l, k - l, QQ(1), r_ls, **dct)
+        # L_operator is a differential operator whose order <= m,
+        # we truncate it.
         pol = _Z_ring(
-            {t: v for t, v in pol.dict().iteritems() if sum(list(t)) <= m // 2})
+            {t: v for t, v in pol.dict().iteritems() if sum(list(t)) <= m})
         res += L_operator(k, m, A, D, r_ls, pol *
                           es.fourier_coefficient(mat), us, d_up_down_mlt)
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
