@@ -406,6 +406,10 @@ class AbstSpaceOfLevel1(HeckeModule):
         idcs = linearly_indep_rows_index_list(ml, dim)
         return [tpls[i] for i in idcs]
 
+    @property
+    def sym_wt(self):
+        return ZZ(0)
+
 
 class SpaceOfModForms(AbstSpaceOfLevel1):
 
