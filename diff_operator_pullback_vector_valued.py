@@ -306,6 +306,57 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     return res
 
 
+def _pullback_vector(l, D, u3, u4, space_of_cuspforms, verbose=False):
+    '''Return a vector corresponding to pullback of Eisenstein series.
+    '''
+    k = space_of_cuspforms.wt
+    j = space_of_cuspforms.sym_wt
+    tpls = space_of_cuspforms.linearly_indep_tuples()
+    u1, u2 = _U_ring.gens()
+    if j > 0:
+        pull_back_fc_dct = {t: fc_of_pullback_of_diff_eisen(
+            l, k, j, tpl_to_half_int_mat(t), D, u3, u4, verbose=verbose) for t
+            in set(t for t, i in tpls)}
+        pull_back_dct = {(t, i): pull_back_fc_dct[t][u1 ** (j - i) * u2 ** i]
+                         for t, i in tpls}
+    else:
+        pull_back_dct = {t: fc_of_pullback_of_diff_eisen(
+            l, k, j, tpl_to_half_int_mat(t), D, u3, u4,
+            verbose=verbose) for t in tpls}
+        pull_back_dct = {k: v.constant_coefficient()
+                         for k, v in pull_back_dct.iteritems()}
+    return space_of_cuspforms._to_vector(pull_back_dct)
+
+
+def _u3_u4_gen():
+    s = 1
+    while True:
+        for a in range(s + 1):
+            yield (a, s - a)
+        s += 1
+
+
+def _u3_u4_nonzero(f, t0):
+    '''
+    Return (u3, u4, f[t0](u3, u4)) such that f[t0](u3, u4) != 0.
+    '''
+    if f.sym_wt > 0:
+        f_t0_pol = f[t0]._to_pol()
+        f_t0_pol_val = 0
+        for u3, u4 in _u3_u4_gen():
+            if f_t0_pol_val == 0:
+                x, y = f_t0_pol.parent().gens()
+                f_t0_pol_val = f_t0_pol.subs({x: u3, y: u4})
+                u3_val = u3
+                u4_val = u4
+            else:
+                break
+    else:
+        f_t0_pol_val = f[t0]
+        u3_val = u4_val = QQ(1)
+    return (u3_val, u4_val, f_t0_pol_val)
+
+
 def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
     r'''f: (vector valued) cuspidal eigenform of degree 2 of weight det^k Sym(j).
     l: positive even integer such that 2 le l < k - 2.
@@ -319,37 +370,9 @@ def algebraic_part_of_standard_l(f, l, space_of_cuspforms, verbose=False):
     D = tpl_to_half_int_mat(t0)
     if not (l % 2 == 0 and 2 <= l < k - 2):
         raise ValueError
-    if j > 0:
-        f_t0_pol = f[t0]._to_pol()
-        f_t0_pol_val = 0
-        for u3 in xrange(1, 100):
-            for u4 in xrange(1, 100):
-                if f_t0_pol_val == 0:
-                    x, y = f_t0_pol.parent().gens()
-                    f_t0_pol_val = f_t0_pol.subs({x: u3, y: u4})
-                    u3_val = u3
-                    u4_val = u4
-                else:
-                    break
-    else:
-        f_t0_pol_val = f[t0]
-        u3_val = u4_val = QQ(1)
-    tpls = space_of_cuspforms.linearly_indep_tuples()
-    u1, u2 = _U_ring.gens()
-    if j > 0:
-        pull_back_fc_dct = {t: fc_of_pullback_of_diff_eisen(
-            l + ZZ(2), k, f.sym_wt,
-            tpl_to_half_int_mat(t), D, u3_val, u4_val, verbose=verbose) for t
-            in set(t for t, i in tpls)}
-        pull_back_dct = {(t, i): pull_back_fc_dct[t][u1 ** (j - i) * u2 ** i]
-                         for t, i in tpls}
-    else:
-        pull_back_dct = {t: fc_of_pullback_of_diff_eisen(
-            l + ZZ(2), k, f.sym_wt, tpl_to_half_int_mat(t), D, u3_val, u4_val,
-            verbose=verbose) for t in tpls}
-        pull_back_dct = {k: v.constant_coefficient()
-                         for k, v in pull_back_dct.iteritems()}
-    pull_back_vec = space_of_cuspforms._to_vector(pull_back_dct)
+    u3_val, u4_val, f_t0_pol_val = _u3_u4_nonzero(f, t0)
+    pull_back_vec = _pullback_vector(
+        l + ZZ(2), D, u3_val, u4_val, space_of_cuspforms, verbose=verbose)
     T2 = space_of_cuspforms.hecke_matrix(2)
     d = space_of_cuspforms.dimension()
     vecs = [(T2 ** i) * pull_back_vec for i in range(d)]
