@@ -10,7 +10,7 @@ from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
-from siegel_series.tests.utils import random_even_symm_mat
+from ..siegel_series.tests.utils import random_even_symm_mat
 from degree2.all import CuspFormsDegree2
 from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, G_poly
 
