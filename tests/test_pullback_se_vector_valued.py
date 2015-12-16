@@ -2,16 +2,25 @@
 import unittest
 from degree2.diff_operator_pullback_vector_valued import (
     bracket_power, ad_bracket, _Z_U_ring, _diff_z_exp,
-    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul, D_tilde_nu)
+    fc_of_pullback_of_diff_eisen, _U_ring, sqcap_mul, D_tilde_nu,
+    algebraic_part_of_standard_l, _pullback_vector, _u3_u4_nonzero)
 from sage.all import (random_matrix, QQ, binomial, identity_matrix, exp,
                       random_vector, symbolic_expression, ZZ, derivative,
-                      block_matrix)
+                      block_matrix, matrix, cached_function)
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.scalar_valued_smfs import x12_with_prec, x35_with_prec
 from unittest import skip
 from siegel_series.tests.utils import random_even_symm_mat
 
 from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, G_poly
+
+
+@cached_function
+def _wt10_13_space_forms():
+    M = vvsmf(10, 13, prec=4)
+    f = M.eigenform_with_eigenvalue_t2(QQ(84480))
+    g = M.eigenform_with_eigenvalue_t2(QQ(-52800))
+    return (M, f, g)
 
 
 class TestPullBackVectorValued(unittest.TestCase):
@@ -42,7 +51,7 @@ class TestPullBackVectorValued(unittest.TestCase):
                 (m, 0, 0, 0), _Z_U_ring(r_pol), [n, 0, 0, 0], base_ring=_Z_U_ring)
             self.assertEqual(r_pol_diff, r_pol_diff_se)
 
-    # @skip("ok")
+    @skip("ok")
     def test_pullback_diff_eisen_sym2_wt14(self):
         M = vvsmf(2, 14, 5)
         u1, _ = _U_ring.gens()
@@ -147,6 +156,36 @@ class TestPullBackVectorValued(unittest.TestCase):
             for k, nu in [(10, 2), (10, 4), (12, 6)]:
                 self.assertEqual(scalar_valued_diff_pol_1(k, nu, t1, t4, t2),
                                  scalar_valued_diff_pol_2(k, nu, t1, t4, t2))
+
+    @skip("OK")
+    def test_pullback_lin_comb(self):
+        M, f, g = _wt10_13_space_forms()
+        t0 = f._none_zero_tpl()
+        D = tpl_to_half_int_mat(t0)
+        u3_val, u4_val, f_t0_pol_val = _u3_u4_nonzero(f, t0)
+        vec = _pullback_vector(ZZ(6), D, u3_val, u4_val, M) / f_t0_pol_val
+        a = algebraic_part_of_standard_l(f, ZZ(4), M)
+        f_vec = M._to_vector(f)
+        g_vec = M._to_vector(g)
+        m = (matrix([f_vec, g_vec]).transpose()) ** (-1)
+        self.assertEqual((m * vec)[0], a)
+
+    def test_pullback_lin_comb1(self):
+        M, f, _ = _wt10_13_space_forms()
+        t0 = f._none_zero_tpl()
+        D = tpl_to_half_int_mat(t0)
+        u3_val, u4_val, _ = _u3_u4_nonzero(f, t0)
+        l = ZZ(6)
+        vec = _pullback_vector(l, D, u3_val, u4_val, M)
+        f_vec = M._to_form(vec)
+
+        def _assert(t):
+            A = tpl_to_half_int_mat(t)
+            fc = fc_of_pullback_of_diff_eisen(l, 13, 10, A, D, u3_val, u4_val)
+            self.assertEqual(fc, f_vec[t]._to_pol())
+
+        _assert((1, 1, 2))
+        _assert((2, 1, 2))
 
 
 def delta_al_be(t1, t2, t4, z2, al, be):
