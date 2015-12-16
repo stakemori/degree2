@@ -266,7 +266,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     of pullback of vector valued Eisenstein series F_{l, (k, m)} in [DIK], pp 1313.
     '''
     dct = {"A": A, "D": D}
-    res = _Z_U_ring(0)
+    res = _U_ring(0)
     es = sess(weight=l, degree=4)
     us = list(_U_ring.gens()) + [u3, u4]
     # D_up is multiplication by d_up_mlt on p(z2)e(A Z1 + R^t Z12 + D Z2)
@@ -275,7 +275,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     v_down = vector(us[2:])
     d_down_mlt = v_down * D * v_down
     d_up_down_mlt = d_up_mlt * d_down_mlt
-
+    _u1, _u2 = (_Z_U_ring(a) for a in ["u1", "u2"])
     for R, mat in r_n_m_iter(A, D):
         r_ls = R.list()
         pol = D_tilde_nu(l, k - l, QQ(1), r_ls, **dct)
@@ -283,12 +283,13 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
         # we truncate it.
         pol = _Z_ring(
             {t: v for t, v in pol.dict().iteritems() if sum(list(t)) <= m})
-        res += L_operator(k, m, A, D, r_ls, pol *
-                          es.fourier_coefficient(mat), us, d_up_down_mlt)
+        _l_op_tmp = L_operator(k, m, A, D, r_ls, pol *
+                               es.fourier_coefficient(mat), us, d_up_down_mlt)
+        _l_op_tmp = _U_ring({(m - a, a): _l_op_tmp[_u1 ** (m - a) * _u2 ** a]
+                             for a in range(m + 1)})
+        res += _l_op_tmp
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
-    sub_dct = {a: QQ(0) for a in _z_u_ring_zgens()}
-    res = _U_ring(res.subs(sub_dct))
     if verbose:
         print "Done computation of Fourier coefficient of pullback."
     return res
