@@ -102,7 +102,6 @@ def _rankin_cohen_bracket_func(Q, rnames=None, unames=None):
     Q = S(Q)
     j = Q.degree()
 
-    @fork
     def monom_mul(tpl, v, flist):
         tpls = group(tpl, 3)
         l = zip(flist, tpls)
