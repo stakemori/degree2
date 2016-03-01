@@ -502,8 +502,8 @@ class SymTensorRepElt(object):
     def __neg__(self):
         return self.__mul__(-1)
 
-    def __sub__(self):
-        return self.__add__(self.__neg__())
+    def __sub__(self, other):
+        return self.__add__(other.__neg__())
 
     def __div__(self, other):
         if isinstance(other, SymTensorRepElt):
