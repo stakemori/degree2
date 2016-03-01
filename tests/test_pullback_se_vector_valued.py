@@ -170,7 +170,7 @@ class TestPullBackVectorValued(unittest.TestCase):
         m = (matrix([f_vec, g_vec]).transpose()) ** (-1)
         self.assertEqual((m * vec)[0], a)
 
-    # @skip("ok")
+    @skip("ok")
     def test_pullback_lin_comb1(self):
         M, f, _ = _wt10_13_space_forms()
         self.assert_pullback_lin_comb(
@@ -200,6 +200,20 @@ class TestPullBackVectorValued(unittest.TestCase):
         S14 = CuspFormsDegree2(14, prec=4)
         f = S14.basis()[0]
         self.assert_pullback_lin_comb(S14, f, 6, [(1, 1, 2), (2, 1, 2)])
+
+    @skip("OK")
+    def test_pullback_linear_comb2(self):
+        M, f, g = _wt10_13_space_forms()
+        a = algebraic_part_of_standard_l(f, 10, M)
+        b = algebraic_part_of_standard_l(g, 10, M)
+        t0 = f._none_zero_tpl()
+        u3_val, u4_val, _ = _u3_u4_nonzero(f, t0)
+        u3, u4 = f[t0]._to_pol().parent().gens()
+        af = f[t0]._to_pol().subs({u3: u3_val, u4: u4_val})
+        ag = g[t0]._to_pol().subs({u3: u3_val, u4: u4_val})
+        A = tpl_to_half_int_mat(t0)
+        self.assertEqual((f[t0] * af * a + g[t0] * ag * b)._to_pol(),
+                         fc_of_pullback_of_diff_eisen(12, 13, 10, A, A, u3_val, u4_val))
 
 
 def delta_al_be(t1, t2, t4, z2, al, be):

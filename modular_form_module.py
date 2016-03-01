@@ -84,14 +84,15 @@ class ModularFormModule(object):
             res.set_parent_space(self)
         return res
 
-    def _to_vector(self, fm):
+    def _to_vector(self, fm, tpls=None):
         '''
         Returns a vector corresponding to fm.
         By this method, self.basis() becomes the standard basis.
         '''
-        lin_indep_tuples = self.linearly_indep_tuples()
-        m1 = matrix([[f[t] for t in lin_indep_tuples] for f in self.basis()])
-        v = vector([fm[t] for t in lin_indep_tuples])
+        if tpls is None:
+            tpls = self.linearly_indep_tuples()
+        m1 = matrix([[f[t] for t in tpls] for f in self.basis()])
+        v = vector([fm[t] for t in tpls])
         return v * m1 ** (-1)
 
     def _to_form(self, v):
