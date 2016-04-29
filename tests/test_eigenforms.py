@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
+import operator
 
-import os.path as opath
-from sage.all import NumberField, QQ, var, Integer, ZZ, PolynomialRing, load
+from sage.all import NumberField, QQ, var, Integer, ZZ, PolynomialRing
 
 from degree2.scalar_valued_smfs import (
     eisenstein_series_degree2, x10_with_prec,
@@ -10,15 +10,12 @@ from degree2.scalar_valued_smfs import (
     KlingenEisensteinAndCuspForms,
     CuspFormsDegree2)
 
-import operator
 
-data_dir = opath.join(opath.dirname(opath.abspath(__file__)),
-                      "data",
-                      "eigen_forms")
+from .data_dir import load_from_data_dir
 
 
 def load_cache(fl):
-    return load(opath.join(data_dir, fl))
+    return load_from_data_dir(fl, "eigen_forms")
 
 
 def _alpha20_3():

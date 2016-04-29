@@ -26,6 +26,8 @@ from degree2.vector_valued_smfs \
     import vector_valued_siegel_modular_forms \
     as vvld_smfs
 
+from .data_dir import data_dir
+
 
 class TestVectorValued(unittest.TestCase):
     # @skip("OK")
@@ -51,12 +53,10 @@ class TestVectorValued(unittest.TestCase):
 
     # @skip("OK")
     def test_differential_operator(self):
-        data_dir = opath.join(opath.dirname(opath.abspath(__file__)),
-                              "data",
-                              "vector_valued_differential")
 
         def load_cache(f):
-            return SymWtModFmElt.load_from(opath.join(data_dir, f))
+            return SymWtModFmElt.load_from(opath.join(
+                data_dir("vector_valued_differential"), f))
 
         p_e4_e4 = load_cache("pair_sym4_e4_e4_prec7.sobj")
         p_e4_x10 = load_cache("pair_sym4_e4_x10_prec7.sobj")
