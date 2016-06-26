@@ -420,6 +420,7 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
     def __init__(self, wt, prec=False):
         self.__wt = wt
         self.__prec = wt // 10 * 2 if prec is False else prec
+        self.__basis = None
 
     @property
     def wt(self):
@@ -432,7 +433,9 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
     def dimension(self):
         return dimension_degree2(self.wt)
 
-    @cached_method
+    def _set_basis(self, bs):
+        self.__basis = bs
+
     def basis(self):
         '''
         Returns the list of the basis.
@@ -440,38 +443,42 @@ class SpaceOfModForms(AbstSpaceOfLevel1):
         how one can construct the modular form as a polynomial
         of es4, es6, x10, x12 and x35.
         '''
+        if self.__basis is not None:
+            return self.__basis
         ple4, ple6, plx10, plx12, plx35 = RDeg2.gens()
         prec = self.prec
         if self.dimension() == 0:
-            return []
+            res = []
         if self.wt == 0:
             a = _number_to_hol_modform(QQ(1), prec)
             a._set_construction(RDeg2(1))
-            return [a]
+            res = [a]
         elif self.wt == 35:
             x35 = x35_with_prec(prec)
             x35._set_construction(plx35)
-            return [x35]
+            res = [x35]
         elif self.wt % 2 == 1:
             x35 = x35_with_prec(prec)
             bs = SpaceOfModForms(self.wt - 35, prec).basis()
-            l = []
+            res = []
             for a in bs:
                 b = x35 * a
                 b._set_construction(a._construction * plx35)
-                l.append(b)
-            return l
-        # if wt is even
-        es4 = eisenstein_series_degree2(4, prec)
-        es6 = eisenstein_series_degree2(6, prec)
-        x10 = x10_with_prec(prec)
-        x12 = x12_with_prec(prec)
-        tuples = tuples_even_wt_modular_forms(self.wt)
-        res = []
-        for (p, q, r, s) in tuples:
-            a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
-            a._construction = ple4 ** p * ple6 ** q * plx10 ** r * plx12 ** s
-            res.append(a)
+                res.append(b)
+        else:
+            # if wt is even
+            es4 = eisenstein_series_degree2(4, prec)
+            es6 = eisenstein_series_degree2(6, prec)
+            x10 = x10_with_prec(prec)
+            x12 = x12_with_prec(prec)
+            tuples = tuples_even_wt_modular_forms(self.wt)
+            res = []
+            for (p, q, r, s) in tuples:
+                a = es4 ** p * es6 ** q * x10 ** r * x12 ** s
+                a._construction = ple4 ** p * \
+                    ple6 ** q * plx10 ** r * plx12 ** s
+                res.append(a)
+        self.__basis = res
         return res
 
 

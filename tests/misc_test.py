@@ -11,11 +11,12 @@ from degree2.scalar_valued_smfs import (KlingenEisensteinAndCuspForms,
                                         x10_with_prec,
                                         x12_with_prec,
                                         x5__with_prec,
-                                        degree2_modular_forms_ring_level1_gens)
+                                        degree2_modular_forms_ring_level1_gens,
+                                        SpaceOfModForms)
 
 from degree2.rankin_cohen_diff import rankin_cohen_pair_sym
 
-from sage.all import matrix, mod
+from sage.all import matrix, mod, QQ
 from degree2.hecke_module import HalfIntegralMatrices2
 from degree2.utils import linearly_indep_rows_index_list, pmap
 
@@ -125,6 +126,15 @@ class TestDeg2fcFunctions(unittest.TestCase):
         self.assertEqual(x5 * es4, es4 * x5)
         self.assertEqual((x5 + x5 * es4) * x5, x10 + x10 * es4)
 
+    def test_basis_of_scalar_valued(self):
+        for k in [12, 16, 35, 37, 47]:
+            M = SpaceOfModForms(k, prec=k // 10)
+            dm = M.dimension()
+            self.assertEqual(dm, len(M.basis()))
+            tpls = M.linearly_indep_tuples()
+            self.assertTrue(all(f.wt == k for f in M.basis()))
+            self.assertTrue(
+                matrix([[f[t] for f in M.basis()] for t in tpls]).change_ring(QQ).is_invertible())
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDeg2fcFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
