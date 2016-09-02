@@ -219,7 +219,7 @@ class HeckeModuleElement(object):
         for i, t, _ in self._hecke_tp2_sum_alst(p, tpl):
             res += nd_tpls(i, t)
         return [(n, r, m) for n, r, m in res
-                if not (n % p, r % p, m % p) == (0, 0, 0)]
+                if (n % p, r % p, m % p) != (0, 0, 0)]
 
     def _hecke_eigen_needed_tuples(self, m):
         tpl = self._none_zero_tpl()
