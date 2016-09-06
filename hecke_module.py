@@ -490,11 +490,10 @@ class SymTensorRepElt(object):
     def __rmul__(self, other):
         if is_number(other):
             return self.__mul__(other)
-        elif isinstance(other, list) or (
-            hasattr(other, "parent") and
-            isinstance(
-                other.parent(),
-                sage.matrix.matrix_space.MatrixSpace)):
+        elif isinstance(other, list) or (hasattr(other, "parent") and
+                                         isinstance(
+                                             other.parent(),
+                                             sage.matrix.matrix_space.MatrixSpace)):
             return self.group_action(other)
         else:
             raise NotImplementedError
