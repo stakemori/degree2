@@ -107,7 +107,4 @@ class ModularFormModule(object):
         precision, then return True otherwise False.
         f may not be contained in self even if this method returns True.
         '''
-        if self._to_form(self._to_vector(f)) == f:
-            return True
-        else:
-            return False
+        return self._to_form(self._to_vector(f)) == f
