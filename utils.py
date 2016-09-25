@@ -35,10 +35,8 @@ def partition_weighted(l, n, weight_fn=None):
     if n == 1:
         return [l]
 
-    if weight_fn is None:
-        weight_fn = lambda x: 1
-
-    idx_list = _partition([weight_fn(x) for x in l], n)
+    idx_list = _partition([weight_fn(x) for x in l]
+                          if weight_fn is not None else [1 for _ in l], n)
     return [[l[i] for i in idl] for idl in idx_list]
 
 
@@ -208,25 +206,16 @@ def find_linearly_indep_indices(vectors, r):
     such that the rank of [vectors[i] for i in I] is equal to r.
     '''
     acc = []
-    ncls = len(vectors[0])
     if isinstance(vectors[0], list):
         vectors = [vector(a) for a in vectors]
     while True:
         if r == 0:
             return acc
         nrws = len(vectors)
-        for a, i in zip(vectors, range(nrws)):
-            if a != 0:
-                first = a
-                first_r_idx = i
-                break
+        first, first_r_idx = next((a, i) for i, a in enumerate(vectors) if a != 0)
 
-        for j in range(ncls):
-            if not first[j] == 0:
-                a = first[j]
-                v = a ** (-1) * first
-                nonzero_col_index = j
-                break
+        nonzero_col_index, a = next((j, a) for j, a in enumerate(first) if a != 0)
+        v = a ** (-1) * first
 
         vectors1 = []
         for j in range(first_r_idx + 1, nrws):
