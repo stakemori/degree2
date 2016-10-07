@@ -137,12 +137,13 @@ class HeckeModuleElement(object):
         return ([t for t, _ in self._hecke_tp_psum_alst(p, tpl)] +
                 [(p * n, p * r, p * m)])
 
-    def _hecke_tp2(self, p, tpl):
+    def _hecke_tp2_for_eigenform(self, p, tpl, lambda_p=None):
         '''
-        Returns tpls-th Fourier coefficient of T(p^2)(self), where p : prime.
+        Assuming self is an eigenform,
+        returns tpls-th Fourier coefficient of T(p^2)(self), where p : prime
+        and lambda_p is the eigenvalue for T(p).
         cf Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
         '''
-        lmp = self.hecke_eigenvalue(p)
         # Assume we know the Hecke eigenvalue for T(p), and return p**i * t th
         # Fourier coeff.
 
@@ -160,10 +161,18 @@ class HeckeModuleElement(object):
                     b = idc(*u)
                     alst.append((b[0], b[1], v))
                 psum = sum([v * fc(e, u) for e, u, v in alst])
-                return lmp * fc(i - 1, t) - psum
+                return lambda_p * fc(i - 1, t) - psum
 
         return sum([v * fc(i, t)
                     for i, t, v in self._hecke_tp2_sum_alst(p, tpl)])
+
+    def _hecke_tp2(self, p, tpl):
+        '''
+        Returns tpls-th Fourier coefficient of T(p^2)(self), where p : prime
+        cf Andrianov, Zhuravlev, Modular Forms and Hecke Operators, pp 242.
+        '''
+        return sum(v * self[(p**i * n, p**i * r, p**i * m)] for
+                   i, (n, r, m), v in self._hecke_tp2_sum_alst(p, tpl))
 
     @cached_method
     def _hecke_tp2_sum_alst(self, p, tpl):
@@ -299,7 +308,12 @@ class HeckeModuleElement(object):
         K = self.base_ring
         if hasattr(K, "fraction_field"):
             K = K.fraction_field()
-        return K(self.hecke_operator(m, t) / self[t])
+        if self.sym_wt == 0 and ZZ(m).is_prime_power() and factor(m)[0][1] == 2:
+            p = factor(m)[0][0]
+            lp = self.hecke_eigenvalue(p)
+            return K(self._hecke_tp2_for_eigenform(p, t, lp)) / self[t]
+        else:
+            return K(self.hecke_operator(m, t) / self[t])
 
     def euler_factor_of_spinor_l(self, p, var="x"):
         '''
