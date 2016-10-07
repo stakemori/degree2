@@ -61,6 +61,19 @@ cons20 = load_cache("cons20.sobj")
 cons47 = load_cache("cons47.sobj")
 
 
+def coerce_dict(d, fld):
+    if fld == QQ or fld == ZZ:
+        return d
+    return {k: fld(v.list()) if len(v.list()) > 1 else fld(v)
+            for k, v in d.items()}
+
+
+def coerce_pol(pl, fld):
+    if fld == QQ or fld == ZZ:
+        return pl
+    return pl.map_coefficients(lambda x: fld(x.list()) if len(x.list()) > 1 else fld(x), fld)
+
+
 class TestEigenforms(unittest.TestCase):
 
     def test_wt_20_eigen(self):
@@ -81,13 +94,14 @@ class TestEigenforms(unittest.TestCase):
 
         l = [f.normalize(f[(1, 1, 1)]) for f in l]
 
+        cons20[-1] = coerce_pol(cons20[-1], alpha20_3.parent())
         self.assertTrue(cons20 == [f._construction for f in l])
-        self.assertTrue([polynomial_to_form(c, 4) == f
-                         for c, f in zip(cons20, l)])
+        self.assertTrue(all(polynomial_to_form(c, 4) == f
+                            for c, f in zip(cons20, l)))
 
         dcts = [f20_1_dct, f20_2_dct, f20_3_dct]
 
-        self.assertTrue(all([d == f.fc_dct for d, f in zip(dcts, l)]))
+        self.assertTrue(all(coerce_dict(d, f.base_ring) == f.fc_dct for d, f in zip(dcts, l)))
 
     def test_wt_20_cusp_eigen(self):
         S20 = CuspFormsDegree2(20)
@@ -109,7 +123,7 @@ class TestEigenforms(unittest.TestCase):
 
         dcts = [f20_2_dct, f20_3_dct]
 
-        self.assertTrue(all([d == f.fc_dct for d, f in zip(dcts, l)]))
+        self.assertTrue(all(coerce_dict(d, f.base_ring) == f.fc_dct for d, f in zip(dcts, l)))
 
     def test_wt_47_eigen(self):
         KS47 = KlingenEisensteinAndCuspForms(47)
@@ -117,17 +131,19 @@ class TestEigenforms(unittest.TestCase):
                    ZZ(34324755775488))
         x47 = KS47.eigenform_with_eigenvalue_t2(lambda2)
         x47 = x47.normalize(x47[(2, -1, 3)])
-        self.assertTrue(cons47[0] == x47._construction)
-        self.assertTrue(polynomial_to_form(cons47[0], x47.prec) == x47)
+        _const47 = coerce_pol(cons47[0], a47.parent())
+        self.assertTrue(_const47 == x47._construction)
+        self.assertTrue(polynomial_to_form(_const47, x47.prec) == x47)
 
-        self.assertTrue(x47.fc_dct == x47_fc_dct)
+        _x47_fc_dct = coerce_dict(x47_fc_dct, a47.parent())
+        self.assertTrue(x47.fc_dct == _x47_fc_dct)
 
         S47 = CuspFormsDegree2(47)
         x47 = S47.eigenform_with_eigenvalue_t2(lambda2)
         x47 = x47.normalize(x47[(2, -1, 3)])
-        self.assertTrue(cons47[0] == x47._construction)
+        self.assertTrue(_const47 == x47._construction)
 
-        self.assertTrue(x47.fc_dct == x47_fc_dct)
+        self.assertTrue(x47.fc_dct == _x47_fc_dct)
 
     def test_wt_35_eigenvalues(self):
         x35 = x35_with_prec([(12, 33, 27), (8, 35, 39), (34, -17, 51)])
