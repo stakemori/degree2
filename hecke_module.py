@@ -367,8 +367,12 @@ class HeckeModule(ModularFormModule):
         has no double eigenvalues,
         this method returns an eigenform whose eigenvalue is eigenvalue.
         '''
-        return self.eigenvector_with_eigenvalue(
+        res = self.eigenvector_with_eigenvalue(
             lambda f, t: f.hecke_operator(2, t), lm)
+        if self.is_eigen_form(res):
+            return res
+        else:
+            raise RuntimeError("This should not happen.")
 
     def is_eigen_form(self, f, tupls=False):
         if tupls is False:
