@@ -214,9 +214,8 @@ def x10_with_prec_inner(prec):
     es4 = eisenstein_series_degree2(4, prec)
     es6 = eisenstein_series_degree2(6, prec)
     es10 = eisenstein_series_degree2(10, prec)
-    chi10 = QQ(43867) * QQ(2 ** 12 * 3 ** 5 * 5 ** 2 * 7 * 53) ** (-1) * \
-        (es10 - es4 * es6)
-    res = - 2 ** 2 * chi10
+    res = QQ(4 * 43867) * QQ(2 ** 12 * 3 ** 5 * 5 ** 2 * 7 * 53) ** (-1) * \
+        (- es10 + es4 * es6)
     res._is_cuspidal = True
     res._is_gen = key
     Deg2global_gens_dict[key] = res
