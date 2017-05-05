@@ -376,6 +376,7 @@ def dimension_degree2(wt):
     else:
         return len(tuples_even_wt_modular_forms(wt - 35))
 
+
 RDeg2 = PolynomialRing(QQ, "es4, es6, x10, x12, x35")
 
 

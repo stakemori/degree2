@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from sage.all import PolynomialRing, QQ, matrix, ZZ, sqrt, floor
 import multiprocessing
 
 from degree2.basic_operation import PrecisionDeg2
-from degree2.elements import QexpLevel1, ModFormQexpLevel1
-from degree2.utils import mul, pmap, group
+from degree2.elements import ModFormQexpLevel1, QexpLevel1
+from degree2.utils import group, mul, pmap
+from sage.all import QQ, ZZ, PolynomialRing, floor, matrix, sqrt
 
 
 def _to_polynomial(f, val1):
@@ -15,8 +15,8 @@ def _to_polynomial(f, val1):
     I = R.ideal([q1 ** (prec + 1), q2 ** (prec + 1)])
     S = R.quotient_ring(I)
     res = sum([sum([f.fc_dct.get((n, r, m), 0) * QQ(val1) ** r
-                    for r in range(-int(floor(2 * sqrt(n * m))), int(floor(2 * sqrt(n * m))) + 1)])
-               * q1 ** n * q2 ** m
+                    for r in range(-int(floor(2 * sqrt(n * m))),
+                                   int(floor(2 * sqrt(n * m))) + 1)]) * q1 ** n * q2 ** m
                for n in range(prec + 1)
                for m in range(prec + 1)])
     return S(res)
@@ -31,7 +31,9 @@ def det_deg2(mat, autom=True,
     n = len(mat)
     bd = mat[0][0].prec.value
     forms_flatten = reduce(lambda x, y: x + y, mat)
-    func = lambda l: matrix(group(l, n)).det()
+
+    def func(l):
+        return matrix(group(l, n)).det()
     if autom:
         return calc_forms(func, forms_flatten,
                           bd, autom=True, wt=wt, num_of_procs=num_of_procs)

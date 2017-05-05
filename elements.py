@@ -117,7 +117,7 @@ class FormalQexp(CommRingLikeElment):
         return to_sorted_fc_list(self.fc_dct)
 
     @abstractmethod
-    def _differential_operator_monomial(self, n, r, m):
+    def _differential_operator_monomial(self, a, b, c):
         pass
 
     def differentiate_wrt_tau(self):
@@ -803,8 +803,7 @@ class ModFormQexpLevel1(QexpLevel1, HeckeModuleElement):
 
     def _to_format_dct(self):
         d = {"wt": self.wt,
-             "construction": self._construction
-             if hasattr(self, "_construction") else None}
+             "construction": self._construction if hasattr(self, "_construction") else None}
         return dict(d.items() + QexpLevel1._to_format_dct(self).items())
 
     @classmethod
@@ -1131,7 +1130,8 @@ def divide(f, g, prec):
     '''
     Assume g is divisible by f. Returns g/f with precision prec.
     '''
-    key_func = lambda x: (x[0] + x[2], x[0], x[1], x[2])
+    def key_func(x):
+        return (x[0] + x[2], x[0], x[1], x[2])
     ts = sorted(PrecisionDeg2(prec), key=key_func)
     f_ts = sorted([k for k, v in f.fc_dct.items() if v != 0], key=key_func)
 

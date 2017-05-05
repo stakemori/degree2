@@ -141,8 +141,8 @@ class GivenWtBase(VectorValuedSiegelModularForms):
             return pl[self.wt]
         else:
             raise NotImplementedError(
-                "The dimensions of small determinant weights"
-                + " are not known in general.")
+                "The dimensions of small determinant weights" +
+                " are not known in general.")
 
     def _basis_const(self):
         '''This method should yield a generator that consists of an instance of

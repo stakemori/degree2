@@ -173,7 +173,7 @@ class PrecisionDeg2(object):
         res = {}
         for _, ls in grpd_by_rdf:
             a_tupl, _, a_sgn = ls[0]
-            res[a_tupl] = [(t, _sgn * a_sgn) for t, _, _sgn in ls]
+            res[a_tupl] = [(t, _sgn * a_sgn) for t, __, _sgn in ls]
         return res
 
     def __eq__(self, other):
@@ -283,7 +283,7 @@ def reduced_form_with_sign(tpl):
         raise RuntimeError("tpl must be definite.")
     sign = 1
     while True:
-        if n <= m and 0 <= r and r <= n:
+        if n <= m and r >= 0 and r <= n:
             return ((n, r, m), sign)
         if n > m:
             sign *= -1
