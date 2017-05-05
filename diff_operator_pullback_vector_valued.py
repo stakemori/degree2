@@ -11,12 +11,14 @@ Comment. Math. Univ. St. Pauli 42 (1992) 1 - 22.
 and Shafarevich-Tate groups.
 '''
 
-from sage.all import (cached_function, matrix, mul, QQ,
-                      PolynomialRing, identity_matrix, ZZ, vector,
-                      factorial, zeta)
-from sage.all import binomial as _binomial
 from itertools import combinations
-from degree2.standard_l_scalar_valued import tpl_to_half_int_mat, first_elt_of_kern_of_vandermonde
+
+from degree2.standard_l_scalar_valued import (first_elt_of_kern_of_vandermonde,
+                                              tpl_to_half_int_mat)
+from sage.all import binomial as _binomial
+from sage.all import (QQ, ZZ, PolynomialRing, cached_function, factorial,
+                      identity_matrix, matrix, mul, vector, zeta)
+
 from .siegel_series.pullback_of_siegel_eisen import r_n_m_iter
 from .siegel_series.siegel_eisenstein import SiegelEisensteinSeries as sess
 
@@ -82,9 +84,9 @@ def sqcap_mul(A, B, n, p, q):
                     if all(a not in add for a in ad) and all(b not in bdd for b in bd):
                         a = _concat(ad, add)
                         b = _concat(bd, bdd)
-                        s = (_sign(ad, add) * _sign(bd, bdd)
-                             * A[p_dct[bd], p_dct[ad]]
-                             * B[q_dct[bdd], q_dct[add]])
+                        s = (_sign(ad, add) * _sign(bd, bdd) *
+                             A[p_dct[bd], p_dct[ad]] *
+                             B[q_dct[bdd], q_dct[add]])
                         res[p_q_dct[b], p_q_dct[a]] += s
     return binomial(p + q, p) ** (-1) * res
 
@@ -218,6 +220,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
         pol = D_tilde(alpha + i, **kwds).diff(pol, r_ls)
     return pol
 
+
 # The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
 _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
@@ -231,7 +234,7 @@ def _D_D_up_D_down(u1, u2, v1, v2, r_ls, pol):
     return u1 * v1 * r11 + u1 * v2 * r12 + u2 * v1 * r21 + u2 * v2 * r22
 
 
-def L_operator(k, m, A, D, r_ls, pol, us, d_up_down_mlt):
+def L_operator(k, m, _A, _D, r_ls, pol, us, d_up_down_mlt):
     '''
     Return (k)_m * Fourier coefficient of
     L_tilde^{k, m}(pol exp(2pi block_matrix([[A, R/2], [R^t/2, D]])Z))/
@@ -250,8 +253,8 @@ def L_operator(k, m, A, D, r_ls, pol, us, d_up_down_mlt):
         for _ in range(n):
             pol_tmp *= d_up_down_mlt
 
-        pol_tmp *= QQ(factorial(n) * factorial(m - 2 * n)
-                      * mul(2 - k - m + i for i in range(n))) ** (-1)
+        pol_tmp *= QQ(factorial(n) * factorial(m - 2 * n) *
+                      mul(2 - k - m + i for i in range(n))) ** (-1)
 
         res += pol_tmp
     return res
@@ -303,9 +306,10 @@ def _pullback_vector(l, D, u3, u4, space_of_cuspforms, verbose=False):
     tpls = space_of_cuspforms.linearly_indep_tuples()
     u1, u2 = _U_ring.gens()
     if j > 0:
-        pull_back_fc_dct = {t: fc_of_pullback_of_diff_eisen(
-            l, k, j, tpl_to_half_int_mat(t), D, u3, u4, verbose=verbose) for t
-            in set(t for t, i in tpls)}
+        pull_back_fc_dct = {
+            t: fc_of_pullback_of_diff_eisen(
+                l, k, j, tpl_to_half_int_mat(t), D, u3, u4, verbose=verbose)
+            for t in set(t for t, i in tpls)}
         pull_back_dct = {(t, i): pull_back_fc_dct[t][u1 ** (j - i) * u2 ** i]
                          for t, i in tpls}
     else:

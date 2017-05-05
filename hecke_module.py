@@ -278,8 +278,7 @@ class HeckeModuleElement(object):
                 for gm in range(i + 1 - al - bt):
                     for u in reprs_of_double_cosets(p, bt):
                         u = matrix(u)
-                        res += (p ** (i * mu + bt - mu * al)
-                                * term(al, bt, gm, u))
+                        res += (p ** (i * mu + bt - mu * al) * term(al, bt, gm, u))
 
         return res
 
@@ -358,8 +357,8 @@ class HeckeModule(ModularFormModule):
     def hecke_matrix(self, a):
         return self.matrix_representaion(lambda f, t: f.hecke_operator(a, t))
 
-    def hecke_charpoly(self, a, var='x', algorithm='linbox'):
-        return self.hecke_matrix(a).charpoly(var, algorithm)
+    def hecke_charpoly(self, m, var='x', algorithm='linbox'):
+        return self.hecke_matrix(m).charpoly(var, algorithm)
 
     def eigenform_with_eigenvalue_t2(self, lm):
         '''

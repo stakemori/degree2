@@ -33,7 +33,7 @@ def diff_opetator_4(f1, f2, f3, f4):
     return res
 
 
-def rankin_cohen_triple_x5(Q, f, prec, i=2):
+def rankin_cohen_triple_x5(_Q, _f, _prec, _i=2):
     '''
     Deprecated.
     '''
@@ -41,7 +41,7 @@ def rankin_cohen_triple_x5(Q, f, prec, i=2):
                              " with x5__with_prec instead.")
 
 
-def rankin_cohen_pair_x5(Q, prec):
+def rankin_cohen_pair_x5(_Q, _prec):
     '''
     Deprecated.
     '''
@@ -211,8 +211,8 @@ def _rankin_cohen_pair_det2_sym_pol(j, k, l):
     detR = r11 * r22 - r12 ** 2
     detS = s11 * s22 - s12 ** 2
     # det(R+S)
-    detRpS = (-r12 ** 2 + r11 * r22 + r22 * s11 - QQ(2) * r12 * s12
-              - s12 ** 2 + r11 * s22 + s11 * s22)
+    detRpS = (-r12 ** 2 + r11 * r22 + r22 * s11 - QQ(2) * r12 * s12 -
+              s12 ** 2 + r11 * s22 + s11 * s22)
     Q2 = ((2 * k - 1) * (2 * l - 1) * detRpS - (2 * k - 1) * (2 * k + 2 * l - 1) * detS -
           (2 * l - 1) * (2 * k + 2 * l - 1) * detR)
     Q = (QQ(4) ** (-1) * Q2 * Q +
@@ -300,11 +300,11 @@ def _rankin_cohen_triple_det_sym4_pol(k1, k2, k3):
                   [r22, s22 ** 2, t22]])
 
     Q0 = (k2 + 1) * m00.det() - (k1 + 1) * m01.det()
-    Q1 = (2 * (k2 + 1) * m10.det() - 2 * (k1 + 1) * m11.det()
-          + (k2 + 1) * m12.det() - (k1 + 1) * m13.det())
+    Q1 = (2 * (k2 + 1) * m10.det() - 2 * (k1 + 1) * m11.det() +
+          (k2 + 1) * m12.det() - (k1 + 1) * m13.det())
     Q2 = 3 * (k2 + 1) * m20.det() - 3 * (k1 + 1) * m21.det()
-    Q3 = (2 * (k2 + 1) * m30.det() - 2 * (k1 + 1) * m31.det()
-          + (k2 + 1) * m32.det() - (k1 + 1) * m33.det())
+    Q3 = (2 * (k2 + 1) * m30.det() - 2 * (k1 + 1) * m31.det() +
+          (k2 + 1) * m32.det() - (k1 + 1) * m33.det())
     Q4 = (k2 + 1) * m40.det() - (k1 + 1) * m41.det()
 
     Q = Q0 * u1 ** 4 + Q1 * u1 ** 3 * u2 + Q2 * u1 ** 2 * \
@@ -400,8 +400,8 @@ def vector_valued_rankin_cohen(f, vec_val):
     This function returns a vector valued Siegel modular form
     of weight det^(k + l + 1) Sym(j).
     '''
-    if not (isinstance(f, (QexpLevel1, QseriesTimesQminushalf))
-            and isinstance(vec_val, SWGElt)):
+    if not (isinstance(f, (QexpLevel1, QseriesTimesQminushalf)) and
+            isinstance(vec_val, SWGElt)):
         raise TypeError("Arguments are invalid.")
 
     sym_wt = vec_val.sym_wt

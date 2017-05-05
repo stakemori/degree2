@@ -147,6 +147,7 @@ def latex_rankin_cohen(i, j, lcs):
     l = ", ".join([c for c in lcs])
     return "\\left\\{%s\\right\\}_{%s}" % (l, sub)
 
+
 scalar_mod_form_wts = {4: [[4]],
                        5: [[5]],
                        6: [[6]],
@@ -163,6 +164,7 @@ scalar_mod_form_wts = {4: [[4]],
 def _scalar_mod_form_consts():
     return {k: [ScalarModFormConst(a) for a in v] for k, v in
             scalar_mod_form_wts.items()}
+
 
 scalar_mod_form_consts = _scalar_mod_form_consts()
 
@@ -242,10 +244,7 @@ class ConstVectBase(object):
         if not os.path.exists(self._fname(data_dir)):
             return False
         f = self.load_form(data_dir)
-        if f.prec >= PrecisionDeg2(prec):
-            return True
-        else:
-            return False
+        return bool(f.prec >= PrecisionDeg2(prec))
 
     def _do_and_save(self, call_back, data_dir, force=False):
         '''Compute a modular form by call_back save the result to data_dir.

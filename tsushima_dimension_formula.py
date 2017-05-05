@@ -98,7 +98,7 @@ def rem_line_1_2():
 
 def rem_line_3_4():
     t, s = global_ring.gens()
-    _, j = t, s
+    j = s
     r = root_of_unities()["rho"]
     pl1 = thr ** (-3) * (r + 1)
     pl2 = two ** (-2) * thr ** (-4) * (2 * r + 1) * (2 * j + 1)
@@ -117,16 +117,16 @@ def rem_line_5_9():
     t, s = global_ring.gens()
     k, j = t, s
     r = root_of_unities()["rho"]
-    pl1 = (two ** (-1) * thr ** (-4) * (1 - r) * (2 * j + 2 * k - 3)
-           - two ** (-1) * thr ** (-2) * (1 - r))
-    pl2 = (two ** (-3) * thr ** (-4) * (r + 2) * (2 * j + k - 1)
-           - two ** (-2) * thr ** (-3) * (5 * r + 6))
-    pl3 = - (two ** (-3) * thr ** (-3) * (r + 2) * (2 * j + k - 1)
-             - two ** (-2) * thr ** (-2) * (r + 2))
-    pl4 = (two ** (-3) * thr ** (-4) * (1 - r) * (k - 2)
-           + two ** (-2) * thr ** (-3) * (r - 5))
-    pl5 = (two ** (-3) * thr ** (-3) * (1 - r) * (k - 2)
-           - two ** (-2) * thr ** (-2) * (1 - r))
+    pl1 = (two ** (-1) * thr ** (-4) * (1 - r) * (2 * j + 2 * k - 3) -
+           two ** (-1) * thr ** (-2) * (1 - r))
+    pl2 = (two ** (-3) * thr ** (-4) * (r + 2) * (2 * j + k - 1) -
+           two ** (-2) * thr ** (-3) * (5 * r + 6))
+    pl3 = - (two ** (-3) * thr ** (-3) * (r + 2) * (2 * j + k - 1) -
+             two ** (-2) * thr ** (-2) * (r + 2))
+    pl4 = (two ** (-3) * thr ** (-4) * (1 - r) * (k - 2) +
+           two ** (-2) * thr ** (-3) * (r - 5))
+    pl5 = (two ** (-3) * thr ** (-3) * (1 - r) * (k - 2) -
+           two ** (-2) * thr ** (-2) * (1 - r))
     res = 0
     key = "rho"
     res += deriv_trace(pl1, {t: t, s: r * s}, key)

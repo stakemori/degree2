@@ -244,8 +244,8 @@ def is_number(a):
         parent = a.parent()
         return CC.has_coerce_map_from(parent) or \
             isinstance(parent, numgen) or \
-            (hasattr(parent, "is_field") and hasattr(parent, "is_finite")
-             and parent.is_field() and parent.is_finite())
+            (hasattr(parent, "is_field") and hasattr(parent, "is_finite") and
+             parent.is_field() and parent.is_finite())
     else:
         return False
 

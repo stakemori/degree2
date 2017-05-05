@@ -8,11 +8,10 @@ Experimental Mathematics (2010), 19:1, 65-77
 
 Original implementation was done by H. Katsurada by the wolfram language.
 '''
-from sage.all import (PolynomialRing, QQ, mul, ZZ, floor, sqrt,
-                      matrix)
-
-from degree2.siegel_series.pullback_of_siegel_eisen import eisenstein_pullback_coeff
+from degree2.siegel_series.pullback_of_siegel_eisen import \
+    eisenstein_pullback_coeff
 from sage.all import zeta as _zeta
+from sage.all import QQ, ZZ, PolynomialRing, floor, matrix, mul, sqrt
 
 
 def zeta(l):
@@ -56,7 +55,7 @@ def epsilon_tilde_l_k_degree2(l, k, A1, A2):
     y1, y2, y3 = G.parent().gens()
     G_y1_y3 = G.subs({y2: A1.det() * A2.det()})
 
-    def func(a, A1, A2, R, mat):
+    def func(a, _A1, _A2, R, mat):
         return G_y1_y3.subs({y1: R.det() / ZZ(4), y3: mat.det()}).constant_coefficient() * a
 
     res = eisenstein_pullback_coeff(l, A1, A2, func=func)
@@ -118,8 +117,8 @@ def first_elt_of_kern_of_vandermonde(chply, lam, beta_vec):
     if phi_d_lam == 0:
         raise ZeroDivisionError("Phi'(lambda) = 0")
     else:
-        num = sum(sum(beta_vec[d - 1 - j] * chply[d - j + i] for j in range(i, d))
-                  * lam ** i for i in range(d))
+        num = sum(sum(beta_vec[d - 1 - j] * chply[d - j + i] for j in range(i, d)) *
+                  lam ** i for i in range(d))
         return num / phi_d_lam
 
 
