@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from sage.all import (NumberField, var, QQ, PolynomialRing, cached_function,
-                      dimension_cusp_forms, O, PowerSeriesRing)
+                      O, PowerSeriesRing)
+from sage.modular.dims import dimension_cusp_forms
+
 
 global_ring = PolynomialRing(QQ, names="t,s")
 
@@ -22,7 +24,7 @@ def derivative_pol(f, pl):
         return a * nm / dm
 
     return sum([mul(v, derivative_exp(derivative_exp(f, a, t), b, s))
-                for (a, b), v in pl.dict().iteritems()])
+                for (a, b), v in pl.dict().items()])
 
 
 def trace(f, key):
@@ -44,8 +46,8 @@ def root_of_unities():
            "rho": x ** 2 + x + 1,
            "omega": x ** 4 + x ** 3 + x ** 2 + x + 1,
            "sigma": x ** 4 - x ** 2 + 1}
-    dctnm = {k: NumberField(v, names=k) for k, v in dct.iteritems()}
-    return {k: v.gens()[0] for k, v in dctnm.iteritems()}
+    dctnm = {k: NumberField(v, names=k) for k, v in dct.items()}
+    return {k: v.gens()[0] for k, v in dctnm.items()}
 
 
 two = QQ(2)
@@ -169,7 +171,7 @@ def gen_func_maybe_cusp_num_t(parity=None):
     else:
         e = parity % 2
         nm = sum([t ** a * s ** b * v for (a, b), v in
-                  nm.dict().iteritems() if a % 2 == e])
+                  nm.dict().items() if a % 2 == e])
         return nm / dnm2
 
 

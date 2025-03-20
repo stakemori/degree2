@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-
+from functools import reduce
 import traceback
 from multiprocessing import Process, Pipe, cpu_count
 import operator
@@ -236,7 +236,7 @@ def polynomial_func(pl):
 
 
 def is_number(a):
-    if isinstance(a, (int, float, long, complex,
+    if isinstance(a, (int, float, complex,
                       sage.rings.all.CommutativeRingElement)):
         return True
     elif hasattr(a, 'parent'):

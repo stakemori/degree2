@@ -2,6 +2,7 @@
 import os
 import operator
 from abc import ABCMeta, abstractproperty
+from functools import reduce
 import sage
 from sage.misc.cachefunc import cached_method, cached_function
 from sage.all import (QQ, save, load, gcd, PolynomialRing,
@@ -132,7 +133,7 @@ def load_cached_gens_from_file(prec):
     prec34_m17_51 = PrecisionDeg2([(34, -17, 51)])
 
     if Deg2global_gens_dict != {}:
-        a_ky = Deg2global_gens_dict.keys()[0]
+        a_ky = next(iter(Deg2global_gens_dict.keys()))
         if Deg2global_gens_dict[a_ky].prec >= prec:
             return None
 
@@ -147,7 +148,7 @@ def load_cached_gens_from_file(prec):
             gens_dct1 = load(os.path.join(cached_dir, '_fc_dict39.sobj'))
             gens_dct2 = load(os.path.join(cached_dir,
                                           '_fc_dict_tuples_34_-17_51.sobj'))
-            for k in gens_dct1.keys():
+            for k in gens_dct1:
                 gens_dct1[k].update(gens_dct2[k])
             gens_dct = {k: {t: gens_dct1[k][t] for t in prec}
                         for k in gens_dct1.keys()}
@@ -296,7 +297,7 @@ def x5_jacobi_g(n, r, prec=40):
     psr = x5_jacobi_pwsr((prec - 1) // 2)
     l_pol = psr[(n - 1) // 2]
     d = {}
-    a_key = l_pol.dict().keys()[0]
+    a_key = next(iter(l_pol.dict()))
     is_int_key = isinstance(a_key, int)
     is_etuple = isinstance(a_key, sage.rings.polynomial.polydict.ETuple)
     for k, v in l_pol.dict().items():
@@ -693,7 +694,7 @@ class CuspFormsDegree2(AbstSpaceOfLevel1):
 
         def morph(a, b, f, m):
             G = (-1) ** m * f.subs({x: -x}) * f
-            alst = [[k // 2, v] for k, v in G.dict().iteritems()]
+            alst = [[k // 2, v] for k, v in G.dict().items()]
             F = sum([v * x ** k for k, v in alst])
             return a ** m * F.subs({x: (x - b) / a})
         f1 = morph(u ** 2 + u + 1, -p * u ** 3 - u ** 2 - p * u, f, m)

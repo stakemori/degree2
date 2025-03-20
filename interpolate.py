@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
+from functools import reduce
 
 from degree2.basic_operation import PrecisionDeg2
 from degree2.elements import ModFormQexpLevel1, QexpLevel1

@@ -5,6 +5,7 @@ A module for construction of vector valued Siegel modular forms.
 
 from __future__ import print_function
 
+from functools import reduce
 from abc import ABCMeta, abstractmethod, abstractproperty
 import os
 import hashlib
@@ -91,7 +92,7 @@ class ScalarModFormConst(object):
         if isinstance(self.wts, list):
             return tuple(self.wts)
         else:
-            return frozenset((k, v) for k, v in self.wts.iteritems())
+            return frozenset((k, v) for k, v in self.wts.items())
 
     @property
     def _key(self):
@@ -119,7 +120,7 @@ class ScalarModFormConst(object):
         def _monm(ws):
             return mul(dct[k] for k in ws)
 
-        return sum(_monm(k) * v for k, v in coeffs_dct.iteritems())
+        return sum(_monm(k) * v for k, v in coeffs_dct.items())
 
     def _polynomial_expr(self):
         R = PolynomialRing(QQ,

@@ -58,7 +58,7 @@ class RamanujanConj(unittest.TestCase):
         else:
             embeddings = K.complex_embeddings(prec=complex_prec)
         if f.phi_operator() == {}:
-            print "Testing when k = %s" % (f.wt,)
+            print("Testing when k = %s" % (f.wt,))
             for phi in embeddings:
                 pl_cc = pl.map_coefficients(phi)
                 R = PolynomialRing(CC, names=("x",))

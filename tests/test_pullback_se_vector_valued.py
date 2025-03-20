@@ -99,13 +99,13 @@ class TestPullBackVectorValued(unittest.TestCase):
         D = tpl_to_half_int_mat(t0)
         f = f * f[t0] ** (-1)
         if verbose:
-            print "Compute for %s" % (t0,)
+            print("Compute for %s" % (t0,))
         a = fc_of_pullback_of_diff_eisen(
             l, f.wt, 0, D, D, 1, 1, verbose=verbose)
         self.assertNotEqual(a, 0)
         for t in ts:
             if verbose:
-                print "Checking for %s" % (t, )
+                print("Checking for %s" % (t, ))
             A = tpl_to_half_int_mat(t)
             self.assertEqual(fc_of_pullback_of_diff_eisen(l, f.wt, 0, A, D, 1, 1, verbose=verbose),
                              a * f[t])
@@ -189,7 +189,7 @@ class TestPullBackVectorValued(unittest.TestCase):
             A = tpl_to_half_int_mat(t)
             fc = fc_of_pullback_of_diff_eisen(l, k, j, A, D, u3_val, u4_val)
             if verbose:
-                print "Checking for t = %s" % (t, )
+                print("Checking for t = %s" % (t,))
             if j > 0:
                 self.assertEqual(fc, f_vec[t]._to_pol())
             else:

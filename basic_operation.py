@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
+from functools import reduce
 
 from sage.all import Integer, ZZ, gcd, QQ, mod, floor, sqrt
 
@@ -336,12 +337,11 @@ def _spos_def_mats_lt(tpl):
 def _key_of_tuples(prec, cuspidal=False, hol=False):
     if cuspidal and not hol:
         return list(PrecisionDeg2(prec).pos_defs())
-    elif hol and cuspidal:
-        return prec.group_by_reduced_forms_with_sgn().keys()
-    elif hol and not cuspidal:
-        return prec.group_by_reduced_forms().keys()
-    else:
-        return list(PrecisionDeg2(prec))
+    if hol and cuspidal:
+        return list(prec.group_by_reduced_forms_with_sgn())
+    if hol and not cuspidal:
+        return list(prec.group_by_reduced_forms())
+    return list(PrecisionDeg2(prec))
 
 
 @cached_function

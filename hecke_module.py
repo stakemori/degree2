@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from functools import reduce
 from abc import ABCMeta, abstractmethod, abstractproperty
 import operator
 

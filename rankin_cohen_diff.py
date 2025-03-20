@@ -67,7 +67,7 @@ def _inc_weight(Q):
     for r11, r12, _ in group(rs, 3):
         rdct[r11] = 4 * r11
         rdct[r12] = 2 * r12
-    t = [t for t, v in Q.dict().iteritems() if v != 0][0]
+    t = [t for t, v in Q.dict().items() if v != 0][0]
     a = Q.map_coefficients(lambda f: f.subs(rdct))[t] / Q.subs({u1: 2 * u1})[t]
     return int(log(a) / log(2))
 
@@ -387,7 +387,7 @@ def _bracket_vec_val(vecs):
         dct.update(_dct(gens_z, v3))
         return f.subs(dct)
 
-    res_dc = {k: pol_to_val(v) for k, v in pol_dc.iteritems()}
+    res_dc = {k: pol_to_val(v) for k, v in pol_dc.items()}
     return [res_dc[(j + 2 - i, i)] for i in range(j + 3)]
 
 

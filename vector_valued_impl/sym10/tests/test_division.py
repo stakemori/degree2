@@ -160,7 +160,6 @@ def _anihilate_pol(k, M):
     elif k == 13:
         # Kim-Ramakrishnan-Shahidi lift
         f = CuspForms(1, 12).basis()[0]
-        a = f[2]
         return x - f[2] ** 3 + QQ(2) ** 12 * f[2]
     else:
         chrply = M.hecke_charpoly(2)
@@ -197,7 +196,7 @@ class TestDivision(unittest.TestCase):
         gens_dct = calculator.forms_dict(prec)
         for c in div_consts:
             k = c.weight()
-            print "checking when k = %s" % (str(k), )
+            print("checking when k = %s" % (str(k),))
             if k % 2 == 0:
                 sccst = _find_const_of_e4_e6_of_same_wt(18 - k)
                 M = Sym10EvenDiv(sccst, prec)

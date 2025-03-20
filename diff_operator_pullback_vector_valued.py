@@ -128,7 +128,7 @@ def _z_u_ring_zgens():
 
 def _from_z_dz_ring_to_diff_op(pol):
     pol = _Z_dZ_ring(pol)
-    d = {tuple(t): _Z_ring(v) for t, v in pol.dict().iteritems()}
+    d = {tuple(t): _Z_ring(v) for t, v in pol.dict().items()}
     return DiffZOperatorElement(d)
 
 
@@ -285,7 +285,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
         # L_operator is a differential operator whose order <= m,
         # we truncate it.
         pol = _Z_ring(
-            {t: v for t, v in pol.dict().iteritems() if sum(list(t)) <= m})
+            {t: v for t, v in pol.dict().items() if sum(list(t)) <= m})
         _l_op_tmp = L_operator(k, m, A, D, r_ls, pol *
                                es.fourier_coefficient(mat), us, d_up_down_mlt)
         _l_op_tmp = _U_ring({(m - a, a): _l_op_tmp[_u1 ** (m - a) * _u2 ** a]
@@ -294,7 +294,7 @@ def fc_of_pullback_of_diff_eisen(l, k, m, A, D, u3, u4, verbose=False):
     res = res * QQ(mul(k + i for i in range(m))) ** (-1)
     res = res * _zeta(1 - l) * _zeta(1 - 2 * l + 2) * _zeta(1 - 2 * l + 4)
     if verbose:
-        print "Done computation of Fourier coefficient of pullback."
+        print("Done computation of Fourier coefficient of pullback.")
     return res
 
 
@@ -317,7 +317,7 @@ def _pullback_vector(l, D, u3, u4, space_of_cuspforms, verbose=False):
             l, k, j, tpl_to_half_int_mat(t), D, u3, u4,
             verbose=verbose) for t in tpls}
         pull_back_dct = {k: v.constant_coefficient()
-                         for k, v in pull_back_dct.iteritems()}
+                         for k, v in pull_back_dct.items()}
     return space_of_cuspforms._to_vector(pull_back_dct)
 
 

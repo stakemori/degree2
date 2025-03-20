@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from functools import reduce
 from degree2.scalar_valued_smfs import eisenstein_series_degree2, QexpLevel1,\
     x10_with_prec, x12_with_prec, x35_with_prec, ModFormQexpLevel1
 from degree2.basic_operation import PrecisionDeg2

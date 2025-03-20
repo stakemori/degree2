@@ -1,6 +1,7 @@
 from sage.all import (ComplexField, NumberField, PolynomialRing, CuspForms, QQ,
-                      CartesianProduct, fork)
+                      fork)
 import unittest
+from itertools import product
 from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvsmf
 from degree2.basic_operation import number_of_procs
 
@@ -50,7 +51,7 @@ class RamanujanConjandKlingen(unittest.TestCase):
         else:
             embeddings = K.complex_embeddings(prec=complex_prec)
         if f.phi_operator() == {}:
-            print "Test the Ramanujan conjecture when k = %s, j = %s" % (f.wt, f.sym_wt)
+            print("Test the Ramanujan conjecture when k = %s, j = %s" % (f.wt, f.sym_wt))
             for phi in embeddings:
                 pl_cc = pl.map_coefficients(phi)
                 R = PolynomialRing(CC, names=("x",))
@@ -58,7 +59,7 @@ class RamanujanConjandKlingen(unittest.TestCase):
                                for a, _ in R(pl_cc).roots())
             self.assertLess(max_diff, CC(2) ** (-complex_prec + 1))
         elif f.base_ring.degree() == 1:
-            print "Test Kligen Eisenstein series when k = %s, j = %s" % (f.wt, f.sym_wt)
+            print("Test Kligen Eisenstein series when k = %s, j = %s" % (f.wt, f.sym_wt))
             self.assertEqual(f.euler_factor_of_spinor_l(2),
                              _hecke_pol_klingen(f.wt, f.sym_wt))
 
@@ -82,7 +83,7 @@ class RamanujanConjandKlingen(unittest.TestCase):
                     self.assert_hecke_eigen_values(f)
 
         with number_of_procs(1):
-            for k, j in CartesianProduct(range(4, 30), [2, 4, 10]):
+            for k, j in product(range(4, 30), [2, 4, 10]):
                 _check(k, j)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(RamanujanConjandKlingen)

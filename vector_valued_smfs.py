@@ -6,7 +6,7 @@ Satoh, On vector valued Siegel modular forms of degree two,
 Ibukiyama, Vector valued Siegel modular forms of symmetric tensor weight
 of small degrees.
 '''
-
+from functools import reduce
 import operator
 
 from sage.misc.cachefunc import cached_method
