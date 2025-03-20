@@ -73,7 +73,7 @@ class ConstsTest(unittest.TestCase):
         self.assertTrue(dependencies(c5), set([c1, c2, c3, c4]))
 
     def test_needed_precs(self):
-        '''Test the funciton needed_precs.
+        '''Test the function needed_precs.
         '''
         j = 10
         c1 = ConstVectValued(j, [SMFC([5, 5])], 0, None)

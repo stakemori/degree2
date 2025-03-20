@@ -112,7 +112,7 @@ class TestPullBackVectorValued(unittest.TestCase):
 
     @skip("Not ok")
     def test_14_identity(self):
-        '''Test idenitity (14) in [Bö].
+        '''Test identity (14) in [Bö].
         '''
         n = 2
         for _ in range(50):

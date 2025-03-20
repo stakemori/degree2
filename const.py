@@ -506,7 +506,8 @@ class ConstDivision(ConstVectBase):
 
     '''Returns a construction for a vector valued modulular form by dividing
     a scalar valued modular form.
-    This construction correponds to
+
+    This construction corresponds to
     sum(F*a for F, a in zip(consts, coeffs)) / scalar_const.
     Needed prec is increased by inc.
     '''
@@ -722,7 +723,7 @@ class CalculatorVectValued(object):
 
     def rdeps(self, const):
         '''Returns a subset of the union of all_dependencies and
-        set(self._const_vecs) cosisting elements
+        set(self._const_vecs) consisting elements
         that depend on const with depth1.
         '''
         return {c for c in self.all_dependencies().union(set(self._const_vecs))

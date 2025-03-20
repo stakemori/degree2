@@ -868,7 +868,8 @@ class SymWtGenElt(object):
 
     '''
     Let Symm(j) be the symmetric tensor representation of degree j of GL2.
-    Symm(j) is the space of homogenous polynomials of u1 and u2 of degree j.
+
+    Symm(j) is the space of homogeneous polynomials of u1 and u2 of degree j.
     We take u1^j, .. u2^j as a basis of Symm(j)
     An instance of this class corresponds to
     a tuple of j Fourier expansions of degree 2.

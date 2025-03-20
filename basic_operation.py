@@ -270,11 +270,12 @@ current_num_of_procs = CurrentNumOfProcs()
 
 def reduced_form_with_sign(tpl):
     '''
-    Assuming the 2-by-2 matrix correspoding to tpl
+    Assuming the 2-by-2 matrix corresponding to tpl
     is positive definite, returns
     ((n, r, m), sgn)
     where (n, r, m) is unmimodular equivalent to tpl
     s.t. n <= m and 0 <= r <= n.
+
     sgn is the determinant of an element GL2(ZZ) that gives
     the unimodular equivalence.
     '''
@@ -377,7 +378,7 @@ def _dict_parallel(f, ls):
 def _mul_fourier(mp1, mp2, prec, cuspidal=False, hol=False):
     '''
     Returns the dictionary of the product of Fourier series
-    correspoding to mp1 and mp2.
+    corresponding to mp1 and mp2.
     '''
     tupls_s = _partition_mul_fourier(
         prec, cuspidal=cuspidal, hol=hol,

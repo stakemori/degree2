@@ -67,7 +67,8 @@ def algebraic_part_of_standard_l(f, l, space_of_cusp_form=None):
     f: cuspidal eigen form of degree 2 of weight k with k: even.
     l: positive even integer s.t. l <= k - 4
     space_of_cusp_form: space of cusp form that f belongs to.
-    If f.parent_space is not None, then this can be ommited.
+
+    If f.parent_space is not None, then this can be omitted.
     Return the algebriac part of the standard L of f at l
     (\tilde{\Lambda}(f, l, St)) defined in [Kat], pp 72.
     '''

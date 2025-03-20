@@ -44,7 +44,8 @@ class ModularFormModule(object):
     def eigenvector_with_eigenvalue(self, lin_op, lm):
         '''Let lin_op(f, t) be an endomorphsim of self and assume
         it has a unique eigenvector (up to constant) with eigenvalue lm.
-        This medhod returns an eigenvector.
+
+        This method returns an eigenvector.
         '''
         basis = self.basis()
         dim = len(basis)

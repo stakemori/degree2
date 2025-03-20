@@ -8,9 +8,10 @@ from degree2.vector_valued_smfs import vector_valued_siegel_modular_forms as vvs
 
 
 def relation(wt, data_directory=None):
-    '''For a given weight wt, this funciton returns a dict whose set of keys
+    '''For a given weight wt, this function returns a dict whose set of keys
     is equal to a set of instances of ConstMul with weight wt.
-    Its value is a rational number. This dictionary represents a releation
+
+    Its value is a rational number. This dictionary represents a relation
     among keys.
     '''
     wts = (24, 26, 27, 29)

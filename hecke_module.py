@@ -248,8 +248,9 @@ class HeckeModuleElement(object):
         '''
         Assuming self is a vector valued Siegel modular form, returns
         tpl th Fourier coefficient of T(p^i)self.
+
         Here tpl is an triple of integers or a tuple (t, a) with
-        t: triple of integers and a: intger.
+        t: triple of integers and a: integer.
         cf. Arakawa, vector valued Siegel's modular forms of degree two and
         the associated Andrianov L-functions, pp 166.
         '''

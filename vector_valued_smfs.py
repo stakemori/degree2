@@ -150,10 +150,11 @@ class GivenWtBase(VectorValuedSiegelModularForms):
         pass
 
     def _basis_const_base(self, ignored_dct):
-        '''This method is used for implmentation of _basis_const.
+        '''This method is used for implementation of _basis_const.
         ignored_dct is a dictionary whose key is an element of self._gen_consts
         and its value is a sub lift of [4, 6, 10, 12].
-        For exmaple if ignored_dct = {c: [4]} and F is a vector valued modular
+
+        For example if ignored_dct = {c: [4]} and F is a vector valued modular
         form that corresponds to c, then
         we do not use F * (a monomial including es4) when constructing a basis.
         '''

@@ -148,7 +148,8 @@ def _anihilate_pol(k, M):
     for generators of M_{det^* sym(10)} and an instance of
     ConstDivision.
     M: an instance of Sym10EvenDiv or Sym10OddDiv.
-    Return a polynomial pl such that the subspace of M anihilated by pl(T(2))
+
+    Return a polynomial pl such that the subspace of M annihilated by pl(T(2))
     is equal to the subspace of holomorphic modular forms.
     '''
     R = PolynomialRing(QQ, names="x")

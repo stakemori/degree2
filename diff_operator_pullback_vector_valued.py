@@ -168,7 +168,7 @@ class DiffZOperatorElement(object):
         return self._pol_idc_dct
 
     def diff(self, pol, r_ls):
-        '''pol is a polynomial in _Z_ring and R is a 2 by 2 marix.
+        '''pol is a polynomial in _Z_ring and R is a 2 by 2 matrix.
         Return (the derivative of pol * exp(2pi R^t Z)) / exp(R^t Z) as a polynomial.
         R = matrix(2, r_ls)
         '''
@@ -221,7 +221,7 @@ def D_tilde_nu(alpha, nu, pol, r_ls, **kwds):
     return pol
 
 
-# The repressentation space of Gl2 is homogenous polynomial of u1 and u2.
+# The representation space of Gl2 is homogeneous polynomial of u1 and u2.
 _U_ring = PolynomialRing(QQ, names='u1, u2')
 _Z_U_ring = PolynomialRing(QQ, names='u1, u2, z11, z12, z21, z22')
 
